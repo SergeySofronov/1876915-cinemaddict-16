@@ -1,7 +1,8 @@
 # Проект «Киноман»
 
 * Студент: [Сергей Софронов](https://up.htmlacademy.ru/ecmascript/16/user/1876915).
-* Наставник: `Неизвестно`.
+* Наставник:[ Ксения Александрович](https://htmlacademy.ru/profile/id618277).
+* Проект: [Киноман](https://sergeysofronov.github.io/1876915-cinemaddict-16/).
 
 ---
 
