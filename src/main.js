@@ -3,7 +3,6 @@ import { getMainMenuTemplate } from './view/menu-main.js';
 import { getFilmSortMenuTemplate } from './view/menu-sort.js';
 import { getFilmSectionTemplate } from './view/films-section.js';
 import { getFilmCardTemplate } from './view/film-card.js';
-//import { getStatsTemplate } from './view/statistic.js';
 import { getPopupTemplate } from './view/popup.js';
 
 const FILM_CARD_MAX_VALUE = 5;
@@ -21,14 +20,9 @@ const HeaderTitles = {
   POPULAR: 'Most commented'
 };
 
-// const ClassTypes = {
-//   HIDDEN: 'visually-hidden',
-//   EXTRA: 'films-list--extra'
-// };
-
 const sectionHeader = document.querySelector('.header');
 const sectionMain = document.querySelector('.main');
-sectionMain.innerHTML = ''; // временно
+sectionMain.innerHTML = '';
 
 const renderTemplate = (container, template, place) => {
   container.insertAdjacentHTML(place, template);
