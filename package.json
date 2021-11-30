@@ -5,9 +5,9 @@
   "description": "Проект «Киноман» от HTML Academy",
   "scripts": {
     "eslint": "eslint src/",
-    "test": "npm run eslint",
-    "build": "webpack --mode development",
-    "start": "webpack serve --open --mode development"
+    "test-eslint": "npm run eslint",
+    "build-webpack": "webpack --mode development",
+    "start-server": "webpack serve --open --mode development"
   },
   "devDependencies": {
     "@babel/core": "7.16.0",
@@ -26,5 +26,8 @@
   },
   "engines": {
     "node": "16"
+  },
+  "dependencies": {
+    "dayjs": "1.10.7"
   }
 }
