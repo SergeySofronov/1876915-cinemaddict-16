@@ -1,6 +1,6 @@
 import { filmDescriptionHandle, changeDateFormat } from '../mock/utils';
 
-
+//Функция возвращает класс для подсветки соответствующего фильтра
 const getCardClassesByFilter = (filter) => filter ? 'film-card__controls-item--active' : '';
 
 const getFilmCardTemplate = (filmData) => {

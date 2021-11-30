@@ -49,8 +49,8 @@ const filmStatistics = getFilmsStatistic(filmsData);
 //Ранг пользователя
 const userRank = getUserRank();
 
-//Количество первоначально отображаемых фильмов
-const shownFilmQuantity = (filmsData.length > FILM_CARD_INITIAL_VALUE) ?
+//Количество отображаемых фильмов
+let shownFilmQuantity = (filmsData.length > FILM_CARD_INITIAL_VALUE) ?
   FILM_CARD_INITIAL_VALUE :
   filmsData.length;
 
@@ -63,13 +63,6 @@ sectionMain.innerHTML = '';
 //Функция для отрисовки HTML-шаблона в DOM
 const renderTemplate = (container, template, place) => {
   container.insertAdjacentHTML(place, template);
-};
-
-//Отображение основного списка карточек фильмов
-const renderCardsHeapTemplate = (upperBorder, lowerBorder, cb) => {
-  for (let i = upperBorder; i < lowerBorder; i++) {
-    cb();
-  }
 };
 
 //Отображение профиля пользователя
@@ -89,7 +82,7 @@ if (shownFilmQuantity) {
 
   //Добавление контейнера в секцию фильмов для подготовки отображения основного перечня карточек фильмов
   renderTemplate(filmSection, getFilmListSectionTemplate?.(SectionMessages.DEFAULT), RenderPosition.BEFOREEND);
-  const filmMainListSection = sectionMain.querySelector('.films-list__container');
+  const filmMainListSection = filmSection.querySelector('.films-list__container');
 
   //Добавление контейнера в секцию фильмов для подготовки отображения карточек фильмов с самым высоким рейтингом
   let filmRatedListSection = '';
@@ -105,26 +98,41 @@ if (shownFilmQuantity) {
     filmPopularListSection = filmSection.querySelector('.films-list--extra:last-child .films-list__container');
   }
 
-  //Отображение основных карточек фильмов
-  renderCardsHeapTemplate(0, shownFilmQuantity, () => renderTemplate(filmMainListSection, getFilmCardTemplate?.(filmsData[i]), RenderPosition.BEFOREEND));
+  for (let i = 0; i < shownFilmQuantity; i++) {
 
-  //Отображение фильмов с самым высоким рейтингом
-  if (filmRatedListSection) {
-    renderCardsHeapTemplate(0, FILM_EXTRA_QUANTITY, () => renderTemplate(filmRatedListSection, getFilmCardTemplate?.(filmsTopRated[i]), RenderPosition.BEFOREEND));
-  }
+    //Отображение основных карточек фильмов
+    renderTemplate(filmMainListSection, getFilmCardTemplate?.(filmsData[i]), RenderPosition.BEFOREEND);
 
-  //Отображение самых комментируемых фильмов
-  if (filmPopularListSection) {
-    renderCardsHeapTemplate(0, FILM_EXTRA_QUANTITY, () => renderTemplate(filmPopularListSection, getFilmCardTemplate?.(filmsTopCommented[i]), RenderPosition.BEFOREEND));
+    if (i < FILM_EXTRA_QUANTITY) {
+      //Отображение фильмов с самым высоким рейтингом
+      if (filmRatedListSection) {
+        renderTemplate(filmRatedListSection, getFilmCardTemplate?.(filmsTopRated[i]), RenderPosition.BEFOREEND);
+      }
+
+      //Отображение самых комментируемых фильмов
+      if (filmPopularListSection) {
+        renderTemplate(filmPopularListSection, getFilmCardTemplate?.(filmsTopCommented[i]), RenderPosition.BEFOREEND);
+      }
+    }
   }
 
   //Добавление кнопки Show More
   renderTemplate(filmMainListSection, getShowMoreButtonTemplate?.(), RenderPosition.AFTEREND);
-  const showMoreButton = filmMainListSection.querySelector('.films-list__show-more');
+  const showMoreButton = filmSection.querySelector('.films-list__show-more');
 
-  const onShowMoreButtonClick = (evt) => {
-    evt.preventDefault();
-    renderCardsHeapTemplate(0, 0, () => renderTemplate(filmMainListSection, getFilmCardTemplate?.(filmsData[i]), RenderPosition.BEFOREEND));
+  //Дорисовка карточек фильмов
+  const onShowMoreButtonClick = () => {
+    if (shownFilmQuantity < filmsData.length) {
+      const lastShownQuantity = shownFilmQuantity;
+      const restFilms = filmsData.length - shownFilmQuantity;
+      shownFilmQuantity += (restFilms < FILM_CARD_INITIAL_VALUE) ? restFilms : FILM_CARD_INITIAL_VALUE;
+      filmsData.slice(lastShownQuantity, shownFilmQuantity)
+        .forEach((film) => renderTemplate(filmMainListSection, getFilmCardTemplate?.(film), RenderPosition.BEFOREEND));
+
+      if (shownFilmQuantity >= filmsData.length) {
+        showMoreButton.remove();
+      }
+    }
   };
 
   showMoreButton.addEventListener('click', onShowMoreButtonClick);
@@ -133,7 +141,18 @@ if (shownFilmQuantity) {
   //Фильмов нет, отображение соответствующего сообщения
   renderTemplate(sectionMain, getFilmSectionEmptyTemplate?.(SectionMessages.NO_MOVIES), RenderPosition.BEFOREEND);
 }
-renderTemplate(footerStatistic, getFilmFooterTemplate?.(filmStatistics), RenderPosition.BEFOREEND);
 
-//Отображение popup фильма
-//renderTemplate(sectionMain, getPopupTemplate?.(), RenderPosition.BEFOREEND);
+if (shownFilmQuantity) {
+  //Отображение в footer'e общего количества фильмов
+  renderTemplate(footerStatistic, getFilmFooterTemplate?.(filmStatistics), RenderPosition.BEFOREEND);
+
+  //Отображение popup фильма #1
+  renderTemplate(sectionFooter, getPopupTemplate?.(filmsData[0]), RenderPosition.AFTEREND);
+  const filmPopup = document.querySelector('.film-details');
+  const popupButtonClose = filmPopup.querySelector('.film-details__close-btn');
+
+  const onPopupButtonClose = () => {
+    filmPopup.remove();
+  };
+  popupButtonClose.addEventListener('click', onPopupButtonClose);
+}

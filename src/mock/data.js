@@ -93,9 +93,9 @@ const prepareFilmData = () => {
         pegi: getRandomInteger(FILM_MIN_PEGI, FILM_MAX_PEGI),
         director: filmDirectors[getRandomInteger(0, filmDirectors.length - 1)],
         description: randomIndexes.map((value) => filmDescriptions[value]).join(' '),
-        actors: getRandomPartFromArray(filmActors),
+        actors: getRandomPartFromArray(filmActors).join(', '),
         genre: getRandomPartFromArray(filmGenres),
-        writers: getRandomPartFromArray(filmWriters),
+        writers: getRandomPartFromArray(filmWriters).join(', '),
         release: {
           date: getRandomDate(DATE_BASE_VALUE, DATE_GAP_MAX, FILM_DATE_FORMAT),
           country: filmCountries[getRandomInteger(0, filmCountries.length - 1)],
