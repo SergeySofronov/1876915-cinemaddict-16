@@ -16,7 +16,6 @@ const FILM_CARD_INITIAL_VALUE = 5;
 const FILM_EXTRA_SECTION = 1;
 const FILM_EXTRA_QUANTITY = 2;
 
-
 const RenderPosition = {
   BEFOREBEGIN: 'beforebegin',
   AFTERBEGIN: 'afterbegin',
@@ -116,12 +115,8 @@ if (shownFilmQuantity) {
     }
   }
 
-  //Добавление кнопки Show More
-  renderTemplate(filmMainListSection, getShowMoreButtonTemplate?.(), RenderPosition.AFTEREND);
-  const showMoreButton = filmSection.querySelector('.films-list__show-more');
-
   //Дорисовка карточек фильмов
-  const onShowMoreButtonClick = () => {
+  const onShowMoreButtonClick = (evt) => {
     if (shownFilmQuantity < filmsData.length) {
       const lastShownQuantity = shownFilmQuantity;
       const restFilms = filmsData.length - shownFilmQuantity;
@@ -130,12 +125,17 @@ if (shownFilmQuantity) {
         .forEach((film) => renderTemplate(filmMainListSection, getFilmCardTemplate?.(film), RenderPosition.BEFOREEND));
 
       if (shownFilmQuantity >= filmsData.length) {
-        showMoreButton.remove();
+        evt.target.remove();
       }
     }
   };
 
-  showMoreButton.addEventListener('click', onShowMoreButtonClick);
+  //Добавление кнопки Show More
+  if (filmsData.length > FILM_CARD_INITIAL_VALUE) {
+    renderTemplate(filmMainListSection, getShowMoreButtonTemplate?.(), RenderPosition.AFTEREND);
+    const showMoreButton = filmSection.querySelector('.films-list__show-more');
+    showMoreButton.addEventListener('click', onShowMoreButtonClick);
+  }
 
 } else {
   //Фильмов нет, отображение соответствующего сообщения
@@ -150,6 +150,12 @@ if (shownFilmQuantity) {
   renderTemplate(sectionFooter, getPopupTemplate?.(filmsData[0]), RenderPosition.AFTEREND);
   const filmPopup = document.querySelector('.film-details');
   const popupButtonClose = filmPopup.querySelector('.film-details__close-btn');
+  const popupCommentSelectors = filmPopup.querySelectorAll('.film-details__bottom-container li button');
+
+  const onButtonCloseClick = (evt) => {
+    evt.target.closest('li').remove();
+  };
+  popupCommentSelectors.forEach((commentSelector) => commentSelector.addEventListener('click', onButtonCloseClick));
 
   const onPopupButtonClose = () => {
     filmPopup.remove();

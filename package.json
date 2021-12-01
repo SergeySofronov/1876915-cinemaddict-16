@@ -5,9 +5,9 @@
   "description": "Проект «Киноман» от HTML Academy",
   "scripts": {
     "eslint": "eslint src/",
-    "test-eslint": "npm run eslint",
-    "build-webpack": "webpack --mode development",
-    "start-server": "webpack serve --open --mode development"
+    "test": "npm run eslint",
+    "build": "webpack --mode development",
+    "start": "webpack serve --open --mode development"
   },
   "devDependencies": {
     "@babel/core": "7.16.0",

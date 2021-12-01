@@ -1,6 +1,6 @@
 const getFilmSectionTemplate = () => (
   `<section class="films">
-  <!-- <section class="films-list"> -->
+    <!-- Секция со списком фильмов -->
   </section>`
 );
 
