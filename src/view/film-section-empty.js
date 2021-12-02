@@ -5,4 +5,5 @@ const getFilmSectionEmptyTemplate = (message = '') => (
     </section>
   </section>`
 );
+
 export { getFilmSectionEmptyTemplate };

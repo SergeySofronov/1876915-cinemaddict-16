@@ -20,6 +20,7 @@ const getUserRank = () => {
       break;
     }
   }
+
   return rank;
 };
 
@@ -30,8 +31,9 @@ const getFilmsStatistic = (films = []) => {
     filmStatistic.favorite += film.userDetails.favorite ? 1 : 0;
   });
   filmStatistic.total = films.length;
+
   return filmStatistic;
 };
 
-export { getFilmsStatistic , getUserRank };
+export { getFilmsStatistic, getUserRank };
 

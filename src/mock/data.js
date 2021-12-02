@@ -58,6 +58,7 @@ const filmQuantity = getRandomInteger(FILM_MIN_QUANTITY, FILM_MAX_QUANTITY);
 
 const prepareCommentData = () => {
   const commentEmotion = commentEmotionTypes[getRandomInteger(0, commentEmotionTypes.length - 1)];
+
   return {
     author: commentUserNames[getRandomInteger(0, commentUserNames.length - 1)],
     emotion: commentEmotion,
@@ -68,6 +69,7 @@ const prepareCommentData = () => {
 
 const getRandomCommentData = () => {
   const commentQuantity = getRandomInteger(COMMENT_MIN_QUANTITY, COMMENT_MAX_QUANTITY);
+
   return Array.from({ length: commentQuantity }, prepareCommentData);
 };
 
@@ -75,6 +77,7 @@ const getFilmTime = () => {
   const time = getRandomInteger(FILM_MIN_RUNTIME, FILM_MAX_RUNTIME);
   const hour = parseInt(time / HOUR_VALUE, 10);
   const minute = time - hour * HOUR_VALUE;
+
   return `${hour}h ${minute}m`;
 };
 
@@ -83,6 +86,7 @@ const prepareFilmData = () => {
     const filmName = [...filmUrl.keys()][getRandomInteger(0, filmUrl.size - 1)];
     const randomIndexes = getNonRepeatUintArray(0, filmDescriptions.length - 1, filmDescriptions.length)
       .slice(FILM_DESCRIPTION_MIN_QUANTITY, FILM_DESCRIPTION_MAX_QUANTITY);
+
     return {
       comments: getRandomCommentData(),
       filmInfo: {
@@ -109,6 +113,7 @@ const prepareFilmData = () => {
       }
     };
   }
+
   return null;
 };
 

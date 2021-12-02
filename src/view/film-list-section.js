@@ -6,4 +6,5 @@ const getFilmListSectionTemplate = (titleText = '', isExtraSection = false) => (
       </div>
   </section>`
 );
+
 export { getFilmListSectionTemplate };

@@ -14,7 +14,6 @@ const DateFormat = {
   MSECOND: 'millisecond'
 };
 
-// Функция из интернета по генерации случайного числа из диапазона
 // Источник - https://github.com/you-dont-need/You-Dont-Need-Lodash-Underscore#_random
 const getRandomInteger = (a = 0, b = 1) => {
   const lower = Math.ceil(Math.min(a, b));
@@ -23,16 +22,10 @@ const getRandomInteger = (a = 0, b = 1) => {
   return Math.floor(lower + Math.random() * (upper - lower + 1));
 };
 
-/*Функция getRandomFloat, возвращающая случайное дробное число из переданного диапазона.
-Включение верхней границы диапазона зависит от Math.random() и округления операции сложения.*/
 const getRandomFloat = (lowerBound, upperBound) => Math.random() * (upperBound - lowerBound) + lowerBound;
 
-/*Функция getRandomFloat, возвращающая случайное дробное число из переданного диапазона включительно.
-Значение параметра valueAfterComma определяет количество знаков после запятой.*/
 const getRandomFloatStrict = (lowerBound, upperBound, valueAfterComma) => Number((getRandomFloat(lowerBound, upperBound) + 1 / Math.pow(10, valueAfterComma + 1)).toFixed(valueAfterComma));
 
-/*Функция-генератор generateNonRepeatArray возвращает массив длиной arrayLength случайных не повторяющихся
-целых чисел из диапазона от lowerBorder до upperBorder.*/
 const getNonRepeatUintArray = (lowerBorder, upperBorder, arrayLength) => {
   const arrayTotalNumbers = [];
   const arrayRandomNumbers = [];
@@ -48,8 +41,10 @@ const getNonRepeatUintArray = (lowerBorder, upperBorder, arrayLength) => {
       arrayRandomNumbers.push(arrayTotalNumbers[lower]);
       arrayTotalNumbers.splice(lower, 1);
     }
+
     return arrayRandomNumbers;
   }
+
   throw new Error('generateNonRepeatArray: wrong attributes');
 };
 
@@ -58,6 +53,7 @@ const getRandomPartFromArray = (inputArray) => {
   if (Array.isArray(inputArray)) {
     return inputArray.slice(0, getRandomInteger(1, inputArray.length));
   }
+
   return new Error('getRandomPartFromArray: inputArray is not an array');
 };
 
@@ -69,6 +65,7 @@ const getRandomDate = (dateBase = BASE_DATE, dateGap = 0, dateFormat = DATE_FORM
     .add(getRandomInteger(-dateGap, dateGap), DateFormat.MONTH)
     .add(getRandomInteger(-dateGap, dateGap), DateFormat.YEAR)
     .toDate();
+
   return dayjs(date).format(dateFormat);
 };
 
@@ -76,6 +73,7 @@ const filmDescriptionHandle = (filmDescription) => {
   if (filmDescription?.length >= DESCRIPTION_MAX_LENGTH) {
     return `${filmDescription.slice(0, DESCRIPTION_MAX_LENGTH - 1)}...`;
   }
+
   return filmDescription;
 };
 
@@ -86,6 +84,8 @@ const getTopRatedFilmsData = (films = []) => {
     return films.filter((film) => Boolean(film.filmInfo?.totalRating))
       .sort((a, b) => (b.filmInfo.totalRating - a.filmInfo.totalRating));
   }
+
+  return null;
 };
 
 
@@ -94,6 +94,7 @@ const getTopCommentedFilmsData = (films = []) => {
     return films.filter((film) => Boolean(film.comments?.length))
       .sort((a, b) => (b.comments.length - a.comments.length));
   }
+
   return null;
 };
 

@@ -5,6 +5,7 @@ const getLoadedCommentTemplate = (comment) => {
     content = '',
     date = '',
   } = comment;
+
   return (
     `<li class="film-details__comment">
       <span class="film-details__comment-emoji">

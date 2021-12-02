@@ -11,10 +11,8 @@ const TableTerms = {
   GENRES: 'Genres'
 };
 
-//Функция возвращает класс для подсветки соответствующего фильтра
 const getCardClassesByFilter = (filter) => filter ? 'film-details__control-button--active' : '';
 
-//Шаблон для таблицы с информацией о фильме
 const getTableRow = (term, ceilData) => (
   `<tr class="film-details__row">
   <td class="film-details__term">${term}</td>
@@ -22,7 +20,6 @@ const getTableRow = (term, ceilData) => (
 </tr>`
 );
 
-//Шаблон с информацией о жанрах фильма
 const getCardGenres = (genres) => {
   const genreHTML = [];
   if (Array.isArray(genres)) {
@@ -30,6 +27,7 @@ const getCardGenres = (genres) => {
       genreHTML.push(`<span class="film-details__genre">${genre}</span>`);
     });
   }
+
   return genres.join(', ');
 };
 
