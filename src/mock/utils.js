@@ -79,23 +79,23 @@ const getShortFilmDescription = (filmDescription) => {
 
 const changeDateFormat = (date, format = DATE_FORMAT) => (date ? dayjs(date).format(format) : '');
 
-const getTopRatedFilmsData = (films = []) => {
+const getTopRatedFilmsData = (films) => {
   if (Array.isArray(films)) {
     return films.filter((film) => Boolean(film.filmInfo?.totalRating))
       .sort((a, b) => (b.filmInfo.totalRating - a.filmInfo.totalRating));
   }
 
-  return null;
+  return [];
 };
 
 
-const getTopCommentedFilmsData = (films = []) => {
+const getTopCommentedFilmsData = (films) => {
   if (Array.isArray(films)) {
     return films.filter((film) => Boolean(film.comments?.length))
       .sort((a, b) => (b.comments.length - a.comments.length));
   }
 
-  return null;
+  return [];
 };
 
 export {

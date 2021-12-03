@@ -24,13 +24,16 @@ const getUserRank = () => {
   return rank;
 };
 
-const getFilmsStatistic = (filmData = []) => {
-  filmData.forEach((film) => {
-    filmStatistic.watchlist += film.userDetails.watchlist ? 1 : 0;
-    filmStatistic.watched += film.userDetails.watched ? 1 : 0;
-    filmStatistic.favorite += film.userDetails.favorite ? 1 : 0;
-  });
-  filmStatistic.total = filmData.length;
+const getFilmsStatistic = (filmData) => {
+  if (Array.isArray(filmData)) {
+    filmStatistic.total = filmData.length;
+
+    filmData.forEach((film) => {
+      filmStatistic.watchlist += film.userDetails.watchlist ? 1 : 0;
+      filmStatistic.watched += film.userDetails.watched ? 1 : 0;
+      filmStatistic.favorite += film.userDetails.favorite ? 1 : 0;
+    });
+  }
 
   return filmStatistic;
 };
