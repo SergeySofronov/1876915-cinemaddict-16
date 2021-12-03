@@ -69,7 +69,7 @@ const getRandomDate = (dateBase = BASE_DATE, dateGap = 0, dateFormat = DATE_FORM
   return dayjs(date).format(dateFormat);
 };
 
-const filmDescriptionHandle = (filmDescription) => {
+const getShortFilmDescription = (filmDescription) => {
   if (filmDescription?.length >= DESCRIPTION_MAX_LENGTH) {
     return `${filmDescription.slice(0, DESCRIPTION_MAX_LENGTH - 1)}...`;
   }
@@ -105,7 +105,7 @@ export {
   getRandomBoolean,
   getRandomDate,
   getRandomFloatStrict,
-  filmDescriptionHandle,
+  getShortFilmDescription,
   changeDateFormat,
   getTopCommentedFilmsData,
   getTopRatedFilmsData

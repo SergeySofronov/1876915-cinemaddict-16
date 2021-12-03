@@ -1,4 +1,4 @@
-const getLoadedCommentTemplate = (comment) => {
+const getLoadedCommentTemplate = (comment = {}) => {
   const {
     author = '',
     emotion = '',
@@ -23,14 +23,18 @@ const getLoadedCommentTemplate = (comment) => {
   );
 };
 
-const getPopupLoadedCommentTemplate = (filmData) => (
-  `<h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${filmData?.comments ? filmData?.comments.length : 0}</span></h3>
-    <ul class="film-details__comments-list">
-
-    <!-- Отрисовка всех комментариев к фильму -->
-    ${filmData?.comments?.map((comment) => getLoadedCommentTemplate(comment)).join('')}
-
+const getPopupLoadedCommentTemplate = (filmData) => {
+  if (filmData) {
+    return (
+      `<h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${filmData?.comments ? filmData?.comments.length : 0}</span></h3>
+        <ul class="film-details__comments-list">
+        <!-- Отрисовка всех комментариев к фильму -->
+        ${filmData.comments?.map((comment) => getLoadedCommentTemplate(comment)).join('')}
     </ul>`
-);
+    );
+  }
+
+  return '';
+};
 
 export { getPopupLoadedCommentTemplate };

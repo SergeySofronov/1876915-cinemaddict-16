@@ -24,13 +24,13 @@ const getUserRank = () => {
   return rank;
 };
 
-const getFilmsStatistic = (films = []) => {
-  films.forEach((film) => {
+const getFilmsStatistic = (filmData = []) => {
+  filmData.forEach((film) => {
     filmStatistic.watchlist += film.userDetails.watchlist ? 1 : 0;
     filmStatistic.watched += film.userDetails.watched ? 1 : 0;
     filmStatistic.favorite += film.userDetails.favorite ? 1 : 0;
   });
-  filmStatistic.total = films.length;
+  filmStatistic.total = filmData.length;
 
   return filmStatistic;
 };

@@ -1,24 +1,30 @@
-import { filmDescriptionHandle, changeDateFormat } from '../mock/utils';
-
-const getCardClassesByFilter = (filter) => filter ? 'film-card__controls-item--active' : '';
+import { getShortFilmDescription, changeDateFormat } from '../mock/utils';
+const YEAR_FORMAT = 'YYYY';
+const ACTIVE_CLASS = 'film-card__controls-item--active';
 
 const getFilmCardTemplate = (filmData) => {
-  const {
-    title = '',
-    description = '',
-    totalRating = 0,
-    poster = '',
-    genre = [],
-    runtime = '',
-    release = '',
-  } = filmData?.filmInfo ? filmData.filmInfo : '';
-  const year = changeDateFormat(release.date, 'YYYY');
-  const watchlistClass = getCardClassesByFilter(filmData?.userDetails?.watchlist);
-  const watchedClass = getCardClassesByFilter(filmData?.userDetails?.watched);
-  const favoriteClass = getCardClassesByFilter(filmData?.userDetails?.favorite);
+  if (filmData) {
+    const {
+      title = '',
+      description = '',
+      totalRating = 0,
+      poster = '',
+      genre = [],
+      runtime = '',
+      release = '',
+    } = filmData.filmInfo || {};
 
-  return (
-    `<article class="film-card">
+    const year = changeDateFormat(release?.date, YEAR_FORMAT);
+    const comments = filmData.comments || [];
+
+    const {
+      watchlist = false,
+      watched = false,
+      favorite = false
+    } = filmData.userDetails || {};
+
+    return (
+      `<article class="film-card">
       <a class="film-card__link">
         <h3 class="film-card__title">${title}</h3>
         <p class="film-card__rating">${totalRating}</p>
@@ -28,16 +34,19 @@ const getFilmCardTemplate = (filmData) => {
           <span class="film-card__genre">${genre.length ? genre[genre.length - 1] : ''}</span>
         </p>
         <img src="${poster}" alt="Изображение обложки фильма" class="film-card__poster">
-        <p class="film-card__description">${filmDescriptionHandle(description)}</p>
-        <span class="film-card__comments">${filmData?.comments ? filmData?.comments.length : 0} comments</span>
+        <p class="film-card__description">${getShortFilmDescription(description)}</p>
+        <span class="film-card__comments">${comments.length} comments</span>
       </a>
       <div class="film-card__controls">
-        <button class="film-card__controls-item film-card__controls-item--add-to-watchlist ${watchlistClass}" type="button">Add to watchlist</button>
-        <button class="film-card__controls-item film-card__controls-item--mark-as-watched ${watchedClass}" type="button">Mark as watched</button>
-        <button class="film-card__controls-item film-card__controls-item--favorite ${favoriteClass}" type="button">Mark as favorite</button>
+        <button class="film-card__controls-item film-card__controls-item--add-to-watchlist ${watchlist ? ACTIVE_CLASS : ''}" type="button">Add to watchlist</button>
+        <button class="film-card__controls-item film-card__controls-item--mark-as-watched ${watched ? ACTIVE_CLASS : ''}" type="button">Mark as watched</button>
+        <button class="film-card__controls-item film-card__controls-item--favorite ${favorite ? ACTIVE_CLASS : ''}" type="button">Mark as favorite</button>
       </div>
     </article>`
-  );
+    );
+  }
+
+  return '';
 };
 
 export { getFilmCardTemplate };

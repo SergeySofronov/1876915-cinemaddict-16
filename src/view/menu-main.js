@@ -1,4 +1,4 @@
-const getMainMenuTemplate = (filmFilter) => {
+const getMainMenuTemplate = (filmFilter = {}) => {
   const {
     watchlist = 0,
     watched = 0,
