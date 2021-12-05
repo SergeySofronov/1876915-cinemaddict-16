@@ -1,5 +1,5 @@
 import { getShortFilmDescription, changeDateFormat } from '../mock/utils';
-import { createElement } from '../render';
+import AbstractView from './abstract-view';
 
 const YEAR_FORMAT = 'YYYY';
 const ACTIVE_CLASS = 'film-card__controls-item--active';
@@ -51,24 +51,27 @@ const getFilmCardTemplate = (filmData) => {
   return '';
 };
 
-class FilmCardView {
+class FilmCardView extends AbstractView {
   #filmData = {};
-  #element = null;
   constructor(filmData) {
+    super();
     this.#filmData = filmData;
   }
 
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(getFilmCardTemplate(this.#filmData));
-    }
-
-    return this.#element;
+  get template() {
+    return getFilmCardTemplate(this.#filmData);
   }
 
-  removeElement() {
-    this.#element.remove();
-    this.#element = null;
+  setFilmClickHandler(callback) {
+    this.createEventListener('.film-card__link', 'click', callback);
+
+    return this.element;
+  }
+
+  removeFilmClickHandler() {
+    this.removeEventListener('.film-card__link');
+
+    return this.element;
   }
 }
 

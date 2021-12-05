@@ -1,4 +1,4 @@
-import { createElement } from '../render.js';
+import AbstractView from './abstract-view';
 
 const getFilmCardsContainerTemplate = () => (
   `<div class="films-list__container">
@@ -6,20 +6,9 @@ const getFilmCardsContainerTemplate = () => (
   </div>`
 );
 
-class FilmCardListView {
-  #element = null;
-
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(getFilmCardsContainerTemplate());
-    }
-
-    return this.#element;
-  }
-
-  removeElement() {
-    this.#element.remove();
-    this.#element = null;
+class FilmCardListView extends AbstractView {
+  get template() {
+    return getFilmCardsContainerTemplate();
   }
 }
 

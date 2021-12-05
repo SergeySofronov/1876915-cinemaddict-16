@@ -1,4 +1,4 @@
-import { createElement } from '../render';
+import AbstractView from './abstract-view';
 
 const getFilmSortMenuTemplate = () => (
   `<ul class="sort">
@@ -8,20 +8,9 @@ const getFilmSortMenuTemplate = () => (
   </ul>`
 );
 
-class SortMenuView {
-  #element = null;
-
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(getFilmSortMenuTemplate());
-    }
-
-    return this.#element;
-  }
-
-  removeElement() {
-    this.#element.remove();
-    this.#element = null;
+class SortMenuView extends AbstractView {
+  get template() {
+    return getFilmSortMenuTemplate();
   }
 }
 

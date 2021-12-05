@@ -55,7 +55,7 @@ const filmCommentExample = {
 };
 
 const filmQuantity = getRandomInteger(FILM_MIN_QUANTITY, FILM_MAX_QUANTITY);
-
+const filmIds = getNonRepeatUintArray(FILM_MIN_QUANTITY, FILM_MAX_QUANTITY, FILM_MAX_QUANTITY);
 const prepareCommentData = () => {
   const commentEmotion = commentEmotionTypes[getRandomInteger(0, commentEmotionTypes.length - 1)];
 
@@ -81,13 +81,15 @@ const getFilmTime = () => {
   return `${hour}h ${minute}m`;
 };
 
+let filmIndex = 0;
 const prepareFilmData = () => {
-  if (filmQuantity) {
+  if (filmQuantity && (filmIndex < filmQuantity)) {
     const filmName = [...filmUrl.keys()][getRandomInteger(0, filmUrl.size - 1)];
     const randomIndexes = getNonRepeatUintArray(0, filmDescriptions.length - 1, filmDescriptions.length)
       .slice(FILM_DESCRIPTION_MIN_QUANTITY, FILM_DESCRIPTION_MAX_QUANTITY);
 
     return {
+      id: filmIds[filmIndex++],
       comments: getRandomCommentData(),
       filmInfo: {
         title: filmName,
@@ -117,8 +119,11 @@ const prepareFilmData = () => {
   return null;
 };
 
-const getRandomFilmData = () => Array.from({ length: filmQuantity }, prepareFilmData);
+const getRandomFilmData = () => {
+  filmIndex = 0;
+  return Array.from({ length: filmQuantity }, prepareFilmData);
+};
 
-const getCommentEmotionTypes = ()=>commentEmotionTypes;
+const getCommentEmotionTypes = () => commentEmotionTypes;
 
 export { getRandomFilmData, getCommentEmotionTypes };

@@ -1,4 +1,4 @@
-import { createElement } from '../render';
+import AbstractView from './abstract-view';
 import { getCommentEmotionTypes } from '../mock/data';
 
 const ACTIVE_CLASS = 'film-details__control-button--active';
@@ -187,25 +187,39 @@ const getPopupTemplate = (filmData) => {
   return '';
 };
 
-class PopupView {
+class PopupView extends AbstractView {
   #filmData = {};
-  #element = null;
   constructor(filmData) {
+    super();
     this.#filmData = filmData;
   }
 
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(getPopupTemplate(this.#filmData));
-    }
-
-    return this.#element;
+  get template() {
+    return getPopupTemplate(this.#filmData);
   }
 
-  removeElement() {
-    this.#element.remove();
-    this.#element = null;
+  setPopupCloseHandler(callback) {
+    this.createEventListener('.film-details__close-btn', 'click', callback);
+
+    return this.element;
   }
+
+  setCommentCloseHandlers(callback) {
+    this.element.querySelectorAll('.film-details__bottom-container li button')
+      .forEach((commentSelector) => this.createEventListener(commentSelector, 'click', callback));
+  }
+
+  removePopupCloseHandler() {
+    this.removeEventListener('.film-details__close-btn');
+
+    return this.element;
+  }
+
+  removeCommentCloseHandlers() {
+    this.element.querySelectorAll('.film-details__bottom-container li button')
+      .forEach((commentSelector) => this.removeEventListener(commentSelector));
+  }
+
 }
 
 export { PopupView as default };

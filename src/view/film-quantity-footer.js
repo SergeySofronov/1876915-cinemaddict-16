@@ -1,4 +1,4 @@
-import { createElement } from '../render';
+import AbstractView from './abstract-view';
 
 const getFilmFooterTemplate = (filmFilter) => {
   if (filmFilter?.total) {
@@ -8,24 +8,15 @@ const getFilmFooterTemplate = (filmFilter) => {
   return '';
 };
 
-class FilmFooterView {
+class FilmFooterView extends AbstractView {
   #filmFilter = {};
-  #element = null;
   constructor(filmFilter) {
+    super();
     this.#filmFilter = filmFilter;
   }
 
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(getFilmFooterTemplate(this.#filmFilter));
-    }
-
-    return this.#element;
-  }
-
-  removeElement() {
-    this.#element.remove();
-    this.#element = null;
+  get template() {
+    return getFilmFooterTemplate(this.#filmFilter);
   }
 }
 
