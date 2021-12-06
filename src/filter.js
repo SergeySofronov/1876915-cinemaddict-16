@@ -38,5 +38,24 @@ const getFilmsStatistic = (filmData) => {
   return filmStatistic;
 };
 
-export { getFilmsStatistic, getUserRank };
+const getTopRatedFilmsData = (films) => {
+  if (Array.isArray(films)) {
+    return films.filter((film) => Boolean(film.filmInfo?.totalRating))
+      .sort((a, b) => (b.filmInfo.totalRating - a.filmInfo.totalRating));
+  }
+
+  return [];
+};
+
+
+const getTopCommentedFilmsData = (films) => {
+  if (Array.isArray(films)) {
+    return films.filter((film) => Boolean(film.comments?.length))
+      .sort((a, b) => (b.comments.length - a.comments.length));
+  }
+
+  return [];
+};
+
+export { getFilmsStatistic, getUserRank, getTopCommentedFilmsData, getTopRatedFilmsData };
 

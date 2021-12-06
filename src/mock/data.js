@@ -119,4 +119,6 @@ const prepareFilmData = () => {
 
 const getRandomFilmData = () => Array.from({ length: filmQuantity }, prepareFilmData);
 
-export { getRandomFilmData };
+const getCommentEmotionTypes = ()=>commentEmotionTypes;
+
+export { getRandomFilmData, getCommentEmotionTypes };

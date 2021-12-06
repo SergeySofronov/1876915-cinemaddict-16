@@ -1,3 +1,5 @@
+import { createElement } from '../render';
+
 const getMainMenuTemplate = (filmFilter = {}) => {
   const {
     watchlist = 0,
@@ -18,4 +20,25 @@ const getMainMenuTemplate = (filmFilter = {}) => {
   );
 };
 
-export { getMainMenuTemplate };
+class MainMenuView {
+  #filmFilter = {};
+  #element = null;
+  constructor(filmFilter) {
+    this.#filmFilter = filmFilter;
+  }
+
+  get element() {
+    if (!this.#element) {
+      this.#element = createElement(getMainMenuTemplate(this.#filmFilter));
+    }
+
+    return this.#element;
+  }
+
+  removeElement() {
+    this.#element.remove();
+    this.#element = null;
+  }
+}
+
+export { MainMenuView as default };

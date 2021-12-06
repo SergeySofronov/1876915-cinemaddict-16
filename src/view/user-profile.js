@@ -1,3 +1,5 @@
+import { createElement } from '../render';
+
 const getUserProfileTemplate = (userRank) => (
   `<section class="header__profile profile ">
     <p class="profile__rating">${userRank || ''}</p>
@@ -5,4 +7,25 @@ const getUserProfileTemplate = (userRank) => (
   </section>`
 );
 
-export { getUserProfileTemplate };
+class UserProfileView {
+  #userRank = '';
+  #element = null;
+  constructor(userRank) {
+    this.#userRank = userRank;
+  }
+
+  get element() {
+    if (!this.#element) {
+      this.#element = createElement(getUserProfileTemplate(this.#userRank));
+    }
+
+    return this.#element;
+  }
+
+  removeElement() {
+    this.#element.remove();
+    this.#element = null;
+  }
+}
+
+export { UserProfileView as default };
