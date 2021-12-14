@@ -2,14 +2,14 @@ import AbstractView from './abstract-view';
 
 const getFilmSectionTemplate = () => (
   `<section class="films">
-    <!-- Секция со списком фильмов -->
+    <!-- Main film section + Top rated + Top commented -->
   </section>`
 );
 
-class FilmsAllView extends AbstractView {
+class FilmsDeskView extends AbstractView {
   get template() {
     return getFilmSectionTemplate();
   }
 }
 
-export { FilmsAllView as default };
+export { FilmsDeskView as default };

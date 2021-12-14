@@ -1,17 +1,17 @@
 import { getFilmsStatistic, getUserRank, getTopRatedFilmsData, getTopCommentedFilmsData } from './filter.js';
 import { getRandomFilmData } from './mock/data.js';
 import { render, replace, getRenderPosition } from './render.js';
-import UserProfileView from './view/user-profile.js';
-import MainMenuView from './view/menu-main.js';
-import SortMenuView from './view/menu-sort.js';
-import FilmsAllView from './view/films-section.js';
-import FilmsEmptyView from './view/film-section-empty.js';
-import FilmsListView from './view/films-list-section.js';
-import FilmCardListView from './view/films-card-container.js';
-import FilmCardView from './view/film-card.js';
-import ShowMoreButtonView from './view/show-more-button.js';
-import FilmFooterView from './view/film-quantity-footer.js';
-import PopupView from './view/popup.js';
+import UserProfileView from './view/user-profile-view.js';
+import MainMenuView from './view/main-menu-view.js';
+import SortMenuView from './view/sort-menu-view.js';
+
+import FilmsDeskView from './view/films-desk-view.js';
+import FilmsSheetView from './view/films-sheet-view.js';
+import FilmCardListView from './view/film-card-list-view.js';
+import FilmCardView from './view/film-card-view.js';
+import ShowMoreButtonView from './view/show-more-button-view.js';
+import FilmFooterView from './view/films-quantity-footer-view.js';
+import PopupView from './view/popup-view.js';
 
 const FILM_CARD_INITIAL_VALUE = 5;
 const FILM_EXTRA_SECTION = 1;
@@ -39,21 +39,23 @@ const filmsTopCommented = getTopCommentedFilmsData(filmsData).slice(0, FILM_EXTR
 const filmsStatistic = getFilmsStatistic(filmsData);
 const userRank = getUserRank();
 
-let shownFilmQuantity = Math.min(filmsData.length, FILM_CARD_INITIAL_VALUE);
-let currentPopup = null;
 
 const sectionHeader = document.querySelector('.header');
 const sectionMain = document.querySelector('.main');
 const sectionFooter = document.querySelector('.footer');
 const footerStatistic = sectionFooter.querySelector('.footer__statistics');
 
-const filmsAllSection = new FilmsAllView();
-const filmMainList = new FilmsListView(SectionMessages.DEFAULT);
-const filmMainCardList = new FilmCardListView();
-const filmRatedList = new FilmsListView(SectionMessages.RATED, FILM_EXTRA_SECTION);
-const filmRatedCardList = new FilmCardListView();
-const filmPopularList = new FilmsListView(SectionMessages.POPULAR, FILM_EXTRA_SECTION);
-const filmPopularCardList = new FilmCardListView();
+const filmsDesk = new FilmsDeskView();
+const filmEmptySheet = new FilmsSheetView(SectionMessages.NO_MOVIES);
+const filmsMainSheet = new FilmsSheetView(SectionMessages.DEFAULT, false, true);
+const filmsMainCardList = new FilmCardListView();
+const filmsRatedSheet = new FilmsSheetView(SectionMessages.RATED, FILM_EXTRA_SECTION);
+const filmsRatedCardList = new FilmCardListView();
+const filmsPopularSheet = new FilmsSheetView(SectionMessages.POPULAR, FILM_EXTRA_SECTION);
+const filmsPopularCardList = new FilmCardListView();
+
+let shownFilmQuantity = Math.min(filmsData.length, FILM_CARD_INITIAL_VALUE);
+let currentPopup = null;
 
 const onPopupClose = () => {
   document.body.classList.remove('.hide-overflow');
@@ -114,7 +116,7 @@ const onShowMoreButtonClick = (evt) => {
 
     shownFilmQuantity += (restFilms < FILM_CARD_INITIAL_VALUE) ? restFilms : FILM_CARD_INITIAL_VALUE;
     filmsData.slice(lastShownQuantity, shownFilmQuantity)
-      .forEach((film) => renderFilmCards(filmMainCardList, film));
+      .forEach((film) => renderFilmCards(filmsMainCardList, film));
 
     if (shownFilmQuantity >= filmsData.length) {
       evt.target.remove();
@@ -126,34 +128,34 @@ sectionMain.innerHTML = '';
 render(sectionHeader, new UserProfileView(userRank), RenderPosition.BEFOREEND);
 render(sectionMain, new MainMenuView(filmsStatistic), RenderPosition.BEFOREEND);
 render(sectionMain, new SortMenuView(), RenderPosition.BEFOREEND);
-render(sectionMain, filmsAllSection, RenderPosition.BEFOREEND);
+render(sectionMain, filmsDesk, RenderPosition.BEFOREEND);
 
 if (shownFilmQuantity) {
 
-  render(filmsAllSection, filmMainList, RenderPosition.BEFOREEND);
-  render(filmMainList, filmMainCardList, RenderPosition.BEFOREEND);
+  render(filmsDesk, filmsMainSheet, RenderPosition.BEFOREEND);
+  render(filmsMainSheet, filmsMainCardList, RenderPosition.BEFOREEND);
 
   if (filmsTopRated.length >= FILM_EXTRA_QUANTITY) {
-    render(filmsAllSection, filmRatedList, RenderPosition.BEFOREEND);
-    render(filmRatedList, filmRatedCardList, RenderPosition.BEFOREEND);
-    filmsTopRated.slice(0, FILM_EXTRA_QUANTITY).forEach((film) => renderFilmCards(filmRatedCardList, film));
+    render(filmsDesk, filmsRatedSheet, RenderPosition.BEFOREEND);
+    render(filmsRatedSheet, filmsRatedCardList, RenderPosition.BEFOREEND);
+    filmsTopRated.slice(0, FILM_EXTRA_QUANTITY).forEach((film) => renderFilmCards(filmsRatedCardList, film));
   }
 
   if (filmsTopCommented.length >= FILM_EXTRA_QUANTITY) {
-    render(filmsAllSection, filmPopularList, RenderPosition.BEFOREEND);
-    render(filmPopularList, filmPopularCardList, RenderPosition.BEFOREEND);
-    filmsTopCommented.slice(0, FILM_EXTRA_QUANTITY).forEach((film) => renderFilmCards(filmPopularCardList, film));
+    render(filmsDesk, filmsPopularSheet, RenderPosition.BEFOREEND);
+    render(filmsPopularSheet, filmsPopularCardList, RenderPosition.BEFOREEND);
+    filmsTopCommented.slice(0, FILM_EXTRA_QUANTITY).forEach((film) => renderFilmCards(filmsPopularCardList, film));
   }
 
-  filmsData.slice(0, shownFilmQuantity).forEach((film) => renderFilmCards(filmMainCardList, film));
+  filmsData.slice(0, shownFilmQuantity).forEach((film) => renderFilmCards(filmsMainCardList, film));
 
   if (filmsData.length > FILM_CARD_INITIAL_VALUE) {
     const showMoreButton = new ShowMoreButtonView().setButtonClickHandler(onShowMoreButtonClick);
-    render(filmMainCardList, showMoreButton, RenderPosition.AFTEREND);
+    render(filmsMainCardList, showMoreButton, RenderPosition.AFTEREND);
   }
 
   render(footerStatistic, new FilmFooterView(filmsStatistic), RenderPosition.BEFOREEND);
 
 } else {
-  render(filmsAllSection, new FilmsEmptyView(SectionMessages.NO_MOVIES), RenderPosition.BEFOREEND);
+  render(filmsDesk, filmEmptySheet, RenderPosition.BEFOREEND);
 }

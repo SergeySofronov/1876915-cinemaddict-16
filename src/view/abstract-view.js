@@ -1,4 +1,3 @@
-import { createElement } from '../render';
 
 class AbstractView {
   #element = null;
@@ -11,7 +10,7 @@ class AbstractView {
 
   get element() {
     if (!this.#element) {
-      this.#element = createElement(this.template);
+      this.#element = this.createElement(this.template);
     }
 
     return this.#element;
@@ -20,6 +19,22 @@ class AbstractView {
   get template() {
     throw new Error('Abstract method not implemented: get template()');
   }
+
+  createElement = (template) => {
+    if (typeof (template) === 'string') {
+      const element = document.createElement('div');
+      element.innerHTML = template;
+
+      if (element.firstElementChild === element.lastElementChild) {
+
+        return element.firstElementChild;
+      }
+
+      throw new Error('Can\'t create component from several sibling elements');
+    }
+
+    return null;
+  };
 
   removeElement() {
     this.#element?.remove();

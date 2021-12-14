@@ -1,4 +1,6 @@
 import { getRandomInteger, getNonRepeatUintArray, getRandomBoolean, getRandomPartFromArray, getRandomDate, getRandomFloatStrict } from './utils.js';
+import { nanoid } from 'nanoid';
+
 const BASE_IMAGE_URL = './images/posters/';
 const COMMENT_MAX_QUANTITY = 50;
 const COMMENT_MIN_QUANTITY = 0;
@@ -55,7 +57,6 @@ const filmCommentExample = {
 };
 
 const filmQuantity = getRandomInteger(FILM_MIN_QUANTITY, FILM_MAX_QUANTITY);
-const filmIds = getNonRepeatUintArray(FILM_MIN_QUANTITY, FILM_MAX_QUANTITY, FILM_MAX_QUANTITY);
 const prepareCommentData = () => {
   const commentEmotion = commentEmotionTypes[getRandomInteger(0, commentEmotionTypes.length - 1)];
 
@@ -81,15 +82,14 @@ const getFilmTime = () => {
   return `${hour}h ${minute}m`;
 };
 
-let filmIndex = 0;
 const prepareFilmData = () => {
-  if (filmQuantity && (filmIndex < filmQuantity)) {
+  if (filmQuantity) {
     const filmName = [...filmUrl.keys()][getRandomInteger(0, filmUrl.size - 1)];
     const randomIndexes = getNonRepeatUintArray(0, filmDescriptions.length - 1, filmDescriptions.length)
       .slice(FILM_DESCRIPTION_MIN_QUANTITY, FILM_DESCRIPTION_MAX_QUANTITY);
 
     return {
-      id: filmIds[filmIndex++],
+      id: nanoid(),
       comments: getRandomCommentData(),
       filmInfo: {
         title: filmName,
@@ -119,10 +119,7 @@ const prepareFilmData = () => {
   return null;
 };
 
-const getRandomFilmData = () => {
-  filmIndex = 0;
-  return Array.from({ length: filmQuantity }, prepareFilmData);
-};
+const getRandomFilmData = () => Array.from({ length: filmQuantity }, prepareFilmData);
 
 const getCommentEmotionTypes = () => commentEmotionTypes;
 

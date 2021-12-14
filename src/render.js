@@ -45,34 +45,6 @@ const replace = (oldElement, newElement) => {
   oldInstance.replaceWith(newInstance);
 };
 
-// const remove = (component) => {
-//   if (component) {
-//     if (!(component instanceof AbstractView)) {
-//       throw new Error('Can remove only components');
-//     }
-
-//     component.element?.remove(); //todo: move into removeElement?
-//     component.removeElement();//todo: move removeElement into AbstractView?
-//   }
-// };
-
-//todo: move createElement into AbstractView?
-const createElement = (template) => {
-  if (typeof (template) === 'string') {
-    const element = document.createElement('div');
-    element.innerHTML = template;
-
-    if (element.firstElementChild === element.lastElementChild) {
-
-      return element.firstElementChild;
-    }
-
-    throw new Error('Can\'t create component from several sibling elements');
-  }
-
-  return null;
-};
-
 const getRenderPosition = () => RenderPosition;
 
-export { render, replace, createElement, getRenderPosition };
+export { render, replace, getRenderPosition };
