@@ -45,6 +45,4 @@ const replace = (oldElement, newElement) => {
   oldInstance.replaceWith(newInstance);
 };
 
-const getRenderPosition = () => RenderPosition;
-
-export { render, replace, getRenderPosition };
+export { render, replace, RenderPosition };
