@@ -1,4 +1,4 @@
-import { createElement } from '../render';
+import AbstractView from './abstract-view';
 
 const getMainMenuTemplate = (filmFilter = {}) => {
   const {
@@ -20,24 +20,15 @@ const getMainMenuTemplate = (filmFilter = {}) => {
   );
 };
 
-class MainMenuView {
+class MainMenuView extends AbstractView {
   #filmFilter = {};
-  #element = null;
   constructor(filmFilter) {
+    super();
     this.#filmFilter = filmFilter;
   }
 
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(getMainMenuTemplate(this.#filmFilter));
-    }
-
-    return this.#element;
-  }
-
-  removeElement() {
-    this.#element.remove();
-    this.#element = null;
+  get template() {
+    return getMainMenuTemplate(this.#filmFilter);
   }
 }
 

@@ -1,4 +1,4 @@
-const MAX_CHILDREN_VALUE = 1;
+import AbstractView from './view/abstract-view';
 
 const RenderPosition = {
   BEFOREBEGIN: 'beforebegin',
@@ -7,35 +7,44 @@ const RenderPosition = {
   AFTEREND: 'afterend',
 };
 
-const render = (container, element, place) => {
+const render = (container, component, place) => {
+
+  const parent = container instanceof AbstractView ? container.element : container;
+  const child = component instanceof AbstractView ? component.element : component;
+
   switch (place) {
     case RenderPosition.BEFOREBEGIN:
-      container.before(element);
+      parent.before(child);
       break;
     case RenderPosition.AFTERBEGIN:
-      container.prepend(element);
+      parent.prepend(child);
       break;
     case RenderPosition.BEFOREEND:
-      container.append(element);
+      parent.append(child);
       break;
     case RenderPosition.AFTEREND:
-      container.after(element);
+      parent.after(child);
       break;
 
     default: break;
   }
 };
 
-const createElement = (template) => {
-  const element = document.createElement('div');
-  element.innerHTML = (typeof (template) === 'string') ? template.trim() : '';
-  if (element.children.length > MAX_CHILDREN_VALUE) {
-    return element;
+const replace = (oldElement, newElement) => {
+  if (!(oldElement && newElement)) {
+    throw new Error('Can\'t replace non-existing elements');
   }
 
-  return element.firstChild;
+  const oldInstance = oldElement instanceof AbstractView ? oldElement.element : oldElement;
+  const newInstance = newElement instanceof AbstractView ? newElement.element : newElement;
+
+  if (!((oldInstance instanceof Element) && (newInstance instanceof Element))) {
+    throw new Error('Can\'t replace non-Element instance');
+  }
+
+  oldInstance.replaceWith(newInstance);
 };
 
 const getRenderPosition = () => RenderPosition;
 
-export { render, createElement, getRenderPosition };
+export { render, replace, getRenderPosition };
