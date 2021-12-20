@@ -52,18 +52,49 @@ const getFilmCardTemplate = (filmData) => {
 };
 
 class FilmCardView extends AbstractView {
+  #id = null;
   #filmData = {};
   constructor(filmData) {
     super();
     this.#filmData = filmData;
   }
 
+  get id() {
+    return this.#id;
+  }
+
   get template() {
     return getFilmCardTemplate(this.#filmData);
   }
 
+  closePopup(){
+    document.querySelector('.film-details').remove();
+  }
+
+  toggleDocumentScroll(){
+    document.body.classList.toggle('.hide-overflow');
+  }
+
   setFilmClickHandler(callback) {
     this.createEventListener('.film-card__link', 'click', callback);
+
+    return this.element;
+  }
+
+  setWatchListClickHandler(callback) {
+    this.createEventListener('.film-card__controls-item--add-to-watchlist', 'click', callback);
+
+    return this.element;
+  }
+
+  setWatchedClickHandler(callback) {
+    this.createEventListener('.film-card__controls-item--mark-as-watched', 'click', callback);
+
+    return this.element;
+  }
+
+  setFavoriteClickHandler(callback) {
+    this.createEventListener('.film-card__controls-item--favorite', 'click', callback);
 
     return this.element;
   }

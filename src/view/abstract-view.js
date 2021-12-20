@@ -61,7 +61,7 @@ class AbstractView {
     }
 
     if (typeof (callback) !== 'function') {
-      throw new Error('Argument "handler" is not a function');
+      throw new Error('Argument "callback" is not a function');
     }
 
     const eventHandler = this.createEventHandler(this, callback);
