@@ -1,3 +1,6 @@
+import { DateFormatStyle } from './const';
+import { changeDateFormat } from './mock/utils';
+
 const filmStatistic = {
   watchlist: 0,
   watched: 0,
@@ -57,5 +60,26 @@ const getTopCommentedFilmsData = (films) => {
   return [];
 };
 
-export { getFilmsStatistic, getUserRank, getTopCommentedFilmsData, getTopRatedFilmsData };
+const getFilmsDataByDate = (films) => {
+  if (Array.isArray(films)) {
+    return films.filter((film) => Boolean(film.filmInfo?.release?.date))
+      .sort((a, b) => {
+        const first = parseInt(changeDateFormat(a.filmInfo.release.date, DateFormatStyle.YEAR), 10);
+        const second = parseInt(changeDateFormat(b.filmInfo.release.date, DateFormatStyle.YEAR), 10);
+
+        if ((typeof (first) !== 'number') && (typeof (second) !== 'number')) {
+          return 0;
+        } else if ((typeof (first) !== 'number')) {
+          return -1;
+        } else {
+          return (second - first);
+        }
+      });
+  }
+
+  return [];
+
+};
+
+export { getFilmsStatistic, getUserRank, getTopCommentedFilmsData, getTopRatedFilmsData, getFilmsDataByDate };
 

@@ -1,9 +1,9 @@
 import { render, replace, RenderPosition } from '../render.js';
-import { getTopRatedFilmsData, getTopCommentedFilmsData } from '../filter.js';
+import { getTopRatedFilmsData, getTopCommentedFilmsData, getFilmsDataByDate } from '../filter.js';
 import { SectionMessages, SortType } from '../const.js';
 import { update } from '../mock/utils.js';
 
-import AbstractView from '../view/abstract-view.js';
+import SortMenuView from '../view/sort-menu-view.js';
 import FilmsDeskView from '../view/films-desk-view.js';
 import FilmsSheetView from '../view/films-sheet-view.js';
 import FilmCardListView from '../view/film-card-list-view.js';
@@ -14,8 +14,8 @@ const FILM_SHOW_PER_STEP = 5;
 const FILM_EXTRA_QUANTITY = 2;
 
 class FilmDeskPresenter {
-  #parentContainer = null;
-  #footerContainer = null;
+  #filmDeskRenderContainer = null;
+  #filmSortMenu = new SortMenuView();
   #filmsDesk = new FilmsDeskView();
   #filmEmptySheet = new FilmsSheetView(SectionMessages.NO_MOVIES);
   #filmsMainSheet = new FilmsSheetView(SectionMessages.DEFAULT, false, true);
@@ -30,48 +30,52 @@ class FilmDeskPresenter {
   #activePopup = null;
   #filmsData = [];
   #filmsDataDefault = [];
-  #filmsTopRated = [];
-  #filmsTopCommented = [];
+  #activeSortType = SortType.DEFAULT;
 
   #shownFilmQuantity = null;
   #totalFilmsQuantity = null;
   #restFilmQuantity = null;
 
-  constructor(parentContainer, footerContainer) {
-    this.#parentContainer = parentContainer;
-    this.#footerContainer = footerContainer;
-  }
-
-  get currentPopup() {
-    return this.#activePopup;
-  }
-
-  set currentPopup(element) {
-    this.#activePopup = (element instanceof AbstractView) ? element : null;
+  constructor(renderContainer) {
+    this.#filmDeskRenderContainer = renderContainer;
   }
 
   init(filmsData) {
     this.#filmsData = [...filmsData];
     this.#filmsDataDefault = [...this.#filmsData];
     this.#totalFilmsQuantity = Math.max(this.#filmsData.length, FILM_SHOW_PER_STEP);
-
-    //todo:delete filmsTopCommented и filmsTopRated
-    this.#filmsTopRated = getTopRatedFilmsData(this.#filmsData).slice(0, FILM_EXTRA_QUANTITY);
-    this.#filmsTopCommented = getTopCommentedFilmsData(this.#filmsData).slice(0, FILM_EXTRA_QUANTITY);
-
-
-    render(this.#parentContainer, this.#filmsDesk, RenderPosition.BEFOREEND);
+    this.#filmSortMenu.setSortClickHandler(this.#onSortMenuClick);
+    render(this.#filmDeskRenderContainer, this.#filmSortMenu, RenderPosition.BEFOREEND);
+    render(this.#filmDeskRenderContainer, this.#filmsDesk, RenderPosition.BEFOREEND);
     this.#renderDesk();
   }
 
-  updateFilmData = (film) => {
-    if (film?.id) {
-      this.#filmsData = update(this.#filmsData, film);
-      this.#filmsDataDefault = update(this.#filmsDataDefault, film);
-      for (const [presenter, filmId] of this.#filmsPresenters.entries()) {
-        if (filmId === film.id) {
-          presenter.init(film);
-        }
+  #removeActivePopup = () => {
+    if (this.#activePopup) {
+      this.#activePopup.removeElement();
+      this.#activePopup = null;
+    }
+  }
+
+  #updateActivePopup = (popup, callback) => {
+    if (popup) {
+      if (this.#activePopup) {
+        replace(this.#activePopup, popup);
+      } else if (callback) {
+        callback();
+      }
+      this.#activePopup = popup;
+    }
+
+    return this.#activePopup;
+  }
+
+  #updateFilmData = (film) => {
+    this.#filmsData = update(this.#filmsData, film);
+    this.#filmsDataDefault = update(this.#filmsDataDefault, film);
+    for (const [presenter, filmId] of this.#filmsPresenters.entries()) {
+      if (filmId === film.id) {
+        presenter.init(film);
       }
     }
   }
@@ -89,7 +93,7 @@ class FilmDeskPresenter {
   #renderFilmCards(from, toward, filmsList) {
     this.#filmsData.slice(from, toward).forEach((film) => {
       if (film.id) {
-        const filmPresenter = new FilmPresenter(filmsList, this.#footerContainer, this);
+        const filmPresenter = new FilmPresenter(filmsList, this.#updateFilmData, this.#updateActivePopup, this.#removeActivePopup);
         filmPresenter.init(film);
         this.#filmsPresenters.set(filmPresenter, film.id);
       }
@@ -108,11 +112,13 @@ class FilmDeskPresenter {
       this.#renderSheet(this.#filmsMainSheet, this.#filmsMainCardList, this.#getFilmsToShowQuantity());
       this.#shownFilmQuantity += currentQuantity;
 
-      if (this.#filmsTopRated.length) {
+      this.#sortFilmsData(SortType.RATE);
+      if (this.#filmsData.length >= FILM_EXTRA_QUANTITY) {
         this.#renderSheet(this.#filmsRatedSheet, this.#filmsRatedCardList, FILM_EXTRA_QUANTITY);
       }
 
-      if (this.#filmsTopCommented.length) {
+      this.#sortFilmsData(SortType.COMMENT);
+      if (this.#filmsData.length >= FILM_EXTRA_QUANTITY) {
         this.#renderSheet(this.#filmsPopularSheet, this.#filmsPopularCardList, FILM_EXTRA_QUANTITY);
       }
 
@@ -125,19 +131,43 @@ class FilmDeskPresenter {
     }
   }
 
+  #resetMainSheet = () => {
+    const currentQuantity = Math.min(this.#totalFilmsQuantity, FILM_SHOW_PER_STEP);
+    this.#filmsMainCardList.removeElement();
+    render(this.#filmsMainSheet, this.#filmsMainCardList, RenderPosition.AFTERBEGIN);
+    this.#renderFilmCards(0, currentQuantity, this.#filmsMainCardList);
+    this.#shownFilmQuantity = currentQuantity;
+  }
+
   #sortFilmsData(sortType) {
     switch (sortType) {
-      case (SortType.DEFAULT):
-        this.#filmsData = this.#filmsDataDefault;
+      case (SortType.RATE):
+        this.#filmsData = getTopRatedFilmsData(this.#filmsDataDefault);
         break;
 
-      case (SortType.RATED):
-        this.#filmsData = getTopRatedFilmsData(this.#filmsData);
+      case (SortType.DATE):
+        this.#filmsData = getFilmsDataByDate(this.#filmsDataDefault);
         break;
-      case (SortType.POPULAR):
-        this.#filmsData = getTopCommentedFilmsData(this.#filmsData);
+
+      case (SortType.COMMENT):
+        this.#filmsData = getTopCommentedFilmsData(this.#filmsDataDefault);
         break;
-      default: break;
+
+      default: case (SortType.DEFAULT):
+        this.#filmsData = [...this.#filmsDataDefault];
+        break;
+    }
+
+    this.#activeSortType = sortType;
+  }
+
+  #onSortMenuClick = (evt) => {
+    if (evt.target.tagName === 'A') {
+      const type = evt.target.dataset.sortType;
+      if (this.#activeSortType !== type) {
+        this.#sortFilmsData(type);
+        this.#resetMainSheet();
+      }
     }
   }
 

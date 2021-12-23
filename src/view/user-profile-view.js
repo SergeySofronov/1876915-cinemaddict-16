@@ -17,6 +17,7 @@ class UserProfileView extends AbstractView {
   get template() {
     return getUserProfileTemplate(this.#userRank);
   }
+
 }
 
 export { UserProfileView as default };

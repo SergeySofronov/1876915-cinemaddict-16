@@ -74,6 +74,7 @@ class AbstractView {
     }
   }
 
+  //todo: remove removeEventListener() if unnecessary (?)
   removeEventListener(selector) {
     const elementSelector = this.#element?.querySelector(selector);
     if (this.#eventInfo?.has(elementSelector)) {

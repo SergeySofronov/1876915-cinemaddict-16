@@ -1,7 +1,7 @@
 import { getShortFilmDescription, changeDateFormat } from '../mock/utils';
+import { DateFormatStyle } from '../const';
 import AbstractView from './abstract-view';
 
-const YEAR_FORMAT = 'YYYY';
 const ACTIVE_CLASS = 'film-card__controls-item--active';
 
 const getFilmCardTemplate = (filmData) => {
@@ -16,7 +16,7 @@ const getFilmCardTemplate = (filmData) => {
       release = '',
     } = filmData.filmInfo || {};
 
-    const year = changeDateFormat(release?.date, YEAR_FORMAT);
+    const year = changeDateFormat(release?.date, DateFormatStyle.YEAR);
     const comments = filmData.comments || [];
 
     const {
@@ -65,14 +65,6 @@ class FilmCardView extends AbstractView {
 
   get template() {
     return getFilmCardTemplate(this.#filmData);
-  }
-
-  closePopup(){
-    document.querySelector('.film-details').remove();
-  }
-
-  toggleDocumentScroll(){
-    document.body.classList.toggle('.hide-overflow');
   }
 
   setFilmClickHandler(callback) {

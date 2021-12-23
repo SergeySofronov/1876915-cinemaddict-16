@@ -10,12 +10,19 @@ const SectionMessages = {
 
 const SortType = {
   DEFAULT: 'default',
-  RATED: 'top-rated',
-  POPULAR: 'most-commented'
+  COMMENT:'most-commented',
+  RATE: 'top-rated',
+  DATE: 'top-dated'
 };
 
-const KeyEnum = {
+const DateFormatStyle = {
+  DEFAULT: 'DD MMMM YYYY',
+  COMMENT: 'YYYY/MM/DD HH:mm',
+  YEAR: 'YYYY'
+};
+
+const KeyCode = {
   ESC: 'Escape',
 };
 
-export { SectionMessages, SortType, KeyEnum };
+export { SectionMessages, SortType, KeyCode, DateFormatStyle };
