@@ -36,20 +36,13 @@ class AbstractView {
     return null;
   };
 
-  removeElement() {
+  removeElement = () => {
     this.#element?.remove();
     this.#element = null;
     this.#eventInfo = null;
   }
 
-  createEventHandler(context, fn) {
-    return function (evt) {
-      evt.preventDefault();
-      return fn.call(context, evt);
-    };
-  }
-
-  createEventListener(selector, eventType, callback) {
+  createEventListener = (selector, eventType, callback) => {
     if (!this.#eventInfo) {
       this.#eventInfo = new Map();
     }
@@ -64,7 +57,11 @@ class AbstractView {
       throw new Error('Argument "callback" is not a function');
     }
 
-    const eventHandler = this.createEventHandler(this, callback);
+    const eventHandler = (evt) => {
+      evt.preventDefault();
+      callback(evt);
+    };
+
     const isHasSimilar = [...this.#eventInfo.entries()]
       .some(([key, [, handler]]) => ((key === elementSelector) || (handler === eventHandler)));
 
@@ -82,7 +79,6 @@ class AbstractView {
       elementSelector.removeEventListener(eventType, eventHandler);
     }
   }
-
 }
 
 export { AbstractView as default };

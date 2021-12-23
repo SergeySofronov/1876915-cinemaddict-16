@@ -40,7 +40,7 @@ class FilmDeskPresenter {
     this.#filmDeskRenderContainer = renderContainer;
   }
 
-  init(filmsData) {
+  init = (filmsData) => {
     this.#filmsData = [...filmsData];
     this.#filmsDataDefault = [...this.#filmsData];
     this.#totalFilmsQuantity = Math.max(this.#filmsData.length, FILM_SHOW_PER_STEP);
@@ -90,7 +90,7 @@ class FilmDeskPresenter {
     return this.#restFilmQuantity;
   }
 
-  #renderFilmCards(from, toward, filmsList) {
+  #renderFilmCards = (from, toward, filmsList) => {
     this.#filmsData.slice(from, toward).forEach((film) => {
       if (film.id) {
         const filmPresenter = new FilmPresenter(filmsList, this.#updateFilmData, this.#updateActivePopup, this.#removeActivePopup);
@@ -106,7 +106,7 @@ class FilmDeskPresenter {
     this.#renderFilmCards(0, quantity, list);
   }
 
-  #renderDesk() {
+  #renderDesk = () => {
     if (this.#totalFilmsQuantity) {
       const currentQuantity = Math.min(this.#totalFilmsQuantity, FILM_SHOW_PER_STEP);
       this.#renderSheet(this.#filmsMainSheet, this.#filmsMainCardList, this.#getFilmsToShowQuantity());
@@ -139,7 +139,7 @@ class FilmDeskPresenter {
     this.#shownFilmQuantity = currentQuantity;
   }
 
-  #sortFilmsData(sortType) {
+  #sortFilmsData = (sortType) => {
     switch (sortType) {
       case (SortType.RATE):
         this.#filmsData = getTopRatedFilmsData(this.#filmsDataDefault);

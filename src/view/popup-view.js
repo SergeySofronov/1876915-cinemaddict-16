@@ -204,46 +204,30 @@ class PopupView extends AbstractView {
     return getPopupTemplate(this.#filmData);
   }
 
-  setPopupCloseHandler(callback) {
+  setPopupCloseHandler = (callback) => {
     this.createEventListener('.film-details__close-btn', 'click', callback);
-
-    return this.element;
   }
 
-  setCommentCloseHandlers(callback) {
+  setCommentCloseHandlers = (callback) => {
     this.element.querySelectorAll('.film-details__bottom-container li button')
       .forEach((commentSelector) => this.createEventListener(commentSelector, 'click', callback));
   }
 
-  setWatchListClickHandler(callback) {
+  setWatchListClickHandler = (callback) => {
     this.createEventListener('.film-details__control-button--watchlist', 'click', callback);
-
-    return this.element;
   }
 
-  setWatchedClickHandler(callback) {
+  setWatchedClickHandler = (callback) => {
     this.createEventListener('.film-details__control-button--watched', 'click', callback);
-
-    return this.element;
   }
 
-  setFavoriteClickHandler(callback) {
+  setFavoriteClickHandler = (callback) => {
     this.createEventListener('.film-details__control-button--favorite', 'click', callback);
-
-    return this.element;
   }
 
-  removePopupCloseHandler() {
+  removePopupCloseHandler = () => {
     this.removeEventListener('.film-details__close-btn');
-
-    return this.element;
   }
-
-  removeCommentCloseHandlers() {
-    this.element.querySelectorAll('.film-details__bottom-container li button')
-      .forEach((commentSelector) => this.removeEventListener(commentSelector));
-  }
-
 }
 
 export { PopupView as default };

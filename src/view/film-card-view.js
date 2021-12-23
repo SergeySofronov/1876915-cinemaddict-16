@@ -67,34 +67,20 @@ class FilmCardView extends AbstractView {
     return getFilmCardTemplate(this.#filmData);
   }
 
-  setFilmClickHandler(callback) {
+  setFilmClickHandler = (callback) => {
     this.createEventListener('.film-card__link', 'click', callback);
-
-    return this.element;
   }
 
-  setWatchListClickHandler(callback) {
+  setWatchListClickHandler = (callback) => {
     this.createEventListener('.film-card__controls-item--add-to-watchlist', 'click', callback);
-
-    return this.element;
   }
 
-  setWatchedClickHandler(callback) {
+  setWatchedClickHandler = (callback) => {
     this.createEventListener('.film-card__controls-item--mark-as-watched', 'click', callback);
-
-    return this.element;
   }
 
-  setFavoriteClickHandler(callback) {
+  setFavoriteClickHandler = (callback) => {
     this.createEventListener('.film-card__controls-item--favorite', 'click', callback);
-
-    return this.element;
-  }
-
-  removeFilmClickHandler() {
-    this.removeEventListener('.film-card__link');
-
-    return this.element;
   }
 }
 
