@@ -2,6 +2,7 @@ import { render, replace, RenderPosition } from '../render.js';
 import { getTopRatedFilmsData, getTopCommentedFilmsData, getFilmsDataByDate } from '../filter.js';
 import { SectionMessages, SortType } from '../const.js';
 import { update } from '../mock/utils.js';
+import { KeyCode } from '../const.js';
 
 import SortMenuView from '../view/sort-menu-view.js';
 import FilmsDeskView from '../view/films-desk-view.js';
@@ -44,7 +45,7 @@ class FilmDeskPresenter {
   init = (filmsData) => {
     this.#filmsData = [...filmsData];
     this.#filmsDataDefault = [...this.#filmsData];
-    this.#totalFilmsQuantity = Math.max(this.#filmsData.length, FILM_SHOW_PER_STEP);
+    this.#totalFilmsQuantity = (this.#filmsData.length) ? Math.max(this.#filmsData.length, FILM_SHOW_PER_STEP) : 0;
     this.#extraFilmsQuantity = (this.#filmsData.length > FILM_EXTRA_QUANTITY) ? FILM_EXTRA_QUANTITY : 0;
     this.#filmSortMenu.setSortClickHandler(this.#onSortMenuClick);
 
@@ -53,19 +54,23 @@ class FilmDeskPresenter {
     this.#renderDeskSheets();
   }
 
+  #toggleDocumentScroll = () => document.body.classList.toggle('hide-overflow');
+
   #removeActivePopup = () => {
-    if (this.#activePopup) {
-      this.#activePopup.removeElement();
-      this.#activePopup = null;
-    }
+    this.#activePopup.removeElement();
+    this.#activePopup = null;
+    document.removeEventListener('keydown', this.#onEscKeyDown);
   }
 
-  #updateActivePopup = (popup, callback) => {
+  #updateActivePopup = (popup, updatePopupHandlers) => {
     if (popup) {
+      updatePopupHandlers();
       if (this.#activePopup) {
         replace(this.#activePopup, popup);
-      } else if (callback) {
-        callback();
+      } else if (updatePopupHandlers) {
+        this.#toggleDocumentScroll();
+        render(document.body, popup, RenderPosition.BEFOREEND);
+        document.addEventListener('keydown', this.#onEscKeyDown);
       }
       this.#activePopup = popup;
     }
@@ -96,7 +101,7 @@ class FilmDeskPresenter {
   #renderFilmCards = (from, toward, filmsList) => {
     this.#filmsData.slice(from, toward).forEach((film) => {
       if (film.id) {
-        const filmPresenter = new FilmPresenter(filmsList, this.#updateFilmData, this.#updateActivePopup, this.#removeActivePopup);
+        const filmPresenter = new FilmPresenter(filmsList, this.#updateFilmData, this.#onPopupButtonClose, this.#updateActivePopup);
         filmPresenter.init(film);
         this.#filmsPresenters.set(filmPresenter, film.id);
       }
@@ -104,18 +109,20 @@ class FilmDeskPresenter {
   }
 
   #renderSheet = (sheet, list, sortType, quantity) => {
-    if (quantity) {
-      this.#sortFilmsData(sortType);
-      render(this.#filmsDesk, sheet, RenderPosition.AFTERBEGIN);
-      render(sheet, list, RenderPosition.BEFOREEND);
-      this.#renderFilmCards(0, quantity, list);
-    }
+    this.#sortFilmsData(sortType);
+    render(this.#filmsDesk, sheet, RenderPosition.AFTERBEGIN);
+    render(sheet, list, RenderPosition.BEFOREEND);
+    this.#renderFilmCards(0, quantity, list);
   }
 
   #renderDeskSheets = (sortType) => {
     if (this.#totalFilmsQuantity) {
-      this.#renderSheet(this.#filmsPopularSheet, this.#filmsPopularCardList, SortType.COMMENT, this.#extraFilmsQuantity);
-      this.#renderSheet(this.#filmsRatedSheet, this.#filmsRatedCardList, SortType.RATE, this.#extraFilmsQuantity);
+
+      if (this.#extraFilmsQuantity) {
+        this.#renderSheet(this.#filmsPopularSheet, this.#filmsPopularCardList, SortType.COMMENT, this.#extraFilmsQuantity);
+        this.#renderSheet(this.#filmsRatedSheet, this.#filmsRatedCardList, SortType.RATE, this.#extraFilmsQuantity);
+      }
+
       this.#renderSheet(this.#filmsMainSheet, this.#filmsMainCardList, sortType, this.#getFilmsToShowQuantity());
       this.#shownFilmQuantity += Math.min(this.#totalFilmsQuantity, FILM_SHOW_PER_STEP);
 
@@ -159,6 +166,19 @@ class FilmDeskPresenter {
 
     this.#activeSortType = sortType;
   }
+
+  #onEscKeyDown = (evt) => {
+    if (evt.key === KeyCode.ESC) {
+      this.#onPopupButtonClose();
+    }
+  };
+
+  #onPopupButtonClose = () => {
+    this.#toggleDocumentScroll();
+    this.#removeActivePopup();
+    document.removeEventListener('keydown', this.#onEscKeyDown);
+  };
+
 
   #onSortMenuClick = (evt) => {
     if (evt.target.tagName === 'A') {

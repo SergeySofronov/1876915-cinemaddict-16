@@ -70,15 +70,6 @@ class AbstractView {
       elementSelector.addEventListener(eventType, eventHandler);
     }
   }
-
-  //todo: remove removeEventListener() if unnecessary (?)
-  removeEventListener(selector) {
-    const elementSelector = this.#element?.querySelector(selector);
-    if (this.#eventInfo?.has(elementSelector)) {
-      const [eventType, eventHandler] = this.#eventInfo.get(elementSelector);
-      elementSelector.removeEventListener(eventType, eventHandler);
-    }
-  }
 }
 
 export { AbstractView as default };
