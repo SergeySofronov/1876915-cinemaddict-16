@@ -48,7 +48,6 @@ const getNonRepeatUintArray = (lowerBorder, upperBorder, arrayLength) => {
   throw new Error('generateNonRepeatArray: wrong attributes');
 };
 
-// Функция getRandomPartFromArray возвращает копию принятого массива случайной длинны от 1 до inputArray.length
 const getRandomPartFromArray = (inputArray) => {
   if (Array.isArray(inputArray)) {
     return inputArray.slice(0, getRandomInteger(1, inputArray.length));
@@ -79,6 +78,23 @@ const getShortFilmDescription = (filmDescription) => {
 
 const changeDateFormat = (date, format = DATE_FORMAT) => (date ? dayjs(date).format(format) : '');
 
+const update = (filmsData, changedFilm) => {
+  if (Array.isArray(filmsData)) {
+
+    const index = filmsData.findIndex((film) => film.id === changedFilm?.id);
+
+    if (index === -1) {
+      return filmsData;
+    }
+
+    return [
+      ...filmsData.slice(0, index),
+      update,
+      ...filmsData.slice(index + 1),
+    ];
+  }
+};
+
 export {
   getRandomInteger,
   getNonRepeatUintArray,
@@ -88,4 +104,5 @@ export {
   getRandomFloatStrict,
   getShortFilmDescription,
   changeDateFormat,
+  update
 };

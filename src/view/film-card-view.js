@@ -1,7 +1,7 @@
 import { getShortFilmDescription, changeDateFormat } from '../mock/utils';
+import { DateFormatStyle } from '../const';
 import AbstractView from './abstract-view';
 
-const YEAR_FORMAT = 'YYYY';
 const ACTIVE_CLASS = 'film-card__controls-item--active';
 
 const getFilmCardTemplate = (filmData) => {
@@ -16,7 +16,7 @@ const getFilmCardTemplate = (filmData) => {
       release = '',
     } = filmData.filmInfo || {};
 
-    const year = changeDateFormat(release?.date, YEAR_FORMAT);
+    const year = changeDateFormat(release?.date, DateFormatStyle.YEAR);
     const comments = filmData.comments || [];
 
     const {
@@ -52,26 +52,35 @@ const getFilmCardTemplate = (filmData) => {
 };
 
 class FilmCardView extends AbstractView {
+  #id = null;
   #filmData = {};
   constructor(filmData) {
     super();
     this.#filmData = filmData;
   }
 
+  get id() {
+    return this.#id;
+  }
+
   get template() {
     return getFilmCardTemplate(this.#filmData);
   }
 
-  setFilmClickHandler(callback) {
+  setFilmClickHandler = (callback) => {
     this.createEventListener('.film-card__link', 'click', callback);
-
-    return this.element;
   }
 
-  removeFilmClickHandler() {
-    this.removeEventListener('.film-card__link');
+  setWatchListClickHandler = (callback) => {
+    this.createEventListener('.film-card__controls-item--add-to-watchlist', 'click', callback);
+  }
 
-    return this.element;
+  setWatchedClickHandler = (callback) => {
+    this.createEventListener('.film-card__controls-item--mark-as-watched', 'click', callback);
+  }
+
+  setFavoriteClickHandler = (callback) => {
+    this.createEventListener('.film-card__controls-item--favorite', 'click', callback);
   }
 }
 

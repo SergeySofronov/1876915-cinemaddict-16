@@ -47,7 +47,7 @@ html {
   min-width: 1240px;
   position: relative;
   min-height: 100%;
-  -webkit-font-smoothing: antialiased
+  -webkit-font-smoothing: antialiased;
 }
 
 .visually-hidden {

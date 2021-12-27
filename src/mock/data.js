@@ -1,5 +1,6 @@
 import { getRandomInteger, getNonRepeatUintArray, getRandomBoolean, getRandomPartFromArray, getRandomDate, getRandomFloatStrict } from './utils.js';
 import { nanoid } from 'nanoid';
+import { DateFormatStyle } from '../const.js';
 
 const BASE_IMAGE_URL = './images/posters/';
 const COMMENT_MAX_QUANTITY = 50;
@@ -14,8 +15,6 @@ const FILM_MIN_RUNTIME = 70;
 const FILM_MAX_RUNTIME = 180;
 const FILM_DESCRIPTION_MAX_QUANTITY = 5;
 const FILM_DESCRIPTION_MIN_QUANTITY = 1;
-const FILM_DATE_FORMAT = 'DD MMMM YY';
-const COMMENT_DATE_FORMAT = 'YYYY/MM/DD HH:mm';
 const DATE_BASE_VALUE = '1950-01-01';
 const DATE_GAP_MAX = 30;
 const HOUR_VALUE = 60;
@@ -64,7 +63,7 @@ const prepareCommentData = () => {
     author: commentUserNames[getRandomInteger(0, commentUserNames.length - 1)],
     emotion: commentEmotion,
     content: filmCommentExample[commentEmotion][getRandomInteger(0, filmCommentExample[commentEmotion].length - 1)],
-    date: getRandomDate(DATE_BASE_VALUE, DATE_GAP_MAX, COMMENT_DATE_FORMAT),
+    date: getRandomDate(DATE_BASE_VALUE, DATE_GAP_MAX, DateFormatStyle.COMMENT),
   };
 };
 
@@ -103,7 +102,7 @@ const prepareFilmData = () => {
         genre: getRandomPartFromArray(filmGenres),
         writers: getRandomPartFromArray(filmWriters).join(', '),
         release: {
-          date: getRandomDate(DATE_BASE_VALUE, DATE_GAP_MAX, FILM_DATE_FORMAT),
+          date: getRandomDate(DATE_BASE_VALUE, DATE_GAP_MAX, DateFormatStyle.DEFAULT),
           country: filmCountries[getRandomInteger(0, filmCountries.length - 1)],
         },
         runtime: getFilmTime()

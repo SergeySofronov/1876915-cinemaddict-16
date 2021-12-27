@@ -188,38 +188,46 @@ const getPopupTemplate = (filmData) => {
 };
 
 class PopupView extends AbstractView {
+  #id = null;
   #filmData = {};
   constructor(filmData) {
     super();
     this.#filmData = filmData;
+    this.#id = filmData?.id || null;
+  }
+
+  get id() {
+    return this.#id;
   }
 
   get template() {
     return getPopupTemplate(this.#filmData);
   }
 
-  setPopupCloseHandler(callback) {
+  setPopupCloseHandler = (callback) => {
     this.createEventListener('.film-details__close-btn', 'click', callback);
-
-    return this.element;
   }
 
-  setCommentCloseHandlers(callback) {
+  setCommentCloseHandlers = (callback) => {
     this.element.querySelectorAll('.film-details__bottom-container li button')
       .forEach((commentSelector) => this.createEventListener(commentSelector, 'click', callback));
   }
 
-  removePopupCloseHandler() {
+  setWatchListClickHandler = (callback) => {
+    this.createEventListener('.film-details__control-button--watchlist', 'click', callback);
+  }
+
+  setWatchedClickHandler = (callback) => {
+    this.createEventListener('.film-details__control-button--watched', 'click', callback);
+  }
+
+  setFavoriteClickHandler = (callback) => {
+    this.createEventListener('.film-details__control-button--favorite', 'click', callback);
+  }
+
+  removePopupCloseHandler = () => {
     this.removeEventListener('.film-details__close-btn');
-
-    return this.element;
   }
-
-  removeCommentCloseHandlers() {
-    this.element.querySelectorAll('.film-details__bottom-container li button')
-      .forEach((commentSelector) => this.removeEventListener(commentSelector));
-  }
-
 }
 
 export { PopupView as default };
