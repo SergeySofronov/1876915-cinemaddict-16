@@ -1,8 +1,7 @@
 import { render, replace, RenderPosition } from '../render.js';
 import { getTopRatedFilmsData, getTopCommentedFilmsData, getFilmsDataByDate } from '../filter.js';
-import { SectionMessages, SortType } from '../const.js';
+import { SectionMessages, SortType, PresenterMessages } from '../const.js';
 import { update } from '../mock/utils.js';
-// import { KeyCode } from '../const.js';
 
 import SortMenuView from '../view/sort-menu-view.js';
 import FilmsDeskView from '../view/films-desk-view.js';
@@ -45,7 +44,7 @@ class FilmDeskPresenter {
   init = (filmsData) => {
     this.#filmsData = [...filmsData];
     this.#filmsDataDefault = [...this.#filmsData];
-    this.#totalFilmsQuantity = (this.#filmsData.length) ? Math.max(this.#filmsData.length, FILM_SHOW_PER_STEP) : 0;
+    this.#totalFilmsQuantity = this.#filmsData.length;
     this.#extraFilmsQuantity = (this.#filmsData.length > FILM_EXTRA_QUANTITY) ? FILM_EXTRA_QUANTITY : 0;
     this.#filmSortMenu.setSortClickHandler(this.#onSortMenuClick);
 
@@ -59,10 +58,9 @@ class FilmDeskPresenter {
   #updateActivePopup = (popup) => {
     if (popup) {
       if (this.#activePopup) {
-        const prevPopup = this.#activePopup;
         replace(this.#activePopup, popup);
         if (this.#activePopup.id !== popup.id) {
-          prevPopup.removeElement();
+          this.#activePopup.destroyPopup(PresenterMessages.DELETE_POPUP);
         }
       } else {
         document.body.classList.add('hide-overflow');
@@ -134,10 +132,10 @@ class FilmDeskPresenter {
 
   #resetDesk = () => {
     this.#shownFilmQuantity = 0;
-    this.#filmsMainCardList.removeElement();
-    this.#filmsRatedCardList.removeElement();
-    this.#filmsPopularCardList.removeElement();
-    this.#showMoreButton.removeElement();
+    this.#filmsMainCardList.destroyElement();
+    this.#filmsRatedCardList.destroyElement();
+    this.#filmsPopularCardList.destroyElement();
+    this.#showMoreButton.destroyElement();
   }
 
   #sortFilmsData = (sortType) => {
@@ -172,7 +170,7 @@ class FilmDeskPresenter {
     }
   }
 
-  #onShowMoreButtonClick = (evt) => {
+  #onShowMoreButtonClick = () => {
     const rest = this.#getFilmsToShowQuantity();
     if (rest) {
       this.#renderFilmCards(this.#shownFilmQuantity, this.#shownFilmQuantity + rest, this.#filmsMainCardList);
@@ -180,7 +178,7 @@ class FilmDeskPresenter {
     }
 
     if (!this.#getFilmsToShowQuantity()) {
-      evt.target.remove();
+      this.#showMoreButton.destroyElement();
     }
   };
 }
