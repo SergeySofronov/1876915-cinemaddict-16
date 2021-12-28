@@ -60,6 +60,7 @@ const prepareCommentData = () => {
   const commentEmotion = commentEmotionTypes[getRandomInteger(0, commentEmotionTypes.length - 1)];
 
   return {
+    id: nanoid(),
     author: commentUserNames[getRandomInteger(0, commentUserNames.length - 1)],
     emotion: commentEmotion,
     content: filmCommentExample[commentEmotion][getRandomInteger(0, filmCommentExample[commentEmotion].length - 1)],

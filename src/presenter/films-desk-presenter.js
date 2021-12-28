@@ -2,7 +2,7 @@ import { render, replace, RenderPosition } from '../render.js';
 import { getTopRatedFilmsData, getTopCommentedFilmsData, getFilmsDataByDate } from '../filter.js';
 import { SectionMessages, SortType } from '../const.js';
 import { update } from '../mock/utils.js';
-import { KeyCode } from '../const.js';
+// import { KeyCode } from '../const.js';
 
 import SortMenuView from '../view/sort-menu-view.js';
 import FilmsDeskView from '../view/films-desk-view.js';
@@ -54,28 +54,23 @@ class FilmDeskPresenter {
     this.#renderDeskSheets();
   }
 
-  #toggleDocumentScroll = () => document.body.classList.toggle('hide-overflow');
+  #getActivePopup = () => this.#activePopup;
 
-  #removeActivePopup = () => {
-    this.#activePopup.removeElement();
-    this.#activePopup = null;
-    document.removeEventListener('keydown', this.#onEscKeyDown);
-  }
-
-  #updateActivePopup = (popup, updatePopupHandlers) => {
+  #updateActivePopup = (popup) => {
     if (popup) {
-      updatePopupHandlers();
       if (this.#activePopup) {
+        const prevPopup = this.#activePopup;
         replace(this.#activePopup, popup);
-      } else if (updatePopupHandlers) {
-        this.#toggleDocumentScroll();
+        if (this.#activePopup.id !== popup.id) {
+          prevPopup.removeElement();
+        }
+      } else {
+        document.body.classList.add('hide-overflow');
         render(document.body, popup, RenderPosition.BEFOREEND);
-        document.addEventListener('keydown', this.#onEscKeyDown);
       }
-      this.#activePopup = popup;
     }
 
-    return this.#activePopup;
+    this.#activePopup = popup;
   }
 
   #updateFilmData = (film) => {
@@ -101,7 +96,7 @@ class FilmDeskPresenter {
   #renderFilmCards = (from, toward, filmsList) => {
     this.#filmsData.slice(from, toward).forEach((film) => {
       if (film.id) {
-        const filmPresenter = new FilmPresenter(filmsList, this.#updateFilmData, this.#onPopupButtonClose, this.#updateActivePopup);
+        const filmPresenter = new FilmPresenter(filmsList, this.#updateFilmData, this.#updateActivePopup, this.#getActivePopup);
         filmPresenter.init(film);
         this.#filmsPresenters.set(filmPresenter, film.id);
       }
@@ -166,19 +161,6 @@ class FilmDeskPresenter {
 
     this.#activeSortType = sortType;
   }
-
-  #onEscKeyDown = (evt) => {
-    if (evt.key === KeyCode.ESC) {
-      this.#onPopupButtonClose();
-    }
-  };
-
-  #onPopupButtonClose = () => {
-    this.#toggleDocumentScroll();
-    this.#removeActivePopup();
-    document.removeEventListener('keydown', this.#onEscKeyDown);
-  };
-
 
   #onSortMenuClick = (evt) => {
     if (evt.target.tagName === 'A') {

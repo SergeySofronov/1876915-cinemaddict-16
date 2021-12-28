@@ -1,4 +1,5 @@
-import AbstractView from './abstract-view';
+import SmartView from './smart-view';
+import { KeyCode, PresenterMessages } from '../const.js';
 import { getCommentEmotionTypes } from '../mock/data';
 
 const ACTIVE_CLASS = 'film-details__control-button--active';
@@ -43,6 +44,7 @@ const getPopupNewCommentTemplate = () => (
 
 const getLoadedCommentTemplate = (comment = {}) => {
   const {
+    id = '',
     author = '',
     emotion = '',
     content = '',
@@ -59,23 +61,23 @@ const getLoadedCommentTemplate = (comment = {}) => {
         <p class="film-details__comment-info">
           <span class="film-details__comment-author">${author}</span>
           <span class="film-details__comment-day">${date}</span>
-          <button class="film-details__comment-delete">Delete</button>
+          <button class="film-details__comment-delete" data-button-id = ${id}>Delete</button>
         </p>
       </div>
     </li>`
   );
 };
 
-const getPopupCommentSectionTemplate = (filmData) => {
-  if (filmData) {
+const getPopupCommentSectionTemplate = (data) => {
+  if (data) {
     return (
       `<div class="film-details__bottom-container">
         <section class="film-details__comments-wrap">
-          <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${filmData.comments ? filmData.comments.length : 0}</span></h3>
+          <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${data.changedComments ? data.changedComments.length : 0}</span></h3>
 
           <ul class="film-details__comments-list">
             <!-- Отрисовка всех комментариев к фильму -->
-            ${filmData.comments?.map((comment) => getLoadedCommentTemplate(comment)).join('')}
+            ${data.changedComments.map((comment) => getLoadedCommentTemplate(comment)).join('')}
           </ul>
 
           ${getPopupNewCommentTemplate()}
@@ -105,8 +107,8 @@ const getCardGenres = (genres) => {
   return genreTemplates.join(' ');
 };
 
-const getPopupTemplate = (filmData) => {
-  if (filmData) {
+const getPopupTemplate = (data) => {
+  if (data) {
     const {
       title = '',
       alternativeTitle = '',
@@ -120,13 +122,13 @@ const getPopupTemplate = (filmData) => {
       director = '',
       writers = [],
       actors = [],
-    } = filmData.filmInfo || {};
+    } = data.filmInfo || {};
 
     const {
       watchlist = false,
       watched = false,
       favorite = false
-    } = filmData.userDetails || {};
+    } = data;
 
     return (
       `<section class="film-details">
@@ -176,7 +178,7 @@ const getPopupTemplate = (filmData) => {
           </div>
 
           <!-- Секция комментариев -->
-          ${getPopupCommentSectionTemplate(filmData)}
+          ${getPopupCommentSectionTemplate(data)}
 
 
         </form>
@@ -187,13 +189,19 @@ const getPopupTemplate = (filmData) => {
   return '';
 };
 
-class PopupView extends AbstractView {
+class PopupView extends SmartView {
   #id = null;
-  #filmData = {};
-  constructor(filmData) {
+  #updateFilmPresenter = null;
+  constructor(filmData, updateFilmPresenter) {
     super();
-    this.#filmData = filmData;
+
+    if (!(updateFilmPresenter instanceof Function)) {
+      throw new Error('Can\'t create PopupView instance updateFilmPresenter is not a Function');
+    }
+
     this.#id = filmData?.id || null;
+    this.data = SmartView.parseData(filmData);
+    this.#updateFilmPresenter = updateFilmPresenter;
   }
 
   get id() {
@@ -201,33 +209,61 @@ class PopupView extends AbstractView {
   }
 
   get template() {
-    return getPopupTemplate(this.#filmData);
+    return getPopupTemplate(this.data);
   }
 
-  setPopupCloseHandler = (callback) => {
-    this.createEventListener('.film-details__close-btn', 'click', callback);
-  }
+  restoreHandlers = (isFilmUpdateNeed = true) => {
+    this.createEventListener('.film-details__close-btn', 'click', this.#onPopupButtonClose);
+    this.createEventListener('.film-details__control-button--watchlist', 'click', this.#onWatchListButtonClick);
+    this.createEventListener('.film-details__control-button--watched', 'click', this.#onWatchedButtonClick);
+    this.createEventListener('.film-details__control-button--favorite', 'click', this.#onFavoriteButtonClick);
 
-  setCommentCloseHandlers = (callback) => {
+    //this.createEventListener('.film-details__comment-input', 'change', this.#onUserCommentChange);
+
+    this.createEventListener(document.body, 'keydown', this.#onEscKeyDown);
     this.element.querySelectorAll('.film-details__bottom-container li button')
-      .forEach((commentSelector) => this.createEventListener(commentSelector, 'click', callback));
+      .forEach((commentSelector) => this.createEventListener(commentSelector, 'click', this.#onCommentDelete));
+
+    if (isFilmUpdateNeed) {
+      this.#updateFilmPresenter(PresenterMessages.UPDATE_FILM);
+    }
   }
 
-  setWatchListClickHandler = (callback) => {
-    this.createEventListener('.film-details__control-button--watchlist', 'click', callback);
+  #onUserCommentChange = (evt) => {
+    this.updateData({ userComment: evt.target.value }, true);
   }
 
-  setWatchedClickHandler = (callback) => {
-    this.createEventListener('.film-details__control-button--watched', 'click', callback);
+  #onCommentDelete = (evt) => {
+    const buttonId = evt.target.dataset.buttonId;
+    const index = this.data.changedComments.findIndex((comment) => comment.id === buttonId);
+    this.data.changedComments.splice(index, 1);
+    this.updateData(this.data.changedComments);
   }
 
-  setFavoriteClickHandler = (callback) => {
-    this.createEventListener('.film-details__control-button--favorite', 'click', callback);
+  #onWatchListButtonClick = () => {
+    this.updateData({ watchlist: !this.data.watchlist });
   }
 
-  removePopupCloseHandler = () => {
-    this.removeEventListener('.film-details__close-btn');
+  #onWatchedButtonClick = () => {
+    this.updateData({ watched: !this.data.watched });
   }
+
+  #onFavoriteButtonClick = () => {
+    this.updateData({ favorite: !this.data.favorite });
+  }
+
+  #onPopupButtonClose = () => {
+    this.element.remove();
+    this.removeElement();
+    this.#updateFilmPresenter(PresenterMessages.DELETE_POPUP);
+    document.body.classList.remove('hide-overflow');
+  };
+
+  #onEscKeyDown = (evt) => {
+    if (evt.key === KeyCode.ESC) {
+      this.#onPopupButtonClose();
+    }
+  };
 }
 
 export { PopupView as default };

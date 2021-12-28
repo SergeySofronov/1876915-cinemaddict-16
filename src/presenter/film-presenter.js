@@ -1,4 +1,6 @@
 import { render, replace, RenderPosition } from '../render.js';
+import { PresenterMessages } from '../const.js';
+import SmartView from '../view/smart-view.js';
 import AbstractView from '../view/abstract-view.js';
 import FilmCardView from '../view/film-card-view';
 import PopupView from '../view/popup-view';
@@ -10,10 +12,10 @@ class FilmPresenter {
   #filmPopup = null;
 
   #updateFilmData = null;
-  #onPopupButtonClose = null;
   #updateActivePopup = null;
+  #getActivePopup = null;
 
-  constructor(filmsList, updateFilmData, onPopupButtonClose, updateActivePopup) {
+  constructor(filmsList, updateFilmData, updateActivePopup, getActivePopup) {
     if (!(filmsList instanceof AbstractView)) {
       throw new Error('Can\'t handle init() while filmsList is not an Element');
     }
@@ -26,19 +28,16 @@ class FilmPresenter {
 
     this.#filmsList = filmsList;
     this.#updateFilmData = updateFilmData;
-    this.#onPopupButtonClose = onPopupButtonClose;
     this.#updateActivePopup = updateActivePopup;
+    this.#getActivePopup = getActivePopup;
   }
 
   init = (filmData) => {
 
     const prevFilmCard = this.#filmCard;
-    const scrollPosition = this.#getActivePopupScrollPosition();
 
     this.#filmData = filmData;
     this.#filmCard = new FilmCardView(this.#filmData);
-    this.#filmPopup = new PopupView(this.#filmData);
-
     this.#updateFilmHandlers();
 
     if (prevFilmCard) {
@@ -47,11 +46,23 @@ class FilmPresenter {
       render(this.#filmsList, this.#filmCard, RenderPosition.BEFOREEND);
     }
 
-    if (this.#isActivePopup()) {
-      this.#updateActivePopup(this.#filmPopup, this.#updatePopupHandlers);
-    }
+    // if (this.#isActivePopup()) {
+    //   this.#updateActivePopup(this.#filmPopup);
+    // }
+  }
 
-    this.#filmPopup.element.scrollTop = scrollPosition;
+  #updateFilmPresenter = (message) => {
+    switch (message) {
+      case (PresenterMessages.DELETE_POPUP):
+        this.#updateActivePopup(null);
+        break;
+
+      case (PresenterMessages.UPDATE_FILM):
+        this.#updateFilmData(SmartView.restoreData(this.#filmPopup.data));
+        break;
+
+      default: break;
+    }
   }
 
   #updateFilmHandlers = () => {
@@ -61,44 +72,38 @@ class FilmPresenter {
     this.#filmCard.setFavoriteClickHandler(this.#onFavoriteClick);
   }
 
-  #updatePopupHandlers = () => {
-    this.#filmPopup.setPopupCloseHandler(this.#onPopupButtonClose);
-    this.#filmPopup.setCommentCloseHandlers(this.#onCommentButtonCloseClick);
-    this.#filmPopup.setWatchListClickHandler(this.#onWatchListClick);
-    this.#filmPopup.setWatchedClickHandler(this.#onWatchedClick);
-    this.#filmPopup.setFavoriteClickHandler(this.#onFavoriteClick);
+  #isActivePopup = () => ((this.#filmPopup) && (this.#getActivePopup()?.id === this.#filmPopup.id));
+
+  #updateFilmInstances = () => {
+    this.#updateFilmData(this.#filmData);
+    this.#filmPopup?.updateData(SmartView.parseData(this.#filmData));
   }
-
-
-  #getActivePopupScrollPosition = () => (this.#updateActivePopup()?.element.scrollTop || 0);
-  #isActivePopup = () => (this.#updateActivePopup()?.id === this.#filmPopup.id);
 
   #onWatchListClick = () => {
     this.#filmData.userDetails.watchlist = !this.#filmData.userDetails.watchlist;
-    this.#updateFilmData(this.#filmData);
+    this.#updateFilmInstances();
   }
 
   #onWatchedClick = () => {
     this.#filmData.userDetails.watched = !this.#filmData.userDetails.watched;
-    this.#updateFilmData(this.#filmData);
+    this.#updateFilmInstances();
   }
 
   #onFavoriteClick = () => {
     this.#filmData.userDetails.favorite = !this.#filmData.userDetails.favorite;
-    this.#updateFilmData(this.#filmData);
+    this.#updateFilmInstances();
   }
 
   #onFilmCardClick = () => {
+    if (!this.#filmPopup) {
+      this.#filmPopup = new PopupView(this.#filmData, this.#updateFilmPresenter);
+    }
+
     if (!this.#isActivePopup()) {
-      this.#updateActivePopup(this.#filmPopup, this.#updatePopupHandlers);
+      this.#updateActivePopup(this.#filmPopup);
+      this.#filmPopup.restoreHandlers(false);
     }
   }
-
-  #onCommentButtonCloseClick = (evt) => {
-    evt.preventDefault();
-    evt.target.closest('li').remove();
-  };
-
 }
 
 export { FilmPresenter as default };
