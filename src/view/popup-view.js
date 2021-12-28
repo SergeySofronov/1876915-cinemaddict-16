@@ -1,5 +1,5 @@
 import SmartView from './smart-view';
-import { KeyCode, PresenterMessages } from '../const.js';
+import { KeyCode, PresenterMessages, UpdateStates } from '../const.js';
 import { getCommentEmotionTypes } from '../mock/data';
 
 const ACTIVE_CLASS = 'film-details__control-button--active';
@@ -16,10 +16,10 @@ const TableTerms = {
 
 const emotionTypes = (Array.isArray(getCommentEmotionTypes()) && getCommentEmotionTypes()) || [];
 
-const getCommentEmotionTemplate = (emotion) => {
+const getCommentEmotionTemplate = (emotion, isChecked = false) => {
   if (emotionTypes.includes(emotion)) {
     return (
-      `<input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-${emotion}" value="${emotion}">
+      `<input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-${emotion}" value="${emotion}" ${isChecked ? 'checked' : ''}>
         <label class="film-details__emoji-label" for="emoji-${emotion}">
           <img src="./images/emoji/${emotion}.png" width="30" height="30" alt="emoji">
         </label>`
@@ -29,16 +29,20 @@ const getCommentEmotionTemplate = (emotion) => {
   return '';
 };
 
-const getPopupNewCommentTemplate = () => (
+
+const getPopupNewCommentTemplate = (comment, userEmoji) => (
   `<div class="film-details__new-comment">
-    <div class="film-details__add-emoji-label"></div>
+    <div class="film-details__add-emoji-label">
+      <!--User Emoji-->
+      ${userEmoji ? `<img src="images/emoji/${userEmoji}.png" width="55" height="55" alt="emoji-${userEmoji}">` : ''}
+    </div>
 
     <label class="film-details__comment-label">
-      <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment"></textarea>
+      <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment">${comment ? comment : ''}</textarea>
     </label>
 
     <div class="film-details__emoji-list">
-        ${emotionTypes.map((emotion) => getCommentEmotionTemplate(emotion)).join('')}
+        ${emotionTypes.map((emotion) => getCommentEmotionTemplate(emotion, (emotion === userEmoji))).join('')}
     </div>
   </div>`);
 
@@ -80,7 +84,7 @@ const getPopupCommentSectionTemplate = (data) => {
             ${data.changedComments.map((comment) => getLoadedCommentTemplate(comment)).join('')}
           </ul>
 
-          ${getPopupNewCommentTemplate()}
+          ${getPopupNewCommentTemplate(data.userComment, data.userEmoji)}
         </section>
       </div>`
     );
@@ -212,25 +216,33 @@ class PopupView extends SmartView {
     return getPopupTemplate(this.data);
   }
 
-  restoreHandlers = (isFilmUpdateNeed = true) => {
+  destroyPopup = (message) => {
+    this.destroyElement();
+    this.#updateFilmPresenter(message);
+  }
+
+  restoreHandlers = (isFilmUpdating = UpdateStates.WITH_FILM_UPDATE) => {
     this.createEventListener('.film-details__close-btn', 'click', this.#onPopupButtonClose);
     this.createEventListener('.film-details__control-button--watchlist', 'click', this.#onWatchListButtonClick);
     this.createEventListener('.film-details__control-button--watched', 'click', this.#onWatchedButtonClick);
     this.createEventListener('.film-details__control-button--favorite', 'click', this.#onFavoriteButtonClick);
-
-    //this.createEventListener('.film-details__comment-input', 'change', this.#onUserCommentChange);
-
-    this.createEventListener(document.body, 'keydown', this.#onEscKeyDown);
+    this.createEventListener('.film-details__comment-input', 'change', this.#onUserCommentChange);
+    this.createEventListener('.film-details__emoji-list', 'change', this.#onUserEmojiChange);
+    this.createEventListener(document.body, 'keydown', this.#onEscKeyDown, UpdateStates.EVENT_DEFAULT);
     this.element.querySelectorAll('.film-details__bottom-container li button')
       .forEach((commentSelector) => this.createEventListener(commentSelector, 'click', this.#onCommentDelete));
 
-    if (isFilmUpdateNeed) {
+    if (isFilmUpdating) {
       this.#updateFilmPresenter(PresenterMessages.UPDATE_FILM);
     }
   }
 
+  #onUserEmojiChange = (evt) => {
+    this.updateData({ userEmoji: evt.target.value });
+  }
+
   #onUserCommentChange = (evt) => {
-    this.updateData({ userComment: evt.target.value }, true);
+    this.updateData({ userComment: evt.target.value }, UpdateStates.WITHOUT_POPUP_UPDATE);
   }
 
   #onCommentDelete = (evt) => {
@@ -253,9 +265,7 @@ class PopupView extends SmartView {
   }
 
   #onPopupButtonClose = () => {
-    this.element.remove();
-    this.removeElement();
-    this.#updateFilmPresenter(PresenterMessages.DELETE_POPUP);
+    this.destroyPopup(PresenterMessages.DELETE_POPUP_UPDATE);
     document.body.classList.remove('hide-overflow');
   };
 

@@ -1,4 +1,5 @@
 import AbstractView from './abstract-view.js';
+import { UpdateStates } from '../const.js';
 
 class SmartView extends AbstractView {
   #data = {};
@@ -11,21 +12,20 @@ class SmartView extends AbstractView {
     this.#data = data;
   }
 
-  updateData = (update, justDataUpdating) => {
+  updateData = (update, isPopupUpdating = UpdateStates.WITH_POPUP_UPDATE, isFilmUpdating = UpdateStates.WITH_FILM_UPDATE) => {
     if (!update) {
       return;
     }
 
     this.#data = { ...this.#data, ...update };
 
-    if (justDataUpdating) {
-      return;
+    if (isPopupUpdating) {
+      this.updateElement(isFilmUpdating);
     }
 
-    this.updateElement();
   }
 
-  updateElement = () => {
+  updateElement = (isFilmUpdating) => {
     const prevElement = this.element;
     const scrollPosition = (prevElement.scrollTop || 0);
     const parent = prevElement.parentElement;
@@ -35,7 +35,7 @@ class SmartView extends AbstractView {
     parent.replaceChild(newElement, prevElement);
     newElement.scrollTop = scrollPosition;
 
-    this.restoreHandlers();
+    this.restoreHandlers(isFilmUpdating);
   }
 
   restoreHandlers = () => {
@@ -59,6 +59,8 @@ class SmartView extends AbstractView {
     delete filmData.watched;
     delete filmData.favorite;
     delete filmData.changedComments;
+    delete filmData.userComment;
+    delete filmData.userEmoji;
 
     return filmData;
   }

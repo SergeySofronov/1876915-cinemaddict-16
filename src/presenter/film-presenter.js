@@ -1,5 +1,5 @@
 import { render, replace, RenderPosition } from '../render.js';
-import { PresenterMessages } from '../const.js';
+import { PresenterMessages, UpdateStates } from '../const.js';
 import SmartView from '../view/smart-view.js';
 import AbstractView from '../view/abstract-view.js';
 import FilmCardView from '../view/film-card-view';
@@ -46,15 +46,21 @@ class FilmPresenter {
       render(this.#filmsList, this.#filmCard, RenderPosition.BEFOREEND);
     }
 
-    // if (this.#isActivePopup()) {
-    //   this.#updateActivePopup(this.#filmPopup);
-    // }
+    if (this.#isActivePopup()) {
+      const popupData = SmartView.parseData(this.#filmData);
+      this.#filmPopup.updateData(popupData, UpdateStates.WITH_POPUP_UPDATE, UpdateStates.WITHOUT_FILM_UPDATE);
+    }
   }
 
   #updateFilmPresenter = (message) => {
     switch (message) {
-      case (PresenterMessages.DELETE_POPUP):
+      case (PresenterMessages.DELETE_POPUP_UPDATE):
         this.#updateActivePopup(null);
+        this.#filmPopup = null;
+        break;
+
+      case (PresenterMessages.DELETE_POPUP):
+        this.#filmPopup = null;
         break;
 
       case (PresenterMessages.UPDATE_FILM):
@@ -74,24 +80,19 @@ class FilmPresenter {
 
   #isActivePopup = () => ((this.#filmPopup) && (this.#getActivePopup()?.id === this.#filmPopup.id));
 
-  #updateFilmInstances = () => {
-    this.#updateFilmData(this.#filmData);
-    this.#filmPopup?.updateData(SmartView.parseData(this.#filmData));
-  }
-
   #onWatchListClick = () => {
     this.#filmData.userDetails.watchlist = !this.#filmData.userDetails.watchlist;
-    this.#updateFilmInstances();
+    this.#updateFilmData(this.#filmData);
   }
 
   #onWatchedClick = () => {
     this.#filmData.userDetails.watched = !this.#filmData.userDetails.watched;
-    this.#updateFilmInstances();
+    this.#updateFilmData(this.#filmData);
   }
 
   #onFavoriteClick = () => {
     this.#filmData.userDetails.favorite = !this.#filmData.userDetails.favorite;
-    this.#updateFilmInstances();
+    this.#updateFilmData(this.#filmData);
   }
 
   #onFilmCardClick = () => {
@@ -101,7 +102,7 @@ class FilmPresenter {
 
     if (!this.#isActivePopup()) {
       this.#updateActivePopup(this.#filmPopup);
-      this.#filmPopup.restoreHandlers(false);
+      this.#filmPopup.restoreHandlers(UpdateStates.WITHOUT_POPUP_UPDATE);
     }
   }
 }

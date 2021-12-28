@@ -14,7 +14,6 @@ class SortMenuView extends AbstractView {
     return getFilmSortMenuTemplate();
   }
 
-  //todo: handle by abstract class in next home work?
   #setActiveAnchor = (evt) => {
     this.element.querySelectorAll('a').forEach((anchor) => {
       if (anchor === evt.target) {
