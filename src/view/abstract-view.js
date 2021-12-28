@@ -1,3 +1,4 @@
+import { UpdateStates } from '../const.js';
 
 class AbstractView {
   #element = null;
@@ -49,7 +50,12 @@ class AbstractView {
     this.#element = null;
   }
 
-  createEventListener = (selector, eventType, callback) => {
+  destroyElement = () => {
+    this.#element.remove();
+    this.removeElement();
+  }
+
+  createEventListener = (selector, eventType, callback, isPreventDefault = UpdateStates.PREVENT_DEFAULT) => {
 
     const elementSelector = this.#getElementSelector(selector);
 
@@ -58,7 +64,9 @@ class AbstractView {
     }
 
     const eventHandler = (evt) => {
-      evt.preventDefault();
+      if (isPreventDefault) {
+        evt.preventDefault();
+      }
       callback(evt);
     };
 
