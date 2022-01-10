@@ -194,34 +194,27 @@ const getPopupTemplate = (data) => {
 };
 
 class PopupView extends SmartView {
-  #id = null;
   #updateFilmPresenter = null;
-  constructor(filmData, updateFilmPresenter) {
+  constructor(updateFilmPresenter) {
     super();
 
     if (!(updateFilmPresenter instanceof Function)) {
       throw new Error('Can\'t create PopupView instance updateFilmPresenter is not a Function');
     }
 
-    this.#id = filmData?.id || null;
-    this.data = SmartView.parseData(filmData);
     this.#updateFilmPresenter = updateFilmPresenter;
-  }
-
-  get id() {
-    return this.#id;
   }
 
   get template() {
     return getPopupTemplate(this.data);
   }
 
-  destroyPopup = (message) => {
-    this.destroyElement();
-    this.#updateFilmPresenter(message);
+  init = (filmData) => {
+    this.data = SmartView.parseData(filmData);
+    this.restoreHandlers();
   }
 
-  restoreHandlers = (isFilmUpdating = UpdateStates.WITH_FILM_UPDATE) => {
+  restoreHandlers = () => {
     this.createEventListener('.film-details__close-btn', 'click', this.#onPopupButtonClose);
     this.createEventListener('.film-details__control-button--watchlist', 'click', this.#onWatchListButtonClick);
     this.createEventListener('.film-details__control-button--watched', 'click', this.#onWatchedButtonClick);
@@ -231,42 +224,42 @@ class PopupView extends SmartView {
     this.createEventListener(document.body, 'keydown', this.#onEscKeyDown, UpdateStates.EVENT_DEFAULT);
     this.element.querySelectorAll('.film-details__bottom-container li button')
       .forEach((commentSelector) => this.createEventListener(commentSelector, 'click', this.#onCommentDelete));
+  }
 
-    if (isFilmUpdating) {
-      this.#updateFilmPresenter(PresenterMessages.UPDATE_FILM);
-    }
+  #defaultPopupUpdate = (update, message = PresenterMessages.UPDATE_FILM)=>{
+    this.updateElement(update);
+    this.#updateFilmPresenter(message);
   }
 
   #onUserEmojiChange = (evt) => {
-    this.updateData({ userEmoji: evt.target.value });
+    this.updateElement({ userEmoji: evt.target.value });
   }
 
   #onUserCommentChange = (evt) => {
-    this.updateData({ userComment: evt.target.value }, UpdateStates.WITHOUT_POPUP_UPDATE);
+    this.updateData({ userComment: evt.target.value });
   }
 
   #onCommentDelete = (evt) => {
     const buttonId = evt.target.dataset.buttonId;
     const index = this.data.changedComments.findIndex((comment) => comment.id === buttonId);
     this.data.changedComments.splice(index, 1);
-    this.updateData(this.data.changedComments);
+    this.#defaultPopupUpdate(this.data.changedComments);
   }
 
   #onWatchListButtonClick = () => {
-    this.updateData({ watchlist: !this.data.watchlist });
+    this.#defaultPopupUpdate({ watchlist: !this.data.watchlist });
   }
 
   #onWatchedButtonClick = () => {
-    this.updateData({ watched: !this.data.watched });
+    this.#defaultPopupUpdate({ watched: !this.data.watched });
   }
 
   #onFavoriteButtonClick = () => {
-    this.updateData({ favorite: !this.data.favorite });
+    this.#defaultPopupUpdate({ favorite: !this.data.favorite });
   }
 
   #onPopupButtonClose = () => {
-    this.destroyPopup(PresenterMessages.DELETE_POPUP_UPDATE);
-    document.body.classList.remove('hide-overflow');
+    this.#updateFilmPresenter(PresenterMessages.REMOVE_POPUP);
   };
 
   #onEscKeyDown = (evt) => {

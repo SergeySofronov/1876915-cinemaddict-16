@@ -1,5 +1,5 @@
 import { render, replace, RenderPosition } from '../render.js';
-import { PresenterMessages, UpdateStates } from '../const.js';
+import { PresenterMessages } from '../const.js';
 import SmartView from '../view/smart-view.js';
 import AbstractView from '../view/abstract-view.js';
 import FilmCardView from '../view/film-card-view';
@@ -11,25 +11,29 @@ class FilmPresenter {
   #filmCard = null;
   #filmPopup = null;
 
-  #updateFilmData = null;
-  #updateActivePopup = null;
-  #getActivePopup = null;
+  #updateFilmsData = null;
+  #setActiveFilm = null;
+  #getActiveFilm = null;
 
-  constructor(filmsList, updateFilmData, updateActivePopup, getActivePopup) {
-    if (!(filmsList instanceof AbstractView)) {
-      throw new Error('Can\'t handle init() while filmsList is not an Element');
+  constructor(filmsList, updateFilmsData, setActiveFilm, getActiveFilm) {
+    if (!((filmsList instanceof AbstractView) || (filmsList instanceof Element))) {
+      throw new Error('Can\'t create instance of FilmPresenter while filmsList is not an Element or instance of AbstractView');
     }
 
     for (let i = 1; i < arguments.length; i++) {
       if (!(arguments[i] instanceof Function)) {
-        throw new Error(`Can\\'t handle init() while argument${i - 1} is not a Function`);
+        throw new Error(`Can\\'t create instance of FilmPresenter while argument${i - 1} is not a Function`);
       }
     }
 
     this.#filmsList = filmsList;
-    this.#updateFilmData = updateFilmData;
-    this.#updateActivePopup = updateActivePopup;
-    this.#getActivePopup = getActivePopup;
+    this.#updateFilmsData = updateFilmsData;
+    this.#setActiveFilm = setActiveFilm;
+    this.#getActiveFilm = getActiveFilm;
+  }
+
+  get id() {
+    return this.#filmData?.id;
   }
 
   init = (filmData) => {
@@ -46,25 +50,26 @@ class FilmPresenter {
       render(this.#filmsList, this.#filmCard, RenderPosition.BEFOREEND);
     }
 
-    if (this.#isActivePopup()) {
-      const popupData = SmartView.parseData(this.#filmData);
-      this.#filmPopup.updateData(popupData, UpdateStates.WITH_POPUP_UPDATE, UpdateStates.WITHOUT_FILM_UPDATE);
+    if (this.#filmPopup) {
+      this.#filmPopup.updateElement(SmartView.parseData(this.#filmData));
     }
+  }
+
+  removePopup = () => {
+    this.#filmPopup?.destroyElement();
+    this.#filmPopup = null;
+    document.body.classList.remove('hide-overflow');
   }
 
   #updateFilmPresenter = (message) => {
     switch (message) {
-      case (PresenterMessages.DELETE_POPUP_UPDATE):
-        this.#updateActivePopup(null);
-        this.#filmPopup = null;
-        break;
-
-      case (PresenterMessages.DELETE_POPUP):
-        this.#filmPopup = null;
+      case (PresenterMessages.REMOVE_POPUP):
+        this.removePopup();
+        this.#setActiveFilm(null);
         break;
 
       case (PresenterMessages.UPDATE_FILM):
-        this.#updateFilmData(SmartView.restoreData(this.#filmPopup.data));
+        this.#updateFilmsData(SmartView.restoreData(this.#filmPopup.data));
         break;
 
       default: break;
@@ -78,32 +83,33 @@ class FilmPresenter {
     this.#filmCard.setFavoriteClickHandler(this.#onFavoriteClick);
   }
 
-  #isActivePopup = () => ((this.#filmPopup) && (this.#getActivePopup()?.id === this.#filmPopup.id));
+  #isActiveFilm = () => (this.#getActiveFilm()?.id === this.id);
 
   #onWatchListClick = () => {
     this.#filmData.userDetails.watchlist = !this.#filmData.userDetails.watchlist;
-    this.#updateFilmData(this.#filmData);
+    this.#updateFilmsData(this.#filmData);
   }
 
   #onWatchedClick = () => {
     this.#filmData.userDetails.watched = !this.#filmData.userDetails.watched;
-    this.#updateFilmData(this.#filmData);
+    this.#updateFilmsData(this.#filmData);
   }
 
   #onFavoriteClick = () => {
     this.#filmData.userDetails.favorite = !this.#filmData.userDetails.favorite;
-    this.#updateFilmData(this.#filmData);
+    this.#updateFilmsData(this.#filmData);
   }
 
   #onFilmCardClick = () => {
-    if (!this.#filmPopup) {
-      this.#filmPopup = new PopupView(this.#filmData, this.#updateFilmPresenter);
+    if (this.#filmPopup || this.#isActiveFilm()) {
+      return;
     }
 
-    if (!this.#isActivePopup()) {
-      this.#updateActivePopup(this.#filmPopup);
-      this.#filmPopup.restoreHandlers(UpdateStates.WITHOUT_POPUP_UPDATE);
-    }
+    this.#setActiveFilm(this);
+    this.#filmPopup = new PopupView(this.#updateFilmPresenter);
+    this.#filmPopup.init(this.#filmData);
+    render(document.body, this.#filmPopup, RenderPosition.BEFOREEND);
+    document.body.classList.add('hide-overflow');
   }
 }
 

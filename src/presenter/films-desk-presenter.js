@@ -1,8 +1,10 @@
-import { render, replace, RenderPosition } from '../render.js';
+import { render, RenderPosition } from '../render.js';
 import { getTopRatedFilmsData, getTopCommentedFilmsData, getFilmsDataByDate } from '../filter.js';
-import { SectionMessages, SortType, PresenterMessages } from '../const.js';
+import { SectionMessages, SortType } from '../const.js';
 import { update } from '../mock/utils.js';
 
+import AbstractObservable from '../model/abstract-observable.js';
+import AbstractView from '../view/abstract-view.js';
 import SortMenuView from '../view/sort-menu-view.js';
 import FilmsDeskView from '../view/films-desk-view.js';
 import FilmsSheetView from '../view/films-sheet-view.js';
@@ -26,8 +28,11 @@ class FilmDeskPresenter {
   #filmsPopularCardList = new FilmCardListView();
   #showMoreButton = new ShowMoreButtonView();
 
+  #filmsModel = null;
   #filmsPresenters = new Map();
-  #activePopup = null;
+
+  #activeFilm = null;
+
   #filmsData = [];
   #filmsDataDefault = [];
   #activeSortType = SortType.DEFAULT;
@@ -37,8 +42,22 @@ class FilmDeskPresenter {
   #extraFilmsQuantity = null;
   #restFilmQuantity = null;
 
-  constructor(renderContainer) {
+  constructor(renderContainer, filmsModel) {
+    if (!((renderContainer instanceof AbstractView) || (renderContainer instanceof Element))) {
+      throw new Error('Can\'t create instance of FilmDeskPresenter while renderContainer is not an Element or instance of AbstractView');
+    }
+
+    if (!(filmsModel instanceof AbstractObservable)) {
+      throw new Error('Can\'t create instance of FilmDeskPresenter while filmsModel is not an instance of AbstractObservable');
+    }
+
     this.#filmDeskRenderContainer = renderContainer;
+    this.#filmsModel = filmsModel;
+  }
+
+  //todo: перевести весь презентер на getter(module 7.1)
+  get filmsData() {
+    return this.#filmsModel.filmsData;
   }
 
   init = (filmsData) => {
@@ -53,25 +72,16 @@ class FilmDeskPresenter {
     this.#renderDeskSheets();
   }
 
-  #getActivePopup = () => this.#activePopup;
+  #getActiveFilm = () => this.#activeFilm;
 
-  #updateActivePopup = (popup) => {
-    if (popup) {
-      if (this.#activePopup) {
-        replace(this.#activePopup, popup);
-        if (this.#activePopup.id !== popup.id) {
-          this.#activePopup.destroyPopup(PresenterMessages.DELETE_POPUP);
-        }
-      } else {
-        document.body.classList.add('hide-overflow');
-        render(document.body, popup, RenderPosition.BEFOREEND);
-      }
+  #setActiveFilm = (film) => {
+    if (film) {
+      this.#activeFilm?.removePopup();
     }
-
-    this.#activePopup = popup;
+    this.#activeFilm = film;
   }
 
-  #updateFilmData = (film) => {
+  #updateFilmsData = (film) => {
     this.#filmsData = update(this.#filmsData, film);
     this.#filmsDataDefault = update(this.#filmsDataDefault, film);
     for (const [presenter, filmId] of this.#filmsPresenters.entries()) {
@@ -94,7 +104,7 @@ class FilmDeskPresenter {
   #renderFilmCards = (from, toward, filmsList) => {
     this.#filmsData.slice(from, toward).forEach((film) => {
       if (film.id) {
-        const filmPresenter = new FilmPresenter(filmsList, this.#updateFilmData, this.#updateActivePopup, this.#getActivePopup);
+        const filmPresenter = new FilmPresenter(filmsList, this.#updateFilmsData, this.#setActiveFilm, this.#getActiveFilm);
         filmPresenter.init(film);
         this.#filmsPresenters.set(filmPresenter, film.id);
       }

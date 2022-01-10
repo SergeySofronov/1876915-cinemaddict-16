@@ -1,5 +1,4 @@
 import AbstractView from './abstract-view.js';
-import { UpdateStates } from '../const.js';
 
 class SmartView extends AbstractView {
   #data = {};
@@ -12,20 +11,10 @@ class SmartView extends AbstractView {
     this.#data = data;
   }
 
-  updateData = (update, isPopupUpdating = UpdateStates.WITH_POPUP_UPDATE, isFilmUpdating = UpdateStates.WITH_FILM_UPDATE) => {
-    if (!update) {
-      return;
-    }
+  updateData = (update) => (this.#data = { ...this.#data, ...update });
 
-    this.#data = { ...this.#data, ...update };
-
-    if (isPopupUpdating) {
-      this.updateElement(isFilmUpdating);
-    }
-
-  }
-
-  updateElement = (isFilmUpdating) => {
+  updateElement = (update) => {
+    this.updateData(update);
     const prevElement = this.element;
     const scrollPosition = (prevElement.scrollTop || 0);
     const parent = prevElement.parentElement;
@@ -35,7 +24,7 @@ class SmartView extends AbstractView {
     parent.replaceChild(newElement, prevElement);
     newElement.scrollTop = scrollPosition;
 
-    this.restoreHandlers(isFilmUpdating);
+    this.restoreHandlers();
   }
 
   restoreHandlers = () => {

@@ -51,6 +51,10 @@ class AbstractView {
   }
 
   destroyElement = () => {
+    if (!this.#element) {
+      return;
+    }
+
     this.#element.remove();
     this.removeElement();
   }

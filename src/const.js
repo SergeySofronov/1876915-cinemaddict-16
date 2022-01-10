@@ -22,17 +22,12 @@ const DateFormatStyle = {
 };
 
 const PresenterMessages = {
-  DELETE_POPUP: 'popupDeleted',
-  DELETE_POPUP_UPDATE: 'popupDeletedUpdate',
+  REMOVE_POPUP: 'popupDeleted',
   UPDATE_POPUP: 'updatePopup',
   UPDATE_FILM: 'updateFilm'
 };
 
 const UpdateStates = {
-  WITHOUT_POPUP_UPDATE: false,
-  WITHOUT_FILM_UPDATE: false,
-  WITH_POPUP_UPDATE: true,
-  WITH_FILM_UPDATE: true,
   PREVENT_DEFAULT: true,
   EVENT_DEFAULT: false
 };
