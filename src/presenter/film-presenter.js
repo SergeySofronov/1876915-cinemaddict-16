@@ -55,6 +55,10 @@ class FilmPresenter {
     }
   }
 
+  removeCard = () => {
+    this.#filmCard.destroyElement();
+  }
+
   removePopup = () => {
     this.#filmPopup?.destroyElement();
     this.#filmPopup = null;

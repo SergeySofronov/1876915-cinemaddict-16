@@ -141,6 +141,11 @@ class FilmDeskPresenter {
   }
 
   #resetDesk = () => {
+    //todo: возможно придется закрывать/обновлять оставшийся popup, при обновлении данных с сервера
+    for (const [presenter,] of this.#filmsPresenters.entries()) {
+      presenter.removeCard();
+    }
+    this.#filmsPresenters.clear();
     this.#shownFilmQuantity = 0;
     this.#filmsMainCardList.destroyElement();
     this.#filmsRatedCardList.destroyElement();

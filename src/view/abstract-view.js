@@ -86,8 +86,8 @@ class AbstractView {
   removeAllEventListeners() {
     for (const [elementSelector, [eventType, eventHandler]] of this.#eventInfo.entries()) {
       elementSelector.removeEventListener(eventType, eventHandler);
-      this.#eventInfo.delete(elementSelector);
     }
+    this.#eventInfo.clear();
   }
 }
 
