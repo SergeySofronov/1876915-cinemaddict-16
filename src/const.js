@@ -10,7 +10,7 @@ const SectionMessages = {
 
 const SortType = {
   DEFAULT: 'default',
-  COMMENT:'most-commented',
+  COMMENT: 'most-commented',
   RATE: 'top-rated',
   DATE: 'top-dated'
 };
@@ -21,8 +21,19 @@ const DateFormatStyle = {
   YEAR: 'YYYY'
 };
 
+const PresenterMessages = {
+  REMOVE_POPUP: 'popupDeleted',
+  UPDATE_POPUP: 'updatePopup',
+  UPDATE_FILM: 'updateFilm'
+};
+
+const UpdateStates = {
+  PREVENT_DEFAULT: true,
+  EVENT_DEFAULT: false
+};
+
 const KeyCode = {
   ESC: 'Escape',
 };
 
-export { SectionMessages, SortType, KeyCode, DateFormatStyle };
+export { SectionMessages, SortType, KeyCode, DateFormatStyle, PresenterMessages, UpdateStates };

@@ -34,6 +34,7 @@ const render = (container, component, place) => {
   }
 };
 
+//todo: unused function?
 const replace = (oldElement, newElement) => {
   if (!(oldElement && newElement)) {
     throw new Error('Can\'t replace non-existing elements');

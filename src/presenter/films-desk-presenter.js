@@ -1,9 +1,10 @@
-import { render, replace, RenderPosition } from '../render.js';
+import { render, RenderPosition } from '../render.js';
 import { getTopRatedFilmsData, getTopCommentedFilmsData, getFilmsDataByDate } from '../filter.js';
 import { SectionMessages, SortType } from '../const.js';
 import { update } from '../mock/utils.js';
-import { KeyCode } from '../const.js';
 
+import AbstractObservable from '../model/abstract-observable.js';
+import AbstractView from '../view/abstract-view.js';
 import SortMenuView from '../view/sort-menu-view.js';
 import FilmsDeskView from '../view/films-desk-view.js';
 import FilmsSheetView from '../view/films-sheet-view.js';
@@ -27,8 +28,11 @@ class FilmDeskPresenter {
   #filmsPopularCardList = new FilmCardListView();
   #showMoreButton = new ShowMoreButtonView();
 
+  #filmsModel = null;
   #filmsPresenters = new Map();
-  #activePopup = null;
+
+  #activeFilm = null;
+
   #filmsData = [];
   #filmsDataDefault = [];
   #activeSortType = SortType.DEFAULT;
@@ -38,14 +42,28 @@ class FilmDeskPresenter {
   #extraFilmsQuantity = null;
   #restFilmQuantity = null;
 
-  constructor(renderContainer) {
+  constructor(renderContainer, filmsModel) {
+    if (!((renderContainer instanceof AbstractView) || (renderContainer instanceof Element))) {
+      throw new Error('Can\'t create instance of FilmDeskPresenter while renderContainer is not an Element or instance of AbstractView');
+    }
+
+    if (!(filmsModel instanceof AbstractObservable)) {
+      throw new Error('Can\'t create instance of FilmDeskPresenter while filmsModel is not an instance of AbstractObservable');
+    }
+
     this.#filmDeskRenderContainer = renderContainer;
+    this.#filmsModel = filmsModel;
+  }
+
+  //todo: перевести весь презентер на getter(module 7.1)
+  get filmsData() {
+    return this.#filmsModel.filmsData;
   }
 
   init = (filmsData) => {
     this.#filmsData = [...filmsData];
     this.#filmsDataDefault = [...this.#filmsData];
-    this.#totalFilmsQuantity = (this.#filmsData.length) ? Math.max(this.#filmsData.length, FILM_SHOW_PER_STEP) : 0;
+    this.#totalFilmsQuantity = this.#filmsData.length;
     this.#extraFilmsQuantity = (this.#filmsData.length > FILM_EXTRA_QUANTITY) ? FILM_EXTRA_QUANTITY : 0;
     this.#filmSortMenu.setSortClickHandler(this.#onSortMenuClick);
 
@@ -54,31 +72,16 @@ class FilmDeskPresenter {
     this.#renderDeskSheets();
   }
 
-  #toggleDocumentScroll = () => document.body.classList.toggle('hide-overflow');
+  #getActiveFilm = () => this.#activeFilm;
 
-  #removeActivePopup = () => {
-    this.#activePopup.removeElement();
-    this.#activePopup = null;
-    document.removeEventListener('keydown', this.#onEscKeyDown);
-  }
-
-  #updateActivePopup = (popup, updatePopupHandlers) => {
-    if (popup) {
-      updatePopupHandlers();
-      if (this.#activePopup) {
-        replace(this.#activePopup, popup);
-      } else if (updatePopupHandlers) {
-        this.#toggleDocumentScroll();
-        render(document.body, popup, RenderPosition.BEFOREEND);
-        document.addEventListener('keydown', this.#onEscKeyDown);
-      }
-      this.#activePopup = popup;
+  #setActiveFilm = (film) => {
+    if (film) {
+      this.#activeFilm?.removePopup();
     }
-
-    return this.#activePopup;
+    this.#activeFilm = film;
   }
 
-  #updateFilmData = (film) => {
+  #updateFilmsData = (film) => {
     this.#filmsData = update(this.#filmsData, film);
     this.#filmsDataDefault = update(this.#filmsDataDefault, film);
     for (const [presenter, filmId] of this.#filmsPresenters.entries()) {
@@ -101,7 +104,7 @@ class FilmDeskPresenter {
   #renderFilmCards = (from, toward, filmsList) => {
     this.#filmsData.slice(from, toward).forEach((film) => {
       if (film.id) {
-        const filmPresenter = new FilmPresenter(filmsList, this.#updateFilmData, this.#onPopupButtonClose, this.#updateActivePopup);
+        const filmPresenter = new FilmPresenter(filmsList, this.#updateFilmsData, this.#setActiveFilm, this.#getActiveFilm);
         filmPresenter.init(film);
         this.#filmsPresenters.set(filmPresenter, film.id);
       }
@@ -139,10 +142,10 @@ class FilmDeskPresenter {
 
   #resetDesk = () => {
     this.#shownFilmQuantity = 0;
-    this.#filmsMainCardList.removeElement();
-    this.#filmsRatedCardList.removeElement();
-    this.#filmsPopularCardList.removeElement();
-    this.#showMoreButton.removeElement();
+    this.#filmsMainCardList.destroyElement();
+    this.#filmsRatedCardList.destroyElement();
+    this.#filmsPopularCardList.destroyElement();
+    this.#showMoreButton.destroyElement();
   }
 
   #sortFilmsData = (sortType) => {
@@ -167,19 +170,6 @@ class FilmDeskPresenter {
     this.#activeSortType = sortType;
   }
 
-  #onEscKeyDown = (evt) => {
-    if (evt.key === KeyCode.ESC) {
-      this.#onPopupButtonClose();
-    }
-  };
-
-  #onPopupButtonClose = () => {
-    this.#toggleDocumentScroll();
-    this.#removeActivePopup();
-    document.removeEventListener('keydown', this.#onEscKeyDown);
-  };
-
-
   #onSortMenuClick = (evt) => {
     if (evt.target.tagName === 'A') {
       const type = evt.target.dataset.sortType;
@@ -190,7 +180,7 @@ class FilmDeskPresenter {
     }
   }
 
-  #onShowMoreButtonClick = (evt) => {
+  #onShowMoreButtonClick = () => {
     const rest = this.#getFilmsToShowQuantity();
     if (rest) {
       this.#renderFilmCards(this.#shownFilmQuantity, this.#shownFilmQuantity + rest, this.#filmsMainCardList);
@@ -198,7 +188,7 @@ class FilmDeskPresenter {
     }
 
     if (!this.#getFilmsToShowQuantity()) {
-      evt.target.remove();
+      this.#showMoreButton.destroyElement();
     }
   };
 }

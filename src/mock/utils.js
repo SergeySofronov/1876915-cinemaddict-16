@@ -89,7 +89,7 @@ const update = (filmsData, changedFilm) => {
 
     return [
       ...filmsData.slice(0, index),
-      update,
+      changedFilm,
       ...filmsData.slice(index + 1),
     ];
   }

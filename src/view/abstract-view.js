@@ -1,7 +1,8 @@
+import { UpdateStates } from '../const.js';
 
 class AbstractView {
   #element = null;
-  #eventInfo = null;
+  #eventInfo = new Map();
   constructor() {
     if (new.target === AbstractView) {
       throw new Error('Can\'t instantiate AbstractView, class instance only');
@@ -18,6 +19,14 @@ class AbstractView {
 
   get template() {
     throw new Error('Abstract method not implemented: get template()');
+  }
+
+  #getElementSelector = (selector) => {
+    const elementSelector = (selector instanceof Element) ? selector : this.element?.querySelector(selector);
+    if (!(elementSelector instanceof Element)) {
+      throw new Error('Unable to create/remove event listener for non DOM Element');
+    }
+    return elementSelector;
   }
 
   createElement = (template) => {
@@ -37,28 +46,31 @@ class AbstractView {
   };
 
   removeElement = () => {
-    this.#element?.remove();
+    this.removeAllEventListeners();
     this.#element = null;
-    this.#eventInfo = null;
   }
 
-  createEventListener = (selector, eventType, callback) => {
-    if (!this.#eventInfo) {
-      this.#eventInfo = new Map();
+  destroyElement = () => {
+    if (!this.#element) {
+      return;
     }
 
-    const elementSelector = (selector instanceof Element) ? selector : this.element.querySelector(selector);
+    this.#element.remove();
+    this.removeElement();
+  }
 
-    if (!(elementSelector instanceof Element)) {
-      throw new Error('Unable to create event listener for non DOM Element');
-    }
+  createEventListener = (selector, eventType, callback, isPreventDefault = UpdateStates.PREVENT_DEFAULT) => {
+
+    const elementSelector = this.#getElementSelector(selector);
 
     if (typeof (callback) !== 'function') {
       throw new Error('Argument "callback" is not a function');
     }
 
     const eventHandler = (evt) => {
-      evt.preventDefault();
+      if (isPreventDefault) {
+        evt.preventDefault();
+      }
       callback(evt);
     };
 
@@ -68,6 +80,13 @@ class AbstractView {
     if (!isHasSimilar) {
       this.#eventInfo.set(elementSelector, [eventType, eventHandler]);
       elementSelector.addEventListener(eventType, eventHandler);
+    }
+  }
+
+  removeAllEventListeners() {
+    for (const [elementSelector, [eventType, eventHandler]] of this.#eventInfo.entries()) {
+      elementSelector.removeEventListener(eventType, eventHandler);
+      this.#eventInfo.delete(elementSelector);
     }
   }
 }
