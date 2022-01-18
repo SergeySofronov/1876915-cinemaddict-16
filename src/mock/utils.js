@@ -78,23 +78,6 @@ const getShortFilmDescription = (filmDescription) => {
 
 const changeDateFormat = (date, format = DATE_FORMAT) => (date ? dayjs(date).format(format) : '');
 
-const update = (filmsData, changedFilm) => {
-  if (Array.isArray(filmsData)) {
-
-    const index = filmsData.findIndex((film) => film.id === changedFilm?.id);
-
-    if (index === -1) {
-      return filmsData;
-    }
-
-    return [
-      ...filmsData.slice(0, index),
-      changedFilm,
-      ...filmsData.slice(index + 1),
-    ];
-  }
-};
-
 export {
   getRandomInteger,
   getNonRepeatUintArray,
@@ -103,6 +86,5 @@ export {
   getRandomDate,
   getRandomFloatStrict,
   getShortFilmDescription,
-  changeDateFormat,
-  update
+  changeDateFormat
 };

@@ -1,5 +1,5 @@
 import { render, replace, RenderPosition } from '../render.js';
-import { PresenterMessages } from '../const.js';
+import { UserActions, UpdateTypes } from '../const.js';
 import SmartView from '../view/smart-view.js';
 import AbstractView from '../view/abstract-view.js';
 import FilmCardView from '../view/film-card-view';
@@ -11,11 +11,12 @@ class FilmPresenter {
   #filmCard = null;
   #filmPopup = null;
 
-  #updateFilmsData = null;
+  #handleViewAction = null;
+  #getActiveFilmId = null;
   #setActiveFilm = null;
-  #getActiveFilm = null;
 
-  constructor(filmsList, updateFilmsData, setActiveFilm, getActiveFilm) {
+  //todo: remove setActiveFilm, getActiveFilm to handleViewAction
+  constructor(filmsList, handleViewAction, getActiveFilmId, setActiveFilm) {
     if (!((filmsList instanceof AbstractView) || (filmsList instanceof Element))) {
       throw new Error('Can\'t create instance of FilmPresenter while filmsList is not an Element or instance of AbstractView');
     }
@@ -27,9 +28,9 @@ class FilmPresenter {
     }
 
     this.#filmsList = filmsList;
-    this.#updateFilmsData = updateFilmsData;
+    this.#handleViewAction = handleViewAction;
+    this.#getActiveFilmId = getActiveFilmId;
     this.#setActiveFilm = setActiveFilm;
-    this.#getActiveFilm = getActiveFilm;
   }
 
   get id() {
@@ -65,19 +66,30 @@ class FilmPresenter {
     document.body.classList.remove('hide-overflow');
   }
 
-  #updateFilmPresenter = (message) => {
-    switch (message) {
-      case (PresenterMessages.REMOVE_POPUP):
-        this.removePopup();
-        this.#setActiveFilm(null);
-        break;
+  createPopup = () => {
+    this.#setActiveFilm(this);
+    this.#filmPopup = new PopupView(this.#handlePopupAction);
+    this.#filmPopup.init(this.#filmData);
+    render(document.body, this.#filmPopup, RenderPosition.BEFOREEND);
+    document.body.classList.add('hide-overflow');
+  }
 
-      case (PresenterMessages.UPDATE_FILM):
-        this.#updateFilmsData(SmartView.restoreData(this.#filmPopup.data));
+  #handlePopupAction = (actionType, update) => {
+    let updateType = UpdateTypes.PATCH;
+    switch (actionType) {
+
+      case (UserActions.REMOVE_POPUP):
+        this.#setActiveFilm(null);
+        return;
+
+      case (UserActions.UPDATE_COMMENT):
+        updateType = UpdateTypes.MINOR;
         break;
 
       default: break;
     }
+
+    this.#handleViewAction(actionType, updateType, update);
   }
 
   #updateFilmHandlers = () => {
@@ -87,21 +99,21 @@ class FilmPresenter {
     this.#filmCard.setFavoriteClickHandler(this.#onFavoriteClick);
   }
 
-  #isActiveFilm = () => (this.#getActiveFilm()?.id === this.id);
+  #isActiveFilm = () => (this.#getActiveFilmId() === this.id);
 
   #onWatchListClick = () => {
     this.#filmData.userDetails.watchlist = !this.#filmData.userDetails.watchlist;
-    this.#updateFilmsData(this.#filmData);
+    this.#handleViewAction(UserActions.UPDATE_CARD, UpdateTypes.PATCH, this.#filmData);
   }
 
   #onWatchedClick = () => {
     this.#filmData.userDetails.watched = !this.#filmData.userDetails.watched;
-    this.#updateFilmsData(this.#filmData);
+    this.#handleViewAction(UserActions.UPDATE_CARD, UpdateTypes.PATCH, this.#filmData);
   }
 
   #onFavoriteClick = () => {
     this.#filmData.userDetails.favorite = !this.#filmData.userDetails.favorite;
-    this.#updateFilmsData(this.#filmData);
+    this.#handleViewAction(UserActions.UPDATE_CARD, UpdateTypes.PATCH, this.#filmData);
   }
 
   #onFilmCardClick = () => {
@@ -109,11 +121,7 @@ class FilmPresenter {
       return;
     }
 
-    this.#setActiveFilm(this);
-    this.#filmPopup = new PopupView(this.#updateFilmPresenter);
-    this.#filmPopup.init(this.#filmData);
-    render(document.body, this.#filmPopup, RenderPosition.BEFOREEND);
-    document.body.classList.add('hide-overflow');
+    this.createPopup();
   }
 }
 

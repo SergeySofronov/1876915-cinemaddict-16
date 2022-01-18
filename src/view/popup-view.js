@@ -1,5 +1,5 @@
 import SmartView from './smart-view';
-import { KeyCode, PresenterMessages, UpdateStates } from '../const.js';
+import { KeyCode, UserActions, EventStates, UpdateTypes } from '../const.js';
 import { getCommentEmotionTypes } from '../mock/data';
 
 const ACTIVE_CLASS = 'film-details__control-button--active';
@@ -194,15 +194,15 @@ const getPopupTemplate = (data) => {
 };
 
 class PopupView extends SmartView {
-  #updateFilmPresenter = null;
-  constructor(updateFilmPresenter) {
+  #popupActionCallback = null;
+  constructor(popupActionCallback) {
     super();
 
-    if (!(updateFilmPresenter instanceof Function)) {
+    if (!(popupActionCallback instanceof Function)) {
       throw new Error('Can\'t create PopupView instance updateFilmPresenter is not a Function');
     }
 
-    this.#updateFilmPresenter = updateFilmPresenter;
+    this.#popupActionCallback = popupActionCallback;
   }
 
   get template() {
@@ -221,14 +221,14 @@ class PopupView extends SmartView {
     this.createEventListener('.film-details__control-button--favorite', 'click', this.#onFavoriteButtonClick);
     this.createEventListener('.film-details__comment-input', 'change', this.#onUserCommentChange);
     this.createEventListener('.film-details__emoji-list', 'change', this.#onUserEmojiChange);
-    this.createEventListener(document.body, 'keydown', this.#onEscKeyDown, UpdateStates.EVENT_DEFAULT);
+    this.createEventListener(document.body, 'keydown', this.#onEscKeyDown, EventStates.EVENT_DEFAULT);
     this.element.querySelectorAll('.film-details__bottom-container li button')
       .forEach((commentSelector) => this.createEventListener(commentSelector, 'click', this.#onCommentDelete));
   }
 
-  #defaultPopupUpdate = (update, message = PresenterMessages.UPDATE_FILM)=>{
+  #defaultPopupUpdate = (update, actionType = UserActions.UPDATE_POPUP) => {
     this.updateElement(update);
-    this.#updateFilmPresenter(message);
+    this.#popupActionCallback(actionType, SmartView.restoreData(this.data));
   }
 
   #onUserEmojiChange = (evt) => {
@@ -243,7 +243,7 @@ class PopupView extends SmartView {
     const buttonId = evt.target.dataset.buttonId;
     const index = this.data.changedComments.findIndex((comment) => comment.id === buttonId);
     this.data.changedComments.splice(index, 1);
-    this.#defaultPopupUpdate(this.data.changedComments);
+    this.#defaultPopupUpdate({ changedComments: this.data.changedComments }, UserActions.UPDATE_COMMENT);
   }
 
   #onWatchListButtonClick = () => {
@@ -259,7 +259,7 @@ class PopupView extends SmartView {
   }
 
   #onPopupButtonClose = () => {
-    this.#updateFilmPresenter(PresenterMessages.REMOVE_POPUP);
+    this.#popupActionCallback(UserActions.REMOVE_POPUP, null);
   };
 
   #onEscKeyDown = (evt) => {

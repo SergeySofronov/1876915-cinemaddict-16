@@ -21,13 +21,22 @@ const DateFormatStyle = {
   YEAR: 'YYYY'
 };
 
-const PresenterMessages = {
-  REMOVE_POPUP: 'popupDeleted',
+const UserActions = {
+  REMOVE_POPUP: 'removePopup',
   UPDATE_POPUP: 'updatePopup',
-  UPDATE_FILM: 'updateFilm'
+  UPDATE_CARD: 'updateFilm',
+  UPDATE_COMMENT: 'changeComment',
+  RESET_DESK: true,
+  RESET_CARDS: false
 };
 
-const UpdateStates = {
+const UpdateTypes = {
+  PATCH: 'patch',
+  MINOR: 'minor',
+  MAJOR: 'major',
+};
+
+const EventStates = {
   PREVENT_DEFAULT: true,
   EVENT_DEFAULT: false
 };
@@ -36,4 +45,4 @@ const KeyCode = {
   ESC: 'Escape',
 };
 
-export { SectionMessages, SortType, KeyCode, DateFormatStyle, PresenterMessages, UpdateStates };
+export { SectionMessages, SortType, KeyCode, DateFormatStyle, UserActions, EventStates, UpdateTypes };
