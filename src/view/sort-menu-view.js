@@ -1,6 +1,8 @@
 import AbstractView from './abstract-view';
 import { SortType } from '../const.js';
 
+const ACTIVE_CLASS = 'sort__button--active';
+
 const getFilmSortMenuTemplate = () => (
   `<ul class="sort">
     <li><a href="#" class="sort__button sort__button--active" data-sort-type = ${SortType.DEFAULT}>Sort by default</a></li>
@@ -17,9 +19,9 @@ class SortMenuView extends AbstractView {
   #setActiveAnchor = (evt) => {
     this.element.querySelectorAll('a').forEach((anchor) => {
       if (anchor === evt.target) {
-        anchor.classList.add('sort__button--active');
+        anchor.classList.add(ACTIVE_CLASS);
       } else {
-        anchor.classList.remove('sort__button--active');
+        anchor.classList.remove(ACTIVE_CLASS);
       }
     });
   }

@@ -1,8 +1,8 @@
 import SmartView from './smart-view';
-import { KeyCode, UserActions, EventStates, UpdateTypes } from '../const.js';
-import { getCommentEmotionTypes } from '../mock/data';
+import { KeyCode, UserActions, EventStates } from '../const.js';
 
 const ACTIVE_CLASS = 'film-details__control-button--active';
+const emotionTypes = ['smile', 'sleeping', 'puke', 'angry'];
 
 const TableTerms = {
   DIRECTOR: 'Director',
@@ -13,8 +13,6 @@ const TableTerms = {
   COUNTRY: 'Country',
   GENRES: 'Genres'
 };
-
-const emotionTypes = (Array.isArray(getCommentEmotionTypes()) && getCommentEmotionTypes()) || [];
 
 const getCommentEmotionTemplate = (emotion, isChecked = false) => {
   if (emotionTypes.includes(emotion)) {
@@ -95,9 +93,9 @@ const getPopupCommentSectionTemplate = (data) => {
 
 const getTableRow = (term, ceilData) => (
   `<tr class="film-details__row">
-  <td class="film-details__term">${term || ''}</td>
-  <td class="film-details__cell">${ceilData || ''}</td>
-</tr>`
+    <td class="film-details__term">${term || ''}</td>
+    <td class="film-details__cell">${ceilData || ''}</td>
+  </tr>`
 );
 
 const getCardGenres = (genres) => {
@@ -265,6 +263,11 @@ class PopupView extends SmartView {
   #onEscKeyDown = (evt) => {
     if (evt.key === KeyCode.ESC) {
       this.#onPopupButtonClose();
+    }
+
+    if ((evt.key === KeyCode.ENTER) && (evt.ctrlKey || evt.metaKey)) {
+      //document.querySelector('.film-details__inner').submit();
+      console.log(evt.key, evt.ctrlKey);
     }
   };
 }

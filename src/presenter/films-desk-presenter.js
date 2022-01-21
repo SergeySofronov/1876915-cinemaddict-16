@@ -1,6 +1,6 @@
 import { render, RenderPosition } from '../render.js';
-import { getTopRatedFilmsData, getTopCommentedFilmsData, getFilmsDataByDate } from '../filter.js';
-import { SectionMessages, SortType, UserActions, UpdateTypes } from '../const.js';
+import { getTopRatedFilmsData, getTopCommentedFilmsData, getFilmsDataByDate, filterFunctions } from '../filter.js';
+import { SectionMessages, SortType, UserActions, UpdateTypes, FilterTypes } from '../const.js';
 
 import AbstractObservable from '../model/abstract-observable.js';
 import AbstractView from '../view/abstract-view.js';
@@ -15,7 +15,7 @@ const FILM_SHOW_PER_STEP = 5;
 const FILM_EXTRA_QUANTITY = 2;
 
 class FilmDeskPresenter {
-  #filmDeskRenderContainer = null;
+  #deskContainer = null;
   #filmSortMenu = new SortMenuView();
   #filmsDesk = new FilmsDeskView();
   #filmEmptySheet = new FilmsSheetView(SectionMessages.NO_MOVIES);
@@ -28,6 +28,7 @@ class FilmDeskPresenter {
   #showMoreButton = new ShowMoreButtonView();
 
   #filmsModel = null;
+  #filterModel = null;
   #filmsPresenters = new Map();
   #topRatedFilms = [];
   #topCommentedFilms = [];
@@ -36,46 +37,56 @@ class FilmDeskPresenter {
   #activeSortType = SortType.DEFAULT;
 
   #shownFilmQuantity = null;
-  #totalFilmsQuantity = null;
   #restFilmQuantity = null;
 
-  constructor(renderContainer, filmsModel) {
-    if (!((renderContainer instanceof AbstractView) || (renderContainer instanceof Element))) {
+  constructor(deskContainer, filmsModel, filterModel) {
+    if (!((deskContainer instanceof AbstractView) || (deskContainer instanceof Element))) {
       throw new Error('Can\'t create instance of FilmDeskPresenter while renderContainer is not an Element or instance of AbstractView');
     }
 
-    if (!(filmsModel instanceof AbstractObservable)) {
-      throw new Error('Can\'t create instance of FilmDeskPresenter while filmsModel is not an instance of AbstractObservable');
+    for (let i = 1; i < arguments.length; i++) {
+      if (!(arguments[i] instanceof AbstractObservable)) {
+        throw new Error(`Can\\'t create instance of FilmDeskPresenter while argument${i - 1} is not an instance of AbstractObservable`);
+      }
     }
 
-    this.#filmDeskRenderContainer = renderContainer;
+    this.#deskContainer = deskContainer;
     this.#filmsModel = filmsModel;
+    this.#filterModel = filterModel;
     this.#filmsModel.addObserver(this.#handleModelEvent);
+    this.#filterModel.addObserver(this.#handleModelEvent);
   }
 
   get filmsData() {
+
+    const filterType = this.#filterModel.filterType;
+    const films = this.#filmsModel.filmsData;
+    const filteredTasks = filterFunctions[filterType](films);
+
+
     switch (this.#activeSortType) {
       case (SortType.RATE):
-        return getTopRatedFilmsData(this.#filmsModel.filmsData);
+        return getTopRatedFilmsData(filteredTasks);
 
       case (SortType.DATE):
-        return getFilmsDataByDate(this.#filmsModel.filmsData);
+        return getFilmsDataByDate(filteredTasks);
 
       case (SortType.COMMENT):
-        return getTopCommentedFilmsData(this.#filmsModel.filmsData);
+        return getTopCommentedFilmsData(filteredTasks);
 
       default: case (SortType.DEFAULT):
-        return this.#filmsModel.filmsData;
+        return filteredTasks;
     }
   }
 
   init = () => {
-    this.#totalFilmsQuantity = this.filmsData.length;
     this.#filmSortMenu.setSortClickHandler(this.#onSortMenuClick);
-    render(this.#filmDeskRenderContainer, this.#filmSortMenu, RenderPosition.BEFOREEND);
-    render(this.#filmDeskRenderContainer, this.#filmsDesk, RenderPosition.BEFOREEND);
+    render(this.#deskContainer, this.#filmSortMenu, RenderPosition.BEFOREEND);
+    render(this.#deskContainer, this.#filmsDesk, RenderPosition.BEFOREEND);
     this.#renderDeskSheets(UserActions.RESET_DESK);
   }
+
+  #getTotalFilmsQuantity = () => this.filmsData.length;
 
   #getActiveFilmId = () => this.#activeFilm?.id;
 
@@ -108,7 +119,13 @@ class FilmDeskPresenter {
 
       default:
         //todo: бесполезное действие, т.к. используется не глубокое копирование объектов в updateData() SmartView!
-        this.#filmsModel.update(updateType, update);
+
+        //todo: сюда переместить принятие решений PATCH/MINOR/MAJOR? тогда можно будет сохранить логику wasInTopCommented
+        if (this.#filterModel.filterType === FilterTypes.ALL) {
+          this.#filmsModel.update(updateType, update);
+        } else {
+          this.#filmsModel.update(UpdateTypes.MINOR, update);
+        }
         break;
     }
   }
@@ -137,7 +154,7 @@ class FilmDeskPresenter {
         }
         break;
       case (UpdateTypes.MAJOR):
-        //todo: обновить всю доску
+        this.#resetDesk();
         break;
     }
   }
@@ -151,8 +168,9 @@ class FilmDeskPresenter {
   }
 
   #getFilmsToShow = () => {
-    if (this.#totalFilmsQuantity > this.#shownFilmQuantity) {
-      this.#restFilmQuantity = Math.min((this.#totalFilmsQuantity - this.#shownFilmQuantity), FILM_SHOW_PER_STEP);
+    const totalQuantity = this.#getTotalFilmsQuantity();
+    if (totalQuantity > this.#shownFilmQuantity) {
+      this.#restFilmQuantity = Math.min((totalQuantity - this.#shownFilmQuantity), FILM_SHOW_PER_STEP);
 
       return this.filmsData.slice(this.#shownFilmQuantity, this.#shownFilmQuantity + this.#restFilmQuantity);
     }
@@ -185,7 +203,7 @@ class FilmDeskPresenter {
   }
 
   #renderDeskSheets = (isDeskReset) => {
-    if (!this.#totalFilmsQuantity) {
+    if (!this.#getTotalFilmsQuantity()) {
       render(this.#filmsDesk, this.#filmEmptySheet, RenderPosition.BEFOREEND);
 
       return;
@@ -209,7 +227,7 @@ class FilmDeskPresenter {
 
     if (isDeskReset) {
       this.#renderSheet(this.#filmsMainSheet, this.#filmsMainCardList);
-      this.#shownFilmQuantity = Math.min(this.#totalFilmsQuantity, FILM_SHOW_PER_STEP);
+      this.#shownFilmQuantity = Math.min(this.#getTotalFilmsQuantity(), FILM_SHOW_PER_STEP);
 
       if (this.#getFilmsToShow()) {
         this.#showMoreButton.setButtonClickHandler(this.#onShowMoreButtonClick);

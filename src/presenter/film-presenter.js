@@ -15,7 +15,6 @@ class FilmPresenter {
   #getActiveFilmId = null;
   #setActiveFilm = null;
 
-  //todo: remove setActiveFilm, getActiveFilm to handleViewAction
   constructor(filmsList, handleViewAction, getActiveFilmId, setActiveFilm) {
     if (!((filmsList instanceof AbstractView) || (filmsList instanceof Element))) {
       throw new Error('Can\'t create instance of FilmPresenter while filmsList is not an Element or instance of AbstractView');

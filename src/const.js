@@ -8,6 +8,26 @@ const SectionMessages = {
   NO_FAVORITE: 'There are no favorite movies now'
 };
 
+const UserScores = {
+  BUFF: 21,
+  FAN: 11,
+  NOVICE: 1,
+};
+
+const UserRanks = {
+  BUFF: 'movie buff',
+  FAN: 'fan',
+  NOVICE: 'novice',
+};
+
+const FilterTypes = {
+  ALL: 'all',
+  WATCHLIST: 'watchlist',
+  WATCHED: 'watched',
+  FAVORITE: 'favorite',
+  STATS: 'stats'
+};
+
 const SortType = {
   DEFAULT: 'default',
   COMMENT: 'most-commented',
@@ -43,6 +63,7 @@ const EventStates = {
 
 const KeyCode = {
   ESC: 'Escape',
+  ENTER: 'Enter',
 };
 
-export { SectionMessages, SortType, KeyCode, DateFormatStyle, UserActions, EventStates, UpdateTypes };
+export { UserScores, UserRanks, FilterTypes, SectionMessages, SortType, KeyCode, DateFormatStyle, UserActions, EventStates, UpdateTypes };
