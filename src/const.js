@@ -42,10 +42,8 @@ const DateFormatStyle = {
 };
 
 const UserActions = {
-  REMOVE_POPUP: 'removePopup',
-  UPDATE_POPUP: 'updatePopup',
-  UPDATE_CARD: 'updateFilm',
-  UPDATE_COMMENT: 'changeComment',
+  UPDATE_ACTIVE: 'updateActive',
+  UPDATE_DATA: 'updateData',
   RESET_DESK: true,
   RESET_CARDS: false
 };

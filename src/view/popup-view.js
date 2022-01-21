@@ -224,7 +224,7 @@ class PopupView extends SmartView {
       .forEach((commentSelector) => this.createEventListener(commentSelector, 'click', this.#onCommentDelete));
   }
 
-  #defaultPopupUpdate = (update, actionType = UserActions.UPDATE_POPUP) => {
+  #defaultPopupUpdate = (update, actionType = UserActions.UPDATE_DATA) => {
     this.updateElement(update);
     this.#popupActionCallback(actionType, SmartView.restoreData(this.data));
   }
@@ -241,7 +241,7 @@ class PopupView extends SmartView {
     const buttonId = evt.target.dataset.buttonId;
     const index = this.data.changedComments.findIndex((comment) => comment.id === buttonId);
     this.data.changedComments.splice(index, 1);
-    this.#defaultPopupUpdate({ changedComments: this.data.changedComments }, UserActions.UPDATE_COMMENT);
+    this.#defaultPopupUpdate({ changedComments: this.data.changedComments });
   }
 
   #onWatchListButtonClick = () => {
@@ -257,7 +257,7 @@ class PopupView extends SmartView {
   }
 
   #onPopupButtonClose = () => {
-    this.#popupActionCallback(UserActions.REMOVE_POPUP, null);
+    this.#popupActionCallback(UserActions.UPDATE_ACTIVE, null);
   };
 
   #onEscKeyDown = (evt) => {

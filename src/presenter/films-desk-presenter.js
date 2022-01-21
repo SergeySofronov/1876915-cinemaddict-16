@@ -111,26 +111,25 @@ class FilmDeskPresenter {
     }
   }
 
-  #handleViewAction = (actionType, updateType, update) => {
+  #handleViewAction = (actionType, /*updateType,*/ update) => {
     switch (actionType) {
-      case (UserActions.REMOVE_POPUP):
+      case (UserActions.UPDATE_ACTIVE):
         this.#setActiveFilm(update);
         break;
 
-      default:
-        //todo: бесполезное действие, т.к. используется не глубокое копирование объектов в updateData() SmartView!
-
-        //todo: сюда переместить принятие решений PATCH/MINOR/MAJOR? тогда можно будет сохранить логику wasInTopCommented
-        if (this.#filterModel.filterType === FilterTypes.ALL) {
-          this.#filmsModel.update(updateType, update);
-        } else {
+      case (UserActions.UPDATE_DATA):
+        if ((this.#filterModel.filterType !== FilterTypes.ALL) || this.#isCommentRatingChanged(update)) {
           this.#filmsModel.update(UpdateTypes.MINOR, update);
+        } else {
+          this.#filmsModel.update(UpdateTypes.PATCH, update);
         }
         break;
+
+      default: break;
     }
   }
 
-  #wasInTopCommented = (film) => {
+  #isCommentRatingChanged = (film) => {
     const type = this.#activeSortType;
     this.#activeSortType = SortType.COMMENT;
     const indexOld = this.#topCommentedFilms.findIndex((item) => (item.id === film.id));
@@ -146,16 +145,16 @@ class FilmDeskPresenter {
       case (UpdateTypes.PATCH):
         this.#updateFilmsPresenters(data);
         break;
+
       case (UpdateTypes.MINOR):
-        if (this.#wasInTopCommented(data)) {
-          this.#resetCards();
-        } else {
-          this.#updateFilmsPresenters(data);
-        }
+        this.#resetCards();
         break;
+
       case (UpdateTypes.MAJOR):
         this.#resetDesk();
         break;
+
+      default: break;
     }
   }
 
@@ -181,7 +180,7 @@ class FilmDeskPresenter {
   #renderFilmCards = (filmsList, filmsData) => {
     filmsData.forEach((film) => {
       if (film.id) {
-        const filmPresenter = new FilmPresenter(filmsList, this.#handleViewAction, this.#getActiveFilmId, this.#setActiveFilm);
+        const filmPresenter = new FilmPresenter(filmsList, this.#handleViewAction, this.#getActiveFilmId);
         filmPresenter.init(film);
         this.#filmsPresenters.set(filmPresenter, film.id);
       }
@@ -252,6 +251,10 @@ class FilmDeskPresenter {
   }
 
   #resetCards = () => {
+    //todo: добавить проверку, надо ли удалять ShowMoreButton, т.к. мало карточек после фильтрации
+    if(this.filmsData.length <= FILM_SHOW_PER_STEP){
+      this.#showMoreButton.destroyElement();
+    }
     this.#clearPresenters();
     this.#renderDeskSheets(UserActions.RESET_CARDS);
   }

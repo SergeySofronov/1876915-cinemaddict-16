@@ -13,9 +13,8 @@ class FilmPresenter {
 
   #handleViewAction = null;
   #getActiveFilmId = null;
-  #setActiveFilm = null;
 
-  constructor(filmsList, handleViewAction, getActiveFilmId, setActiveFilm) {
+  constructor(filmsList, handleViewAction, getActiveFilmId) {
     if (!((filmsList instanceof AbstractView) || (filmsList instanceof Element))) {
       throw new Error('Can\'t create instance of FilmPresenter while filmsList is not an Element or instance of AbstractView');
     }
@@ -29,7 +28,6 @@ class FilmPresenter {
     this.#filmsList = filmsList;
     this.#handleViewAction = handleViewAction;
     this.#getActiveFilmId = getActiveFilmId;
-    this.#setActiveFilm = setActiveFilm;
   }
 
   get id() {
@@ -66,29 +64,11 @@ class FilmPresenter {
   }
 
   createPopup = () => {
-    this.#setActiveFilm(this);
-    this.#filmPopup = new PopupView(this.#handlePopupAction);
+    this.#handleViewAction(UserActions.UPDATE_ACTIVE, this);
+    this.#filmPopup = new PopupView(this.#handleViewAction);
     this.#filmPopup.init(this.#filmData);
     render(document.body, this.#filmPopup, RenderPosition.BEFOREEND);
     document.body.classList.add('hide-overflow');
-  }
-
-  #handlePopupAction = (actionType, update) => {
-    let updateType = UpdateTypes.PATCH;
-    switch (actionType) {
-
-      case (UserActions.REMOVE_POPUP):
-        this.#setActiveFilm(null);
-        return;
-
-      case (UserActions.UPDATE_COMMENT):
-        updateType = UpdateTypes.MINOR;
-        break;
-
-      default: break;
-    }
-
-    this.#handleViewAction(actionType, updateType, update);
   }
 
   #updateFilmHandlers = () => {
@@ -102,17 +82,17 @@ class FilmPresenter {
 
   #onWatchListClick = () => {
     this.#filmData.userDetails.watchlist = !this.#filmData.userDetails.watchlist;
-    this.#handleViewAction(UserActions.UPDATE_CARD, UpdateTypes.PATCH, this.#filmData);
+    this.#handleViewAction(UserActions.UPDATE_DATA, this.#filmData);
   }
 
   #onWatchedClick = () => {
     this.#filmData.userDetails.watched = !this.#filmData.userDetails.watched;
-    this.#handleViewAction(UserActions.UPDATE_CARD, UpdateTypes.PATCH, this.#filmData);
+    this.#handleViewAction(UserActions.UPDATE_DATA, this.#filmData);
   }
 
   #onFavoriteClick = () => {
     this.#filmData.userDetails.favorite = !this.#filmData.userDetails.favorite;
-    this.#handleViewAction(UserActions.UPDATE_CARD, UpdateTypes.PATCH, this.#filmData);
+    this.#handleViewAction(UserActions.UPDATE_DATA, this.#filmData);
   }
 
   #onFilmCardClick = () => {
