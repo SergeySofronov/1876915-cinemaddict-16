@@ -2,10 +2,6 @@ const SectionMessages = {
   DEFAULT: 'All movies. Upcoming',
   RATED: 'Top rated',
   POPULAR: 'Most commented',
-  NO_MOVIES: 'There are no movies in our database',
-  NO_WATCHLIST: 'There are no movies to watch now',
-  NO_HISTORY: 'There are no watched movies now',
-  NO_FAVORITE: 'There are no favorite movies now'
 };
 
 const UserScores = {
@@ -28,11 +24,12 @@ const FilterTypes = {
   STATS: 'stats'
 };
 
-const SortType = {
+const SortTypes = {
   DEFAULT: 'default',
-  COMMENT: 'most-commented',
-  RATE: 'top-rated',
-  DATE: 'top-dated'
+  TOP_COMMENT: 'most-commented',
+  TOP_RATE: 'top-rated',
+  RATE: 'sortByRating',
+  DATE: 'sortByDate'
 };
 
 const DateFormatStyle = {
@@ -44,8 +41,6 @@ const DateFormatStyle = {
 const UserActions = {
   UPDATE_ACTIVE: 'updateActive',
   UPDATE_DATA: 'updateData',
-  RESET_DESK: true,
-  RESET_CARDS: false
 };
 
 const UpdateTypes = {
@@ -64,4 +59,4 @@ const KeyCode = {
   ENTER: 'Enter',
 };
 
-export { UserScores, UserRanks, FilterTypes, SectionMessages, SortType, KeyCode, DateFormatStyle, UserActions, EventStates, UpdateTypes };
+export { UserScores, UserRanks, FilterTypes, SectionMessages, SortTypes, KeyCode, DateFormatStyle, UserActions, EventStates, UpdateTypes };

@@ -41,7 +41,6 @@ class FilterMenuPresenter {
 
   init = () => {
 
-
     const prevFilterComponent = this.#filterComponent;
     this.#filterComponent = new FilterMenuView(this.#getStatistic(), this.#filterModel.filterType);
     this.#filterComponent.setFilterMenuClickHandler(this.#onFilterMenuClick);
@@ -53,7 +52,7 @@ class FilterMenuPresenter {
       return;
     }
 
-    render(this.#filterContainer, this.#filterComponent, RenderPosition.BEFOREEND);
+    render(this.#filterContainer, this.#filterComponent, RenderPosition.AFTERBEGIN);
   }
 
   #handleModelEvent = () => {
@@ -65,7 +64,8 @@ class FilterMenuPresenter {
       return;
     }
 
-    this.#filterModel.setFilter(UpdateTypes.MAJOR, filterType);
+    const updateType = (filterType === FilterTypes.STATS) ? UpdateTypes.MAJOR : UpdateTypes.MINOR;
+    this.#filterModel.setFilter(updateType, filterType);
   }
 
 }

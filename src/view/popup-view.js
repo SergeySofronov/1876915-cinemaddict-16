@@ -1,5 +1,5 @@
 import SmartView from './smart-view';
-import { KeyCode, UserActions, EventStates } from '../const.js';
+import { KeyCode, UserActions, EventStates, FilterTypes } from '../const.js';
 
 const ACTIVE_CLASS = 'film-details__control-button--active';
 const emotionTypes = ['smile', 'sleeping', 'puke', 'angry'];
@@ -224,9 +224,9 @@ class PopupView extends SmartView {
       .forEach((commentSelector) => this.createEventListener(commentSelector, 'click', this.#onCommentDelete));
   }
 
-  #defaultPopupUpdate = (update, actionType = UserActions.UPDATE_DATA) => {
+  #defaultPopupUpdate = (update, actionDetails, actionType = UserActions.UPDATE_DATA) => {
     this.updateElement(update);
-    this.#popupActionCallback(actionType, SmartView.restoreData(this.data));
+    this.#popupActionCallback(SmartView.restoreData(this.data), actionType, actionDetails);
   }
 
   #onUserEmojiChange = (evt) => {
@@ -245,19 +245,19 @@ class PopupView extends SmartView {
   }
 
   #onWatchListButtonClick = () => {
-    this.#defaultPopupUpdate({ watchlist: !this.data.watchlist });
+    this.#defaultPopupUpdate({ watchlist: !this.data.watchlist }, FilterTypes.WATCHLIST);
   }
 
   #onWatchedButtonClick = () => {
-    this.#defaultPopupUpdate({ watched: !this.data.watched });
+    this.#defaultPopupUpdate({ watched: !this.data.watched }, FilterTypes.WATCHED);
   }
 
   #onFavoriteButtonClick = () => {
-    this.#defaultPopupUpdate({ favorite: !this.data.favorite });
+    this.#defaultPopupUpdate({ favorite: !this.data.favorite }, FilterTypes.FAVORITE);
   }
 
   #onPopupButtonClose = () => {
-    this.#popupActionCallback(UserActions.UPDATE_ACTIVE, null);
+    this.#popupActionCallback(null, UserActions.UPDATE_ACTIVE);
   };
 
   #onEscKeyDown = (evt) => {

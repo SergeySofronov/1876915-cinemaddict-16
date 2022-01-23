@@ -84,6 +84,7 @@ const filterFunctions = {
   [FilterTypes.WATCHLIST]: (films) => films.filter((film) => Boolean(film.userDetails.watchlist)),
   [FilterTypes.WATCHED]: (films) => films.filter((film) => Boolean(film.userDetails.watched)),
   [FilterTypes.FAVORITE]: (films) => films.filter((film) => Boolean(film.userDetails.favorite)),
+  [FilterTypes.STATS]: (films) => films.filter((film) => Boolean(film.id))
 };
 
 export { getFilmsStatistic, getUserRank, getTopCommentedFilmsData, getTopRatedFilmsData, getFilmsDataByDate, filterFunctions };

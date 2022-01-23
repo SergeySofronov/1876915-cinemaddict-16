@@ -36,9 +36,9 @@ class FilterMenuView extends AbstractView {
     return getFilterMenuTemplate(this.#filmsStatistic, this.#filterType);
   }
 
-  #setActiveAnchor = (evt) => {
-    this.element.querySelectorAll('a').forEach((anchor) => {
-      if ((anchor === evt.target) || (anchor === evt.target.closest('a'))) {
+  #setActiveAnchor = (target) => {
+    this.element.querySelectorAll('A').forEach((anchor) => {
+      if (anchor === target) {
         anchor.classList.add(ACTIVE_CLASS);
       } else {
         anchor.classList.remove(ACTIVE_CLASS);
@@ -48,8 +48,11 @@ class FilterMenuView extends AbstractView {
 
   setFilterMenuClickHandler = (callback) => {
     this.createEventListener(this.element, 'click', (evt) => {
-      this.#setActiveAnchor(evt);
-      callback(evt.target.dataset.filterType);
+      const target = (evt.target.tagName === 'A') ? evt.target : evt.target.closest('A');
+      if (target) {
+        this.#setActiveAnchor(target);
+        callback(target.dataset.filterType);
+      }
     });
   }
 }

@@ -1,5 +1,5 @@
 import { render, replace, RenderPosition } from '../render.js';
-import { UserActions, UpdateTypes } from '../const.js';
+import { UserActions, FilterTypes } from '../const.js';
 import SmartView from '../view/smart-view.js';
 import AbstractView from '../view/abstract-view.js';
 import FilmCardView from '../view/film-card-view';
@@ -47,10 +47,6 @@ class FilmPresenter {
     } else {
       render(this.#filmsList, this.#filmCard, RenderPosition.BEFOREEND);
     }
-
-    if (this.#filmPopup) {
-      this.#filmPopup.updateElement(SmartView.parseData(this.#filmData));
-    }
   }
 
   removeCard = () => {
@@ -64,11 +60,22 @@ class FilmPresenter {
   }
 
   createPopup = () => {
-    this.#handleViewAction(UserActions.UPDATE_ACTIVE, this);
+    this.#handleViewAction(this, UserActions.UPDATE_ACTIVE);
     this.#filmPopup = new PopupView(this.#handleViewAction);
     this.#filmPopup.init(this.#filmData);
     render(document.body, this.#filmPopup, RenderPosition.BEFOREEND);
     document.body.classList.add('hide-overflow');
+  }
+
+  #updatePopup = () => {
+    if (this.#filmPopup) {
+      this.#filmPopup.updateElement(SmartView.parseData(this.#filmData));
+    }
+  }
+
+  #filmActionCallback = (actionDetails) => {
+    this.#updatePopup();
+    this.#handleViewAction(this.#filmData, UserActions.UPDATE_DATA, actionDetails);
   }
 
   #updateFilmHandlers = () => {
@@ -78,22 +85,22 @@ class FilmPresenter {
     this.#filmCard.setFavoriteClickHandler(this.#onFavoriteClick);
   }
 
-  #isActiveFilm = () => (this.#getActiveFilmId() === this.id);
-
   #onWatchListClick = () => {
     this.#filmData.userDetails.watchlist = !this.#filmData.userDetails.watchlist;
-    this.#handleViewAction(UserActions.UPDATE_DATA, this.#filmData);
+    this.#filmActionCallback(FilterTypes.WATCHLIST);
   }
 
   #onWatchedClick = () => {
     this.#filmData.userDetails.watched = !this.#filmData.userDetails.watched;
-    this.#handleViewAction(UserActions.UPDATE_DATA, this.#filmData);
+    this.#filmActionCallback(FilterTypes.WATCHED);
   }
 
   #onFavoriteClick = () => {
     this.#filmData.userDetails.favorite = !this.#filmData.userDetails.favorite;
-    this.#handleViewAction(UserActions.UPDATE_DATA, this.#filmData);
+    this.#filmActionCallback(FilterTypes.FAVORITE);
   }
+
+  #isActiveFilm = () => (this.#getActiveFilmId() === this.id);
 
   #onFilmCardClick = () => {
     if (this.#filmPopup || this.#isActiveFilm()) {
