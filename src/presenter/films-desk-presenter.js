@@ -107,10 +107,6 @@ class FilmDeskPresenter {
     this.#renderSheet(this.#filmsMainSheet, this.#filmsMainSheetTitle, this.#filmsMainCardList);
     this.#shownFilmsQuantity = Math.min(this.#getFilteredFilmsQuantity(), FILM_SHOW_PER_STEP);
 
-    if (!this.#shownFilmsQuantity) {
-      this.#renderEmptyTitle();
-    }
-
     this.#renderCards();
   };
 
@@ -180,7 +176,7 @@ class FilmDeskPresenter {
 
     for (const [presenter, filmId] of this.#filmsPresenters.entries()) {
       if (filmId === activeFilmId) {
-        presenter.createPopup();
+        presenter.createPopup(this.#activeFilm.getScrollPosition());
 
         return;
       }
@@ -203,6 +199,7 @@ class FilmDeskPresenter {
   }
 
   #handleViewAction = (update, actionType, actionDetails) => {
+    const isFilterTypeStats = (this.#filterModel.filterType === FilterTypes.STATS);
     const isFilterTypePatch = (this.#activeFilterType === FilterTypes.ALL) || (this.#activeFilterType === FilterTypes.STATS) || (this.#activeFilterType !== actionDetails);
     const isUpdateTypePatch = isFilterTypePatch && (!this.#isCommentRatingChanged(update));
 
@@ -212,7 +209,7 @@ class FilmDeskPresenter {
         break;
 
       case (UserActions.UPDATE_DATA):
-        if ((isUpdateTypePatch)) {
+        if ((isUpdateTypePatch || isFilterTypeStats)) {
           this.#filmsModel.update(UpdateTypes.PATCH, update);
         } else {
           this.#filmsModel.update(UpdateTypes.MINOR, update);
@@ -311,8 +308,6 @@ class FilmDeskPresenter {
 
   #renderCards = () => {
 
-    this.#updateExtraFilmsData();
-
     if (this.#topCommentedFilms.length >= FILM_EXTRA_QUANTITY) {
       this.#renderFilmCards(this.#filmsPopularCardList, this.#topCommentedFilms);
     }
@@ -323,6 +318,8 @@ class FilmDeskPresenter {
 
     if (this.filmsData.length) {
       this.#replaceEmptyTitle();
+    } else {
+      this.#renderEmptyTitle();
     }
 
     this.#renderFilmCards(this.#filmsMainCardList, this.filmsData.slice(0, this.#shownFilmsQuantity));
@@ -348,10 +345,11 @@ class FilmDeskPresenter {
     }
     if (this.#filmsStats) {
       //todo: добавить удаление stats
+      //todo: или отрисовать stats с помощью filter-presenter!
     }
   }
 
-  #restoreShownFilmsQuantity = () => (this.#shownFilmsQuantity = this.#shownFilmsQuantity > FILM_SHOW_PER_STEP ? FILM_SHOW_PER_STEP : this.#shownFilmsQuantity);
+  #restoreShownFilmsQuantity = () => (this.#shownFilmsQuantity = (this.#getFilteredFilmsQuantity() > FILM_SHOW_PER_STEP) ? FILM_SHOW_PER_STEP : this.#shownFilmsQuantity);
 
   #resetCards = (filterType) => {
     if ((this.#activeFilterType !== filterType) || (!this.#filmsSortMenu) || (!this.filmsData.length)) {
@@ -359,10 +357,8 @@ class FilmDeskPresenter {
       this.#renderSortMenu();
     }
     this.#destroyCards();
+    this.#updateExtraFilmsData();
     this.#renderCards();
-    if (!this.filmsData.length) {
-      this.#renderEmptyTitle();
-    }
     this.#changeActiveFilm();
   }
 

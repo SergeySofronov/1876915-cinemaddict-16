@@ -3,11 +3,11 @@ import AbstractView from './abstract-view.js';
 class SmartView extends AbstractView {
   #data = {};
 
-  get data() {
+  get _data() {
     return this.#data;
   }
 
-  set data(data) {
+  set _data(data) {
     this.#data = data;
   }
 

@@ -23,10 +23,12 @@ const filmsModel = new FilmsModel;
 filmsModel.filmsData = filmsData;
 const filterModel = new FilterModel;
 
-const filmDesk = new FilmDeskPresenter(sectionMain, filmsModel, filterModel);
-filmDesk.init(filmsData);
 const filterMenu = new FilterMenuPresenter(sectionMain, filterModel, filmsModel);
 filterMenu.init();
+
+const filmDesk = new FilmDeskPresenter(sectionMain, filmsModel, filterModel);
+filmDesk.init(filmsData);
+
 
 if (filmsData.length) {
   render(footerStatistic, new FilmFooterView(filmsStatistic), RenderPosition.BEFOREEND);

@@ -1,6 +1,7 @@
 import AbstractView from '../view/abstract-view.js';
 import AbstractObservable from '../model/abstract-observable.js';
 import FilterMenuView from '../view/filter-menu-view.js';
+import UserStatisticView from '../view/user-statistic-view.js';
 import { replace, render, RenderPosition } from '../render.js';
 import { filterFunctions } from '../filter.js';
 import { FilterTypes, UpdateTypes } from '../const.js';
@@ -10,6 +11,7 @@ class FilterMenuPresenter {
   #filterModel = null;
   #filmsModel = null;
 
+  #userStatistic = null;
   #filterComponent = null;
 
   constructor(filterContainer, filterModel, filmsModel) {
@@ -55,6 +57,21 @@ class FilterMenuPresenter {
     render(this.#filterContainer, this.#filterComponent, RenderPosition.AFTERBEGIN);
   }
 
+  #renderUserStatistic = () => {
+    if (!this.#userStatistic) {
+      this.#userStatistic = new UserStatisticView(this.#filmsModel.filmsData);
+      this.#userStatistic.init();
+      render(this.#filterContainer, this.#userStatistic, RenderPosition.BEFOREEND);
+    }
+  }
+
+  #destroyUserStatistic = () => {
+    if (this.#userStatistic) {
+      this.#userStatistic.destroyElement();
+      this.#userStatistic = null;
+    }
+  }
+
   #handleModelEvent = () => {
     this.init();
   }
@@ -64,10 +81,17 @@ class FilterMenuPresenter {
       return;
     }
 
-    const updateType = (filterType === FilterTypes.STATS) ? UpdateTypes.MAJOR : UpdateTypes.MINOR;
-    this.#filterModel.setFilter(updateType, filterType);
-  }
+    const isFilterTypeStats = filterType === FilterTypes.STATS;
+    const updateType = (isFilterTypeStats) ? UpdateTypes.MAJOR : UpdateTypes.MINOR;
 
+    this.#filterModel.setFilter(updateType, filterType);
+    if (isFilterTypeStats) {
+      this.#renderUserStatistic();
+    } else {
+      this.#destroyUserStatistic();
+    }
+
+  }
 }
 
 export { FilterMenuPresenter as default };

@@ -40,7 +40,9 @@ class FilmPresenter {
 
     this.#filmData = filmData;
     this.#filmCard = new FilmCardView(this.#filmData);
+
     this.#updateFilmHandlers();
+    this.#updatePopup();
 
     if (prevFilmCard) {
       replace(prevFilmCard, this.#filmCard);
@@ -59,13 +61,16 @@ class FilmPresenter {
     document.body.classList.remove('hide-overflow');
   }
 
-  createPopup = () => {
+  createPopup = (scrollPosition) => {
     this.#handleViewAction(this, UserActions.UPDATE_ACTIVE);
     this.#filmPopup = new PopupView(this.#handleViewAction);
     this.#filmPopup.init(this.#filmData);
     render(document.body, this.#filmPopup, RenderPosition.BEFOREEND);
+    this.#filmPopup.element.scrollTop = scrollPosition;
     document.body.classList.add('hide-overflow');
   }
+
+  getScrollPosition = ()=>(this.#filmPopup?.element.scrollTop || 0);
 
   #updatePopup = () => {
     if (this.#filmPopup) {
@@ -74,7 +79,6 @@ class FilmPresenter {
   }
 
   #filmActionCallback = (actionDetails) => {
-    this.#updatePopup();
     this.#handleViewAction(this.#filmData, UserActions.UPDATE_DATA, actionDetails);
   }
 
