@@ -13,4 +13,5 @@ node_modules/
 webpack.config.js
 
 # Собранные файлы (допишите самостоятельно)
-
+#public/bundle.js
+#public/bundle.js.map

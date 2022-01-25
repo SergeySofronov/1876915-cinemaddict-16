@@ -221,6 +221,8 @@ class PopupView extends SmartView {
     this.restoreHandlers();
   }
 
+  //updateCallback = (popupActionCallback) => (this.#popupActionCallback = popupActionCallback);
+
   restoreHandlers = () => {
     this.#updateValiditySelectors();
     this.createEventListener('.film-details__inner', 'keydown', this.#onCommentSubmit, EventStates.EVENT_DEFAULT);

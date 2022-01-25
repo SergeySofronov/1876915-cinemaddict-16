@@ -176,32 +176,58 @@ class FilmDeskPresenter {
 
     for (const [presenter, filmId] of this.#filmsPresenters.entries()) {
       if (filmId === activeFilmId) {
-        presenter.createPopup(this.#activeFilm.getScrollPosition());
-
+        //presenter.createPopup(this.#activeFilm.getScrollPosition());
+        presenter.createPopup(this.#activeFilm.popup);
+        this.#activeFilm = presenter;
         return;
       }
     }
   }
 
   #isCommentRatingChanged = (film) => {
-    if (!film) {
-      return false;
-    }
+    let result = false;
 
-    const type = this.#activeSortType;
-    this.#activeSortType = SortTypes.TOP_COMMENT;
-    const indexOld = this.#topCommentedFilms.findIndex((item) => (item.id === film.id));
-    const indexNew = this.filmsData.indexOf(film);
-    const result = !(((indexOld === -1) || (indexOld === indexNew)));
-    this.#activeSortType = type;
+    if (film) {
+      const indexOld = this.#topCommentedFilms.findIndex((item) => (item.id === film.id));
+      const indexTotal = this.#filmsModel.filmsData.findIndex((item) => (item.id === film.id));
+
+      if (indexOld === -1) {
+
+        const some = this.#topCommentedFilms[this.#topCommentedFilms.length];
+        const some1 = this.#topCommentedFilms[this.#topCommentedFilms.length].comment.length
+
+        if (film.comments.length > this.#topCommentedFilms[this.#topCommentedFilms.length].comment.length) {
+          result = true;
+        }
+      } else {
+        let some = [...this.#filmsModel.filmsData];
+        some = some.splice(indexTotal, 1, film);
+        some = getTopCommentedFilmsData(some);
+        const newTopCommentFilms = getTopCommentedFilmsData([...this.#filmsModel.filmsData].splice(indexOld, 1, film));
+        const indexNew = newTopCommentFilms.findIndex((item) => (item.id === film.id))
+        if ((indexNew === -1) || (indexOld !== indexNew)) {
+          result = true;
+        }
+      }
+    }
 
     return result;
   }
 
-  #handleViewAction = (update, actionType, actionDetails) => {
+  #isUpdatePatch = (update, actionDetails) => {
+
     const isFilterTypeStats = (this.#filterModel.filterType === FilterTypes.STATS);
-    const isFilterTypePatch = (this.#activeFilterType === FilterTypes.ALL) || (this.#activeFilterType === FilterTypes.STATS) || (this.#activeFilterType !== actionDetails);
-    const isUpdateTypePatch = isFilterTypePatch && (!this.#isCommentRatingChanged(update));
+    const isFilterTypeAll = (this.#filterModel.filterType === FilterTypes.ALL);
+    const isFilterAndActionSame = Boolean((actionDetails) && (this.#filterModel.filterType !== actionDetails));
+
+    return Boolean(isFilterTypeStats || ((isFilterTypeAll || isFilterAndActionSame) && (!this.#isCommentRatingChanged(update))));
+  }
+
+  #handleViewAction = (update, actionType, actionDetails) => {
+    // const isFilterTypeStats = (this.#filterModel.filterType === FilterTypes.STATS);
+    // const isFilterTypePatch = (this.#activeFilterType === FilterTypes.ALL) || (this.#activeFilterType === FilterTypes.STATS) || (this.#activeFilterType !== actionDetails);
+    // const isUpdateTypePatch = isFilterTypePatch && (!this.#isCommentRatingChanged(update));
+
 
     switch (actionType) {
       case (UserActions.UPDATE_ACTIVE):
@@ -209,7 +235,7 @@ class FilmDeskPresenter {
         break;
 
       case (UserActions.UPDATE_DATA):
-        if ((isUpdateTypePatch || isFilterTypeStats)) {
+        if (this.#isUpdatePatch(update, actionDetails)) {
           this.#filmsModel.update(UpdateTypes.PATCH, update);
         } else {
           this.#filmsModel.update(UpdateTypes.MINOR, update);
