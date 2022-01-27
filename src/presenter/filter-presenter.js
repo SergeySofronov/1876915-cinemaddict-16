@@ -29,15 +29,13 @@ class FilterMenuPresenter {
     this.#filterModel = filterModel;
     this.#filmsModel = filmsModel;
 
-    //todo: проверить, что не нужно
-    //this.#filterModel.addObserver(this.#onFilterMenuClick);
     this.#filmsModel.addObserver(this.#handleModelEvent);
   }
 
   #getStatistic = () => ({
     watchlist: filterFunctions[FilterTypes.WATCHLIST](this.#filmsModel.filmsData).length,
     watched: filterFunctions[FilterTypes.WATCHED](this.#filmsModel.filmsData).length,
-    favorite: filterFunctions[FilterTypes.FAVORITE](this.#filmsModel.filmsData).length,
+    favorite: filterFunctions[FilterTypes.FAVORITE](this.#filmsModel.filmsData).length
   });
 
 

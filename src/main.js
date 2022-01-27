@@ -10,7 +10,7 @@ import FilterModel from './model/filter-model.js';
 
 const filmsData = getRandomFilmData();
 const filmsStatistic = getFilmsStatistic(filmsData);
-const userRank = getUserRank();
+const userRank = getUserRank(filmsStatistic.watched);
 
 const sectionHeader = document.querySelector('.header');
 const sectionMain = document.querySelector('.main');

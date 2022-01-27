@@ -50,7 +50,14 @@ const getNonRepeatUintArray = (lowerBorder, upperBorder, arrayLength) => {
 
 const getRandomPartFromArray = (inputArray) => {
   if (Array.isArray(inputArray)) {
-    return inputArray.slice(0, getRandomInteger(1, inputArray.length));
+    const upper = getRandomInteger(1, inputArray.length);
+    const lower = getRandomInteger(0, inputArray.length - 1);
+
+    if (upper > lower) {
+      return inputArray.slice(lower, upper);
+    } else {
+      return inputArray.slice(upper, lower);
+    }
   }
 
   return new Error('getRandomPartFromArray: inputArray is not an array');
@@ -76,6 +83,12 @@ const getShortFilmDescription = (filmDescription) => {
   return filmDescription;
 };
 
+const getFilmDuration = (durationInMinutes) => {
+  const hours = dayjs.duration(durationInMinutes, 'minutes').$d.hours;
+  const minutes = dayjs.duration(durationInMinutes, 'minutes').$d.minutes;
+  return `${hours ? hours : ''}${hours?'h':''} ${minutes ? minutes : '00'}m`;
+};
+
 const changeDateFormat = (date, format = DATE_FORMAT) => (date ? dayjs(date).format(format) : '');
 
 export {
@@ -86,5 +99,6 @@ export {
   getRandomDate,
   getRandomFloatStrict,
   getShortFilmDescription,
-  changeDateFormat
+  changeDateFormat,
+  getFilmDuration
 };

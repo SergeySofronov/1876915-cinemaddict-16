@@ -34,7 +34,7 @@ class FilmPresenter {
     return this.#filmData?.id;
   }
 
-  get popup(){
+  get popup() {
     return this.#filmPopup;
   }
 
@@ -67,20 +67,17 @@ class FilmPresenter {
   }
 
   createPopup = (currentPopup) => {
-    if(currentPopup){
+    if (currentPopup) {
       this.#filmPopup = currentPopup;
-      //this.#filmPopup.updateCallback(this.#handleViewAction);
       return;
     }
-    this.#handleViewAction(this, UserActions.UPDATE_ACTIVE);
+
     this.#filmPopup = new PopupView(this.#handleViewAction);
     this.#filmPopup.init(this.#filmData);
+    this.#handleViewAction(this, UserActions.UPDATE_ACTIVE);
     render(document.body, this.#filmPopup, RenderPosition.BEFOREEND);
-    //this.#filmPopup.element.scrollTop = scrollPosition;
     document.body.classList.add('hide-overflow');
   }
-
-  //getScrollPosition = () => (this.#filmPopup?.element.scrollTop || 0);
 
   #updatePopup = () => {
     if (this.#filmPopup) {

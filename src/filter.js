@@ -1,7 +1,6 @@
 import { DateFormatStyle, FilterTypes, UserScores, UserRanks } from './const';
 import { changeDateFormat } from './mock/utils';
 
-//todo:remove
 const filmsStatistic = {
   watchlist: 0,
   watched: 0,
@@ -9,23 +8,22 @@ const filmsStatistic = {
   total: 0
 };
 
-const getUserRank = () => {
-  if (filmsStatistic.watched >= UserScores.BUFF) {
+const getUserRank = (watchedFilmsQuantity) => {
+  if (watchedFilmsQuantity >= UserScores.BUFF) {
     return UserRanks.BUFF;
   }
 
-  if (filmsStatistic.watched >= UserScores.FAN) {
+  if (watchedFilmsQuantity >= UserScores.FAN) {
     return UserRanks.FAN;
   }
 
-  if (filmsStatistic.watched >= UserScores.NOVICE) {
+  if (watchedFilmsQuantity >= UserScores.NOVICE) {
     return UserRanks.NOVICE;
   }
 
-  return null;
+  return '';
 };
 
-//todo:remove
 const getFilmsStatistic = (films) => {
   if (Array.isArray(films)) {
     filmsStatistic.total = films.length;
@@ -38,6 +36,12 @@ const getFilmsStatistic = (films) => {
   }
 
   return filmsStatistic;
+};
+
+const getWatchedFilmsData = (films) => {
+  if (Array.isArray(films)) {
+    return films.filter((film) => Boolean(film.userDetails?.watched));
+  }
 };
 
 const getTopRatedFilmsData = (films) => {
@@ -87,5 +91,5 @@ const filterFunctions = {
   [FilterTypes.STATS]: (films) => films.filter((film) => Boolean(film.id))
 };
 
-export { getFilmsStatistic, getUserRank, getTopCommentedFilmsData, getTopRatedFilmsData, getFilmsDataByDate, filterFunctions };
+export { getFilmsStatistic, getUserRank, getWatchedFilmsData, getTopCommentedFilmsData, getTopRatedFilmsData, getFilmsDataByDate, filterFunctions };
 

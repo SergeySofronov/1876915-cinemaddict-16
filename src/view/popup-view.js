@@ -1,6 +1,9 @@
 import he from 'he';
 import { nanoid } from 'nanoid';
+import { getFilmDuration } from '../mock/utils';
 import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+dayjs.extend(relativeTime);
 import SmartView from './smart-view';
 import { KeyCode, UserActions, EventStates, FilterTypes } from '../const.js';
 
@@ -68,7 +71,7 @@ const getLoadedCommentTemplate = (comment = {}) => {
         <p class="film-details__comment-text">${content}</p>
         <p class="film-details__comment-info">
           <span class="film-details__comment-author">${author}</span>
-          <span class="film-details__comment-day">${date}</span>
+          <span class="film-details__comment-day">${dayjs(date).fromNow()}</span>
           <button class="film-details__comment-delete" data-button-id = ${id}>Delete</button>
         </p>
       </div>
@@ -168,7 +171,7 @@ const getPopupTemplate = (data) => {
                 ${getTableRow(TableTerms.WRITERS, writers)}
                 ${getTableRow(TableTerms.ACTORS, actors)}
                 ${getTableRow(TableTerms.DATE, release.date || '')}
-                ${getTableRow(TableTerms.TIME, runtime)}
+                ${getTableRow(TableTerms.TIME, getFilmDuration(runtime))}
                 ${getTableRow(TableTerms.COUNTRY, release.country || '')}
                 ${getTableRow(TableTerms.GENRES, getCardGenres(genre))}
                 </table>
@@ -220,8 +223,6 @@ class PopupView extends SmartView {
     this._data = SmartView.parseData(filmData);
     this.restoreHandlers();
   }
-
-  //updateCallback = (popupActionCallback) => (this.#popupActionCallback = popupActionCallback);
 
   restoreHandlers = () => {
     this.#updateValiditySelectors();
@@ -307,7 +308,7 @@ class PopupView extends SmartView {
       if ((!this._data.userComment) || (!this._data.userEmoji)) {
         return;
       }
-      //todo: переделать формат поля date, поле author
+
       const userComment = {
         id: nanoid(),
         author: 'User',

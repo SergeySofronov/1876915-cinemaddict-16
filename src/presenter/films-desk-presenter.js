@@ -176,7 +176,6 @@ class FilmDeskPresenter {
 
     for (const [presenter, filmId] of this.#filmsPresenters.entries()) {
       if (filmId === activeFilmId) {
-        //presenter.createPopup(this.#activeFilm.getScrollPosition());
         presenter.createPopup(this.#activeFilm.popup);
         this.#activeFilm = presenter;
         return;
@@ -185,37 +184,29 @@ class FilmDeskPresenter {
   }
 
   #isCommentRatingChanged = (film) => {
-    let result = false;
-
     if (film) {
       const indexOld = this.#topCommentedFilms.findIndex((item) => (item.id === film.id));
-      const indexTotal = this.#filmsModel.filmsData.findIndex((item) => (item.id === film.id));
-
       if (indexOld === -1) {
+        if (film.comments.length > this.#topCommentedFilms[this.#topCommentedFilms.length - 1].comments.length) {
 
-        const some = this.#topCommentedFilms[this.#topCommentedFilms.length];
-        const some1 = this.#topCommentedFilms[this.#topCommentedFilms.length].comment.length
-
-        if (film.comments.length > this.#topCommentedFilms[this.#topCommentedFilms.length].comment.length) {
-          result = true;
+          return true;
         }
       } else {
-        let some = [...this.#filmsModel.filmsData];
-        some = some.splice(indexTotal, 1, film);
-        some = getTopCommentedFilmsData(some);
-        const newTopCommentFilms = getTopCommentedFilmsData([...this.#filmsModel.filmsData].splice(indexOld, 1, film));
-        const indexNew = newTopCommentFilms.findIndex((item) => (item.id === film.id))
+        const indexTotal = this.#filmsModel.filmsData.findIndex((item) => (item.id === film.id));
+        const newTopCommentFilms = [...this.#filmsModel.filmsData];
+        newTopCommentFilms.splice(indexTotal, 1, film);
+        const indexNew = getTopCommentedFilmsData(newTopCommentFilms).findIndex((item) => (item.id === film.id));
         if ((indexNew === -1) || (indexOld !== indexNew)) {
-          result = true;
+
+          return true;
         }
       }
     }
 
-    return result;
+    return false;
   }
 
   #isUpdatePatch = (update, actionDetails) => {
-
     const isFilterTypeStats = (this.#filterModel.filterType === FilterTypes.STATS);
     const isFilterTypeAll = (this.#filterModel.filterType === FilterTypes.ALL);
     const isFilterAndActionSame = Boolean((actionDetails) && (this.#filterModel.filterType !== actionDetails));
@@ -224,10 +215,6 @@ class FilmDeskPresenter {
   }
 
   #handleViewAction = (update, actionType, actionDetails) => {
-    // const isFilterTypeStats = (this.#filterModel.filterType === FilterTypes.STATS);
-    // const isFilterTypePatch = (this.#activeFilterType === FilterTypes.ALL) || (this.#activeFilterType === FilterTypes.STATS) || (this.#activeFilterType !== actionDetails);
-    // const isUpdateTypePatch = isFilterTypePatch && (!this.#isCommentRatingChanged(update));
-
 
     switch (actionType) {
       case (UserActions.UPDATE_ACTIVE):
@@ -348,6 +335,10 @@ class FilmDeskPresenter {
       this.#renderEmptyTitle();
     }
 
+    if(this.#shownFilmsQuantity % FILM_SHOW_PER_STEP){
+      this.#shownFilmsQuantity += this.filmsData.length - this.#shownFilmsQuantity;
+    }
+
     this.#renderFilmCards(this.#filmsMainCardList, this.filmsData.slice(0, this.#shownFilmsQuantity));
     this.#renderShowMoreButton();
   }
@@ -368,10 +359,6 @@ class FilmDeskPresenter {
       this.#showMoreButton = null;
       this.#filmsDesk.destroyElement();
       this.#filmsDesk = null;
-    }
-    if (this.#filmsStats) {
-      //todo: добавить удаление stats
-      //todo: или отрисовать stats с помощью filter-presenter!
     }
   }
 
