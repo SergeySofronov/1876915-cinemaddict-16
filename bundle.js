@@ -3465,7 +3465,7 @@ class UserStatisticView extends _smart_view_js__WEBPACK_IMPORTED_MODULE_2__["def
     });
 
     _defineProperty(this, "init", () => {
-      _classPrivateFieldSet(this, _userRank, (0,_filter_js__WEBPACK_IMPORTED_MODULE_3__.getUserRank)(this._data));
+      _classPrivateFieldSet(this, _userRank, (0,_filter_js__WEBPACK_IMPORTED_MODULE_3__.getUserRank)(this._data.length));
 
       _classPrivateFieldGet(this, _updateFilmsStatistic).call(this);
 
