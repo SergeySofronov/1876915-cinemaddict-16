@@ -56,9 +56,9 @@ class FilterMenuPresenter {
   }
 
   #renderUserStatistic = () => {
-    if (!this.#userStatistic) {
-      this.#userStatistic = new UserStatisticView(this.#filmsModel.filmsData);
-      this.#userStatistic.init();
+    if(!this.#userStatistic){
+      this.#userStatistic = new UserStatisticView();
+      this.#userStatistic.init(this.#filmsModel.filmsData);
       render(this.#filterContainer, this.#userStatistic, RenderPosition.BEFOREEND);
     }
   }
@@ -72,6 +72,9 @@ class FilterMenuPresenter {
 
   #handleModelEvent = () => {
     this.init();
+    if (this.#filterModel.filterType === FilterTypes.STATS) {
+      this.#userStatistic.init(this.#filmsModel.filmsData);
+    }
   }
 
   #onFilterMenuClick = (filterType) => {

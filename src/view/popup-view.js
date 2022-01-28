@@ -289,7 +289,7 @@ class PopupView extends SmartView {
   }
 
   #onWatchedButtonClick = () => {
-    this.#defaultPopupUpdate({ watched: !this._data.watched }, FilterTypes.WATCHED);
+    this.#defaultPopupUpdate({ watched: !this._data.watched, watchingDate: this._data.watched ? '' : dayjs() }, FilterTypes.WATCHED);
   }
 
   #onFavoriteButtonClick = () => {

@@ -4,6 +4,7 @@ import SmartView from '../view/smart-view.js';
 import AbstractView from '../view/abstract-view.js';
 import FilmCardView from '../view/film-card-view';
 import PopupView from '../view/popup-view';
+import dayjs from 'dayjs';
 
 class FilmPresenter {
   #filmsList = null;
@@ -103,6 +104,7 @@ class FilmPresenter {
 
   #onWatchedClick = () => {
     this.#filmData.userDetails.watched = !this.#filmData.userDetails.watched;
+    this.#filmData.userDetails.watchingDate = this.#filmData.userDetails.watched ? '' : dayjs();
     this.#filmActionCallback(FilterTypes.WATCHED);
   }
 

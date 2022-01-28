@@ -4,7 +4,9 @@ import SmartView from './smart-view.js';
 import { getUserRank, getWatchedFilmsData } from '../filter.js';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
+import isBetween from 'dayjs/plugin/isBetween';
 dayjs.extend(duration);
+dayjs.extend(isBetween);
 
 const BAR_HEIGHT = 50;
 
@@ -16,7 +18,7 @@ const FilterTypes = {
   YEAR: 'year'
 };
 
-const MenuNames = {
+const menuNames = {
   [FilterTypes.ALL_TIME]: 'All time',
   [FilterTypes.TODAY]: 'Today',
   [FilterTypes.WEEK]: 'Week',
@@ -24,9 +26,17 @@ const MenuNames = {
   [FilterTypes.YEAR]: 'Year'
 };
 
+const dateDiffCalc = {
+  [FilterTypes.ALL_TIME]: () => dayjs().subtract(1000, 'year'),
+  [FilterTypes.TODAY]: () => dayjs().subtract(1, 'day'),
+  [FilterTypes.WEEK]: () => dayjs().subtract(1, 'week'),
+  [FilterTypes.MONTH]: () => dayjs().subtract(1, 'month'),
+  [FilterTypes.YEAR]: () => dayjs().subtract(1, 'year')
+};
+
 const getStatisticMenuItem = (filterType, activeFilterType) => (
   `<input type="radio" class="statistic__filters-input visually-hidden" name="statistic-filter" id="statistic-${filterType}" value="${filterType}" ${activeFilterType === filterType ? 'checked' : ''}>
-  <label for="statistic-${filterType}" class="statistic__filters-label">${MenuNames[filterType]}</label>`
+  <label for="statistic-${filterType}" class="statistic__filters-label">${menuNames[filterType]}</label>`
 );
 
 const getStatisticMenu = (activeFilterType) => {
@@ -41,8 +51,8 @@ const getStatsTemplate = (data, activeFilterType, genresAndQuantity, userRank, t
 
   const topGenre = [...genresAndQuantity.keys()][0];
   const chartRows = genresAndQuantity.size;
-  const hours = dayjs.duration(totalDuration,'minutes').$d.hours;
-  const minutes = dayjs.duration(totalDuration,'minutes').$d.minutes;
+  const hours = dayjs.duration(totalDuration, 'minutes').$d.hours;
+  const minutes = dayjs.duration(totalDuration, 'minutes').$d.minutes;
 
   return (
     `<section class="statistic">
@@ -68,7 +78,7 @@ const getStatsTemplate = (data, activeFilterType, genresAndQuantity, userRank, t
         </li>
         <li class="statistic__text-item">
           <h4 class="statistic__item-title">Top genre</h4>
-          <p class="statistic__item-text">${topGenre}</p>
+          <p class="statistic__item-text">${topGenre?topGenre:''}</p>
         </li>
       </ul>
       <div class="statistic__chart-wrap">
@@ -79,7 +89,6 @@ const getStatsTemplate = (data, activeFilterType, genresAndQuantity, userRank, t
 };
 
 class UserStatisticView extends SmartView {
-  #chart = null;
   #userRank = '';
   #totalDuration = '';
   #genres = new Set;
@@ -87,29 +96,33 @@ class UserStatisticView extends SmartView {
   #activeFilterType = FilterTypes.ALL_TIME;
   #statisticCtx = null;
 
-  constructor(filmsData) {
-    super();
-    this._data = getWatchedFilmsData(filmsData) || [];
-  }
-
   get template() {
-    return getStatsTemplate(this._data, this.#activeFilterType, this.#genresAndQuantity, this.#userRank, this.#totalDuration);
+    return getStatsTemplate(this._data.filteredFilmsData, this.#activeFilterType, this.#genresAndQuantity, this.#userRank, this.#totalDuration);
   }
 
-  init = () => {
-    this.#userRank = getUserRank(this._data.length);
-
+  init = (filmsData) => {
+    if(filmsData){
+      this._data = { filmsData: getWatchedFilmsData(filmsData) || [], filteredFilmsData: [], };
+      this.#userRank = getUserRank(this._data.filmsData.length);
+    }
+    this._data.filteredFilmsData = this.#getFilteredFilmsData();
     this.#updateFilmsStatistic();
-    this.#createChart(this._data);
-    this.createEventListener('.statistic__filters', 'change', this.#onFiltersChange);
+    this.updateElement();
+    this.#createChart();
+    this.restoreHandlers();
   }
+
+  restoreHandlers = () => this.createEventListener('.statistic__filters', 'change', this.#onFiltersChange);
+
 
   #updateFilmsGenres = (genres) => genres.forEach((genre) => this.#genres.add(genre));
+
+  #getFilteredFilmsData = () => this._data.filmsData.filter((film) => (dayjs(film.userDetails.watchingDate).isBetween(dateDiffCalc[this.#activeFilterType](), dayjs())));
 
   #getFilmsQuantityByGenre = () => {
     this.#genres.forEach((genre) => {
       let quantity = 0;
-      this._data.forEach((film) => {
+      this._data.filteredFilmsData.forEach((film) => {
         const filmGenres = film.filmInfo?.genre;
         if (Array.isArray(filmGenres) && filmGenres.includes(genre)) {
           quantity++;
@@ -121,18 +134,20 @@ class UserStatisticView extends SmartView {
   }
 
   #updateFilmsStatistic = () => {
-    this._data.forEach((film) => {
+    this.#genres = new Set;
+    this.#genresAndQuantity = new Map;
+    this._data.filteredFilmsData.forEach((film) => {
       this.#updateFilmsGenres(film.filmInfo?.genre || []);
     });
     this.#getFilmsQuantityByGenre();
-    this.#totalDuration = this._data.reduce((sum, film) => (sum += parseInt(film.filmInfo?.runtime, 10)), 0);
+    this.#totalDuration = this._data.filteredFilmsData.reduce((sum, film) => (sum += parseInt(film.filmInfo?.runtime, 10)), 0);
   }
 
   #createChart = () => {
 
     this.#statisticCtx = this.element.querySelector('.statistic__chart');
 
-    this.#chart = new Chart(this.#statisticCtx, {
+    new Chart(this.#statisticCtx, {
       plugins: [ChartDataLabels],
       type: 'horizontalBar',
       data: {
@@ -191,8 +206,9 @@ class UserStatisticView extends SmartView {
     });
   }
 
-  #onFiltersChange = (evt)=>{
+  #onFiltersChange = (evt) => {
     this.#activeFilterType = evt.target.value;
+    this.init();
   }
 
 }

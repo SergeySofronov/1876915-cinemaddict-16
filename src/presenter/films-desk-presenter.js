@@ -42,6 +42,7 @@ class FilmDeskPresenter {
   #topCommentedFilms = [];
 
   #activeFilm = null;
+  #isActiveFilmChanging = false;
   #activeSortType = SortTypes.DEFAULT;
   #activeFilterType = FilterTypes.ALL;
 
@@ -167,22 +168,6 @@ class FilmDeskPresenter {
     this.#activeFilm = film;
   }
 
-  #changeActiveFilm = () => {
-    const activeFilmId = this.#getActiveFilmId();
-    if (!activeFilmId) {
-
-      return;
-    }
-
-    for (const [presenter, filmId] of this.#filmsPresenters.entries()) {
-      if (filmId === activeFilmId) {
-        presenter.createPopup(this.#activeFilm.popup);
-        this.#activeFilm = presenter;
-        return;
-      }
-    }
-  }
-
   #isCommentRatingChanged = (film) => {
     if (film) {
       const indexOld = this.#topCommentedFilms.findIndex((item) => (item.id === film.id));
@@ -243,6 +228,7 @@ class FilmDeskPresenter {
         if (this.#filmsDesk) {
           this.#resetCards(this.#filterModel.filterType);
         } else {
+          this.#setActiveFilmChangingFlag();
           this.init();
         }
         break;
@@ -274,12 +260,32 @@ class FilmDeskPresenter {
     return null;
   }
 
+  #setActiveFilmChangingFlag = () => {
+    const activeFilmId = this.#getActiveFilmId();
+    if (activeFilmId) {
+      if (this.#filmsModel.filmsData.some((film) => film.id === activeFilmId)) {
+        this.#isActiveFilmChanging = true;
+        return;
+      }
+    }
+
+    this.#isActiveFilmChanging = false;
+  }
+
+  #changeActiveFilm = (filmId, presenter) => {
+    if ((this.#isActiveFilmChanging) && (filmId === this.#getActiveFilmId())) {
+      presenter.createPopup(this.#activeFilm.popup);
+      this.#activeFilm = presenter;
+    }
+  }
+
   #renderFilmCards = (filmsList, filmsData) => {
     filmsData.forEach((film) => {
       if (film.id) {
         const filmPresenter = new FilmPresenter(filmsList, this.#handleViewAction, this.#getActiveFilmId);
         filmPresenter.init(film);
         this.#filmsPresenters.set(filmPresenter, film.id);
+        this.#changeActiveFilm(film.id, filmPresenter);
       }
     });
   }
@@ -335,7 +341,7 @@ class FilmDeskPresenter {
       this.#renderEmptyTitle();
     }
 
-    if(this.#shownFilmsQuantity % FILM_SHOW_PER_STEP){
+    if (this.#shownFilmsQuantity % FILM_SHOW_PER_STEP) {
       this.#shownFilmsQuantity += this.filmsData.length - this.#shownFilmsQuantity;
     }
 
@@ -371,8 +377,8 @@ class FilmDeskPresenter {
     }
     this.#destroyCards();
     this.#updateExtraFilmsData();
+    this.#setActiveFilmChangingFlag();
     this.#renderCards();
-    this.#changeActiveFilm();
   }
 
   #onSortMenuClick = (evt) => {

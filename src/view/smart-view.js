@@ -32,7 +32,8 @@ class SmartView extends AbstractView {
   }
 
   static parseData = (filmData) => ({
-    ...filmData, changedComments: [...filmData.comments],
+    ...filmData,
+    changedComments: [...filmData.comments],
     watchlist: filmData.userDetails.watchlist,
     watched: filmData.userDetails.watched,
     favorite: filmData.userDetails.favorite

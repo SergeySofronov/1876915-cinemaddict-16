@@ -106,7 +106,7 @@ const prepareFilmData = () => {
         watchlist: getRandomBoolean(),
         watched: getRandomBoolean(),
         favorite: getRandomBoolean(),
-        watchingDate: getRandomDate(dayjs(), DATE_GAP_MAX, DateFormatStyle.DEFAULT)
+        watchingDate: getRandomDate(dayjs().subtract(2, 'year'), 1, DateFormatStyle.DEFAULT)
       }
     };
   }

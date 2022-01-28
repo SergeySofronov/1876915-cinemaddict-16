@@ -40,7 +40,7 @@ const getFilmsStatistic = (films) => {
 
 const getWatchedFilmsData = (films) => {
   if (Array.isArray(films)) {
-    return films.filter((film) => Boolean(film.userDetails?.watched));
+    return films.filter((film) => Boolean((film.userDetails?.watched) && (film.userDetails?.watchingDate)));
   }
 };
 
