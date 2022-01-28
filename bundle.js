@@ -136,9 +136,9 @@ const getFilmsStatistic = films => {
 const getWatchedFilmsData = films => {
   if (Array.isArray(films)) {
     return films.filter(film => {
-      var _film$userDetails;
+      var _film$userDetails, _film$userDetails2;
 
-      return Boolean((_film$userDetails = film.userDetails) === null || _film$userDetails === void 0 ? void 0 : _film$userDetails.watched);
+      return Boolean(((_film$userDetails = film.userDetails) === null || _film$userDetails === void 0 ? void 0 : _film$userDetails.watched) && ((_film$userDetails2 = film.userDetails) === null || _film$userDetails2 === void 0 ? void 0 : _film$userDetails2.watchingDate));
     });
   }
 };
@@ -304,7 +304,7 @@ const prepareFilmData = () => {
         watchlist: (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.getRandomBoolean)(),
         watched: (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.getRandomBoolean)(),
         favorite: (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.getRandomBoolean)(),
-        watchingDate: (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.getRandomDate)(dayjs__WEBPACK_IMPORTED_MODULE_2___default()(), DATE_GAP_MAX, _const_js__WEBPACK_IMPORTED_MODULE_1__.DateFormatStyle.DEFAULT)
+        watchingDate: (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.getRandomDate)(dayjs__WEBPACK_IMPORTED_MODULE_2___default()().subtract(2, 'year'), 1, _const_js__WEBPACK_IMPORTED_MODULE_1__.DateFormatStyle.DEFAULT)
       }
     };
   }
@@ -623,6 +623,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _view_abstract_view_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../view/abstract-view.js */ "./src/view/abstract-view.js");
 /* harmony import */ var _view_film_card_view__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../view/film-card-view */ "./src/view/film-card-view.js");
 /* harmony import */ var _view_popup_view__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../view/popup-view */ "./src/view/popup-view.js");
+/* harmony import */ var dayjs__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! dayjs */ "./node_modules/dayjs/dayjs.min.js");
+/* harmony import */ var dayjs__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(dayjs__WEBPACK_IMPORTED_MODULE_6__);
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _classPrivateFieldInitSpec(obj, privateMap, value) { _checkPrivateRedeclaration(obj, privateMap); privateMap.set(obj, value); }
@@ -638,6 +640,7 @@ function _classPrivateFieldSet(receiver, privateMap, value) { var descriptor = _
 function _classExtractFieldDescriptor(receiver, privateMap, action) { if (!privateMap.has(receiver)) { throw new TypeError("attempted to " + action + " private field on non-instance"); } return privateMap.get(receiver); }
 
 function _classApplyDescriptorSet(receiver, descriptor, value) { if (descriptor.set) { descriptor.set.call(receiver, value); } else { if (!descriptor.writable) { throw new TypeError("attempted to set read only private field"); } descriptor.value = value; } }
+
 
 
 
@@ -798,6 +801,7 @@ class FilmPresenter {
       writable: true,
       value: () => {
         _classPrivateFieldGet(this, _filmData).userDetails.watched = !_classPrivateFieldGet(this, _filmData).userDetails.watched;
+        _classPrivateFieldGet(this, _filmData).userDetails.watchingDate = _classPrivateFieldGet(this, _filmData).userDetails.watched ? '' : dayjs__WEBPACK_IMPORTED_MODULE_6___default()();
 
         _classPrivateFieldGet(this, _filmActionCallback).call(this, _const_js__WEBPACK_IMPORTED_MODULE_1__.FilterTypes.WATCHED);
       }
@@ -957,6 +961,8 @@ var _topCommentedFilms = /*#__PURE__*/new WeakMap();
 
 var _activeFilm = /*#__PURE__*/new WeakMap();
 
+var _isActiveFilmChanging = /*#__PURE__*/new WeakMap();
+
 var _activeSortType = /*#__PURE__*/new WeakMap();
 
 var _activeFilterType = /*#__PURE__*/new WeakMap();
@@ -979,8 +985,6 @@ var _getActiveFilmId = /*#__PURE__*/new WeakMap();
 
 var _setActiveFilm = /*#__PURE__*/new WeakMap();
 
-var _changeActiveFilm = /*#__PURE__*/new WeakMap();
-
 var _isCommentRatingChanged = /*#__PURE__*/new WeakMap();
 
 var _isUpdatePatch = /*#__PURE__*/new WeakMap();
@@ -992,6 +996,10 @@ var _handleModelEvent = /*#__PURE__*/new WeakMap();
 var _updateFilmsPresenters = /*#__PURE__*/new WeakMap();
 
 var _getFilmsToShow = /*#__PURE__*/new WeakMap();
+
+var _setActiveFilmChangingFlag = /*#__PURE__*/new WeakMap();
+
+var _changeActiveFilm = /*#__PURE__*/new WeakMap();
 
 var _renderFilmCards = /*#__PURE__*/new WeakMap();
 
@@ -1122,6 +1130,11 @@ class FilmDeskPresenter {
     _classPrivateFieldInitSpec(this, _activeFilm, {
       writable: true,
       value: null
+    });
+
+    _classPrivateFieldInitSpec(this, _isActiveFilmChanging, {
+      writable: true,
+      value: false
     });
 
     _classPrivateFieldInitSpec(this, _activeSortType, {
@@ -1259,27 +1272,6 @@ class FilmDeskPresenter {
       }
     });
 
-    _classPrivateFieldInitSpec(this, _changeActiveFilm, {
-      writable: true,
-      value: () => {
-        const activeFilmId = _classPrivateFieldGet(this, _getActiveFilmId).call(this);
-
-        if (!activeFilmId) {
-          return;
-        }
-
-        for (const [presenter, filmId] of _classPrivateFieldGet(this, _filmsPresenters).entries()) {
-          if (filmId === activeFilmId) {
-            presenter.createPopup(_classPrivateFieldGet(this, _activeFilm).popup);
-
-            _classPrivateFieldSet(this, _activeFilm, presenter);
-
-            return;
-          }
-        }
-      }
-    });
-
     _classPrivateFieldInitSpec(this, _isCommentRatingChanged, {
       writable: true,
       value: film => {
@@ -1354,6 +1346,8 @@ class FilmDeskPresenter {
             if (_classPrivateFieldGet(this, _filmsDesk)) {
               _classPrivateFieldGet(this, _resetCards).call(this, _classPrivateFieldGet(this, _filterModel).filterType);
             } else {
+              _classPrivateFieldGet(this, _setActiveFilmChangingFlag).call(this);
+
               this.init();
             }
 
@@ -1396,6 +1390,34 @@ class FilmDeskPresenter {
       }
     });
 
+    _classPrivateFieldInitSpec(this, _setActiveFilmChangingFlag, {
+      writable: true,
+      value: () => {
+        const activeFilmId = _classPrivateFieldGet(this, _getActiveFilmId).call(this);
+
+        if (activeFilmId) {
+          if (_classPrivateFieldGet(this, _filmsModel).filmsData.some(film => film.id === activeFilmId)) {
+            _classPrivateFieldSet(this, _isActiveFilmChanging, true);
+
+            return;
+          }
+        }
+
+        _classPrivateFieldSet(this, _isActiveFilmChanging, false);
+      }
+    });
+
+    _classPrivateFieldInitSpec(this, _changeActiveFilm, {
+      writable: true,
+      value: (filmId, presenter) => {
+        if (_classPrivateFieldGet(this, _isActiveFilmChanging) && filmId === _classPrivateFieldGet(this, _getActiveFilmId).call(this)) {
+          presenter.createPopup(_classPrivateFieldGet(this, _activeFilm).popup);
+
+          _classPrivateFieldSet(this, _activeFilm, presenter);
+        }
+      }
+    });
+
     _classPrivateFieldInitSpec(this, _renderFilmCards, {
       writable: true,
       value: (filmsList, filmsData) => {
@@ -1405,6 +1427,8 @@ class FilmDeskPresenter {
             filmPresenter.init(film);
 
             _classPrivateFieldGet(this, _filmsPresenters).set(filmPresenter, film.id);
+
+            _classPrivateFieldGet(this, _changeActiveFilm).call(this, film.id, filmPresenter);
           }
         });
       }
@@ -1545,9 +1569,9 @@ class FilmDeskPresenter {
 
         _classPrivateFieldGet(this, _updateExtraFilmsData).call(this);
 
-        _classPrivateFieldGet(this, _renderCards).call(this);
+        _classPrivateFieldGet(this, _setActiveFilmChangingFlag).call(this);
 
-        _classPrivateFieldGet(this, _changeActiveFilm).call(this);
+        _classPrivateFieldGet(this, _renderCards).call(this);
       }
     });
 
@@ -1756,9 +1780,9 @@ class FilterMenuPresenter {
       writable: true,
       value: () => {
         if (!_classPrivateFieldGet(this, _userStatistic)) {
-          _classPrivateFieldSet(this, _userStatistic, new _view_user_statistic_view_js__WEBPACK_IMPORTED_MODULE_3__["default"](_classPrivateFieldGet(this, _filmsModel).filmsData));
+          _classPrivateFieldSet(this, _userStatistic, new _view_user_statistic_view_js__WEBPACK_IMPORTED_MODULE_3__["default"]());
 
-          _classPrivateFieldGet(this, _userStatistic).init();
+          _classPrivateFieldGet(this, _userStatistic).init(_classPrivateFieldGet(this, _filmsModel).filmsData);
 
           (0,_render_js__WEBPACK_IMPORTED_MODULE_4__.render)(_classPrivateFieldGet(this, _filterContainer), _classPrivateFieldGet(this, _userStatistic), _render_js__WEBPACK_IMPORTED_MODULE_4__.RenderPosition.BEFOREEND);
         }
@@ -1780,6 +1804,10 @@ class FilterMenuPresenter {
       writable: true,
       value: () => {
         this.init();
+
+        if (_classPrivateFieldGet(this, _filterModel).filterType === _const_js__WEBPACK_IMPORTED_MODULE_6__.FilterTypes.STATS) {
+          _classPrivateFieldGet(this, _userStatistic).init(_classPrivateFieldGet(this, _filmsModel).filmsData);
+        }
       }
     });
 
@@ -2928,7 +2956,8 @@ class PopupView extends _smart_view__WEBPACK_IMPORTED_MODULE_4__["default"] {
       writable: true,
       value: () => {
         _classPrivateFieldGet(this, _defaultPopupUpdate).call(this, {
-          watched: !this._data.watched
+          watched: !this._data.watched,
+          watchingDate: this._data.watched ? '' : dayjs__WEBPACK_IMPORTED_MODULE_2___default()()
         }, _const_js__WEBPACK_IMPORTED_MODULE_5__.FilterTypes.WATCHED);
       }
     });
@@ -3312,6 +3341,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var dayjs__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(dayjs__WEBPACK_IMPORTED_MODULE_4__);
 /* harmony import */ var dayjs_plugin_duration__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! dayjs/plugin/duration */ "./node_modules/dayjs/plugin/duration.js");
 /* harmony import */ var dayjs_plugin_duration__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(dayjs_plugin_duration__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var dayjs_plugin_isBetween__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! dayjs/plugin/isBetween */ "./node_modules/dayjs/plugin/isBetween.js");
+/* harmony import */ var dayjs_plugin_isBetween__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(dayjs_plugin_isBetween__WEBPACK_IMPORTED_MODULE_6__);
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _classPrivateFieldInitSpec(obj, privateMap, value) { _checkPrivateRedeclaration(obj, privateMap); privateMap.set(obj, value); }
@@ -3334,7 +3365,9 @@ function _classApplyDescriptorGet(receiver, descriptor) { if (descriptor.get) { 
 
 
 
+
 dayjs__WEBPACK_IMPORTED_MODULE_4___default().extend((dayjs_plugin_duration__WEBPACK_IMPORTED_MODULE_5___default()));
+dayjs__WEBPACK_IMPORTED_MODULE_4___default().extend((dayjs_plugin_isBetween__WEBPACK_IMPORTED_MODULE_6___default()));
 const BAR_HEIGHT = 50;
 const FilterTypes = {
   ALL_TIME: 'all-time',
@@ -3343,16 +3376,23 @@ const FilterTypes = {
   MONTH: 'month',
   YEAR: 'year'
 };
-const MenuNames = {
+const menuNames = {
   [FilterTypes.ALL_TIME]: 'All time',
   [FilterTypes.TODAY]: 'Today',
   [FilterTypes.WEEK]: 'Week',
   [FilterTypes.MONTH]: 'Month',
   [FilterTypes.YEAR]: 'Year'
 };
+const dateDiffCalc = {
+  [FilterTypes.ALL_TIME]: () => dayjs__WEBPACK_IMPORTED_MODULE_4___default()().subtract(1000, 'year'),
+  [FilterTypes.TODAY]: () => dayjs__WEBPACK_IMPORTED_MODULE_4___default()().subtract(1, 'day'),
+  [FilterTypes.WEEK]: () => dayjs__WEBPACK_IMPORTED_MODULE_4___default()().subtract(1, 'week'),
+  [FilterTypes.MONTH]: () => dayjs__WEBPACK_IMPORTED_MODULE_4___default()().subtract(1, 'month'),
+  [FilterTypes.YEAR]: () => dayjs__WEBPACK_IMPORTED_MODULE_4___default()().subtract(1, 'year')
+};
 
 const getStatisticMenuItem = (filterType, activeFilterType) => `<input type="radio" class="statistic__filters-input visually-hidden" name="statistic-filter" id="statistic-${filterType}" value="${filterType}" ${activeFilterType === filterType ? 'checked' : ''}>
-  <label for="statistic-${filterType}" class="statistic__filters-label">${MenuNames[filterType]}</label>`;
+  <label for="statistic-${filterType}" class="statistic__filters-label">${menuNames[filterType]}</label>`;
 
 const getStatisticMenu = activeFilterType => {
   const result = [];
@@ -3392,7 +3432,7 @@ const getStatsTemplate = (data, activeFilterType, genresAndQuantity, userRank, t
         </li>
         <li class="statistic__text-item">
           <h4 class="statistic__item-title">Top genre</h4>
-          <p class="statistic__item-text">${topGenre}</p>
+          <p class="statistic__item-text">${topGenre ? topGenre : ''}</p>
         </li>
       </ul>
       <div class="statistic__chart-wrap">
@@ -3400,8 +3440,6 @@ const getStatsTemplate = (data, activeFilterType, genresAndQuantity, userRank, t
       </div>
     </section>`;
 };
-
-var _chart = /*#__PURE__*/new WeakMap();
 
 var _userRank = /*#__PURE__*/new WeakMap();
 
@@ -3417,6 +3455,8 @@ var _statisticCtx = /*#__PURE__*/new WeakMap();
 
 var _updateFilmsGenres = /*#__PURE__*/new WeakMap();
 
+var _getFilteredFilmsData = /*#__PURE__*/new WeakMap();
+
 var _getFilmsQuantityByGenre = /*#__PURE__*/new WeakMap();
 
 var _updateFilmsStatistic = /*#__PURE__*/new WeakMap();
@@ -3426,13 +3466,8 @@ var _createChart = /*#__PURE__*/new WeakMap();
 var _onFiltersChange = /*#__PURE__*/new WeakMap();
 
 class UserStatisticView extends _smart_view_js__WEBPACK_IMPORTED_MODULE_2__["default"] {
-  constructor(filmsData) {
-    super();
-
-    _classPrivateFieldInitSpec(this, _chart, {
-      writable: true,
-      value: null
-    });
+  constructor(...args) {
+    super(...args);
 
     _classPrivateFieldInitSpec(this, _userRank, {
       writable: true,
@@ -3464,19 +3499,37 @@ class UserStatisticView extends _smart_view_js__WEBPACK_IMPORTED_MODULE_2__["def
       value: null
     });
 
-    _defineProperty(this, "init", () => {
-      _classPrivateFieldSet(this, _userRank, (0,_filter_js__WEBPACK_IMPORTED_MODULE_3__.getUserRank)(this._data.length));
+    _defineProperty(this, "init", filmsData => {
+      if (filmsData) {
+        this._data = {
+          filmsData: (0,_filter_js__WEBPACK_IMPORTED_MODULE_3__.getWatchedFilmsData)(filmsData) || [],
+          filteredFilmsData: []
+        };
+
+        _classPrivateFieldSet(this, _userRank, (0,_filter_js__WEBPACK_IMPORTED_MODULE_3__.getUserRank)(this._data.filmsData.length));
+      }
+
+      this._data.filteredFilmsData = _classPrivateFieldGet(this, _getFilteredFilmsData).call(this);
 
       _classPrivateFieldGet(this, _updateFilmsStatistic).call(this);
 
-      _classPrivateFieldGet(this, _createChart).call(this, this._data);
+      this.updateElement();
 
-      this.createEventListener('.statistic__filters', 'change', _classPrivateFieldGet(this, _onFiltersChange));
+      _classPrivateFieldGet(this, _createChart).call(this);
+
+      this.restoreHandlers();
     });
+
+    _defineProperty(this, "restoreHandlers", () => this.createEventListener('.statistic__filters', 'change', _classPrivateFieldGet(this, _onFiltersChange)));
 
     _classPrivateFieldInitSpec(this, _updateFilmsGenres, {
       writable: true,
       value: genres => genres.forEach(genre => _classPrivateFieldGet(this, _genres).add(genre))
+    });
+
+    _classPrivateFieldInitSpec(this, _getFilteredFilmsData, {
+      writable: true,
+      value: () => this._data.filmsData.filter(film => dayjs__WEBPACK_IMPORTED_MODULE_4___default()(film.userDetails.watchingDate).isBetween(dateDiffCalc[_classPrivateFieldGet(this, _activeFilterType)](), dayjs__WEBPACK_IMPORTED_MODULE_4___default()()))
     });
 
     _classPrivateFieldInitSpec(this, _getFilmsQuantityByGenre, {
@@ -3485,7 +3538,7 @@ class UserStatisticView extends _smart_view_js__WEBPACK_IMPORTED_MODULE_2__["def
         _classPrivateFieldGet(this, _genres).forEach(genre => {
           let quantity = 0;
 
-          this._data.forEach(film => {
+          this._data.filteredFilmsData.forEach(film => {
             var _film$filmInfo;
 
             const filmGenres = (_film$filmInfo = film.filmInfo) === null || _film$filmInfo === void 0 ? void 0 : _film$filmInfo.genre;
@@ -3505,7 +3558,11 @@ class UserStatisticView extends _smart_view_js__WEBPACK_IMPORTED_MODULE_2__["def
     _classPrivateFieldInitSpec(this, _updateFilmsStatistic, {
       writable: true,
       value: () => {
-        this._data.forEach(film => {
+        _classPrivateFieldSet(this, _genres, new Set());
+
+        _classPrivateFieldSet(this, _genresAndQuantity, new Map());
+
+        this._data.filteredFilmsData.forEach(film => {
           var _film$filmInfo2;
 
           _classPrivateFieldGet(this, _updateFilmsGenres).call(this, ((_film$filmInfo2 = film.filmInfo) === null || _film$filmInfo2 === void 0 ? void 0 : _film$filmInfo2.genre) || []);
@@ -3513,7 +3570,7 @@ class UserStatisticView extends _smart_view_js__WEBPACK_IMPORTED_MODULE_2__["def
 
         _classPrivateFieldGet(this, _getFilmsQuantityByGenre).call(this);
 
-        _classPrivateFieldSet(this, _totalDuration, this._data.reduce((sum, film) => {
+        _classPrivateFieldSet(this, _totalDuration, this._data.filteredFilmsData.reduce((sum, film) => {
           var _film$filmInfo3;
 
           return sum += parseInt((_film$filmInfo3 = film.filmInfo) === null || _film$filmInfo3 === void 0 ? void 0 : _film$filmInfo3.runtime, 10);
@@ -3526,7 +3583,7 @@ class UserStatisticView extends _smart_view_js__WEBPACK_IMPORTED_MODULE_2__["def
       value: () => {
         _classPrivateFieldSet(this, _statisticCtx, this.element.querySelector('.statistic__chart'));
 
-        _classPrivateFieldSet(this, _chart, new (chart_js__WEBPACK_IMPORTED_MODULE_0___default())(_classPrivateFieldGet(this, _statisticCtx), {
+        new (chart_js__WEBPACK_IMPORTED_MODULE_0___default())(_classPrivateFieldGet(this, _statisticCtx), {
           plugins: [(chartjs_plugin_datalabels__WEBPACK_IMPORTED_MODULE_1___default())],
           type: 'horizontalBar',
           data: {
@@ -3582,7 +3639,7 @@ class UserStatisticView extends _smart_view_js__WEBPACK_IMPORTED_MODULE_2__["def
               enabled: false
             }
           }
-        }));
+        });
       }
     });
 
@@ -3590,14 +3647,14 @@ class UserStatisticView extends _smart_view_js__WEBPACK_IMPORTED_MODULE_2__["def
       writable: true,
       value: evt => {
         _classPrivateFieldSet(this, _activeFilterType, evt.target.value);
+
+        this.init();
       }
     });
-
-    this._data = (0,_filter_js__WEBPACK_IMPORTED_MODULE_3__.getWatchedFilmsData)(filmsData) || [];
   }
 
   get template() {
-    return getStatsTemplate(this._data, _classPrivateFieldGet(this, _activeFilterType), _classPrivateFieldGet(this, _genresAndQuantity), _classPrivateFieldGet(this, _userRank), _classPrivateFieldGet(this, _totalDuration));
+    return getStatsTemplate(this._data.filteredFilmsData, _classPrivateFieldGet(this, _activeFilterType), _classPrivateFieldGet(this, _genresAndQuantity), _classPrivateFieldGet(this, _userRank), _classPrivateFieldGet(this, _totalDuration));
   }
 
 }
@@ -21198,6 +21255,16 @@ return plugin;
 /***/ (function(module) {
 
 !function(t,s){ true?module.exports=s():0}(this,(function(){"use strict";var t,s,n=1e3,i=6e4,e=36e5,r=864e5,o=/\[([^\]]+)]|Y{1,4}|M{1,4}|D{1,2}|d{1,4}|H{1,2}|h{1,2}|a|A|m{1,2}|s{1,2}|Z{1,2}|SSS/g,u=31536e6,h=2592e6,a=/^(-|\+)?P(?:([-+]?[0-9,.]*)Y)?(?:([-+]?[0-9,.]*)M)?(?:([-+]?[0-9,.]*)W)?(?:([-+]?[0-9,.]*)D)?(?:T(?:([-+]?[0-9,.]*)H)?(?:([-+]?[0-9,.]*)M)?(?:([-+]?[0-9,.]*)S)?)?$/,d={years:u,months:h,days:r,hours:e,minutes:i,seconds:n,milliseconds:1,weeks:6048e5},c=function(t){return t instanceof p},f=function(t,s,n){return new p(t,n,s.$l)},m=function(t){return s.p(t)+"s"},l=function(t){return t<0},$=function(t){return l(t)?Math.ceil(t):Math.floor(t)},y=function(t){return Math.abs(t)},g=function(t,s){return t?l(t)?{negative:!0,format:""+y(t)+s}:{negative:!1,format:""+t+s}:{negative:!1,format:""}},p=function(){function l(t,s,n){var i=this;if(this.$d={},this.$l=n,void 0===t&&(this.$ms=0,this.parseFromMilliseconds()),s)return f(t*d[m(s)],this);if("number"==typeof t)return this.$ms=t,this.parseFromMilliseconds(),this;if("object"==typeof t)return Object.keys(t).forEach((function(s){i.$d[m(s)]=t[s]})),this.calMilliseconds(),this;if("string"==typeof t){var e=t.match(a);if(e){var r=e.slice(2).map((function(t){return null!=t?Number(t):0}));return this.$d.years=r[0],this.$d.months=r[1],this.$d.weeks=r[2],this.$d.days=r[3],this.$d.hours=r[4],this.$d.minutes=r[5],this.$d.seconds=r[6],this.calMilliseconds(),this}}return this}var y=l.prototype;return y.calMilliseconds=function(){var t=this;this.$ms=Object.keys(this.$d).reduce((function(s,n){return s+(t.$d[n]||0)*d[n]}),0)},y.parseFromMilliseconds=function(){var t=this.$ms;this.$d.years=$(t/u),t%=u,this.$d.months=$(t/h),t%=h,this.$d.days=$(t/r),t%=r,this.$d.hours=$(t/e),t%=e,this.$d.minutes=$(t/i),t%=i,this.$d.seconds=$(t/n),t%=n,this.$d.milliseconds=t},y.toISOString=function(){var t=g(this.$d.years,"Y"),s=g(this.$d.months,"M"),n=+this.$d.days||0;this.$d.weeks&&(n+=7*this.$d.weeks);var i=g(n,"D"),e=g(this.$d.hours,"H"),r=g(this.$d.minutes,"M"),o=this.$d.seconds||0;this.$d.milliseconds&&(o+=this.$d.milliseconds/1e3);var u=g(o,"S"),h=t.negative||s.negative||i.negative||e.negative||r.negative||u.negative,a=e.format||r.format||u.format?"T":"",d=(h?"-":"")+"P"+t.format+s.format+i.format+a+e.format+r.format+u.format;return"P"===d||"-P"===d?"P0D":d},y.toJSON=function(){return this.toISOString()},y.format=function(t){var n=t||"YYYY-MM-DDTHH:mm:ss",i={Y:this.$d.years,YY:s.s(this.$d.years,2,"0"),YYYY:s.s(this.$d.years,4,"0"),M:this.$d.months,MM:s.s(this.$d.months,2,"0"),D:this.$d.days,DD:s.s(this.$d.days,2,"0"),H:this.$d.hours,HH:s.s(this.$d.hours,2,"0"),m:this.$d.minutes,mm:s.s(this.$d.minutes,2,"0"),s:this.$d.seconds,ss:s.s(this.$d.seconds,2,"0"),SSS:s.s(this.$d.milliseconds,3,"0")};return n.replace(o,(function(t,s){return s||String(i[t])}))},y.as=function(t){return this.$ms/d[m(t)]},y.get=function(t){var s=this.$ms,n=m(t);return"milliseconds"===n?s%=1e3:s="weeks"===n?$(s/d[n]):this.$d[n],0===s?0:s},y.add=function(t,s,n){var i;return i=s?t*d[m(s)]:c(t)?t.$ms:f(t,this).$ms,f(this.$ms+i*(n?-1:1),this)},y.subtract=function(t,s){return this.add(t,s,!0)},y.locale=function(t){var s=this.clone();return s.$l=t,s},y.clone=function(){return f(this.$ms,this)},y.humanize=function(s){return t().add(this.$ms,"ms").locale(this.$l).fromNow(!s)},y.milliseconds=function(){return this.get("milliseconds")},y.asMilliseconds=function(){return this.as("milliseconds")},y.seconds=function(){return this.get("seconds")},y.asSeconds=function(){return this.as("seconds")},y.minutes=function(){return this.get("minutes")},y.asMinutes=function(){return this.as("minutes")},y.hours=function(){return this.get("hours")},y.asHours=function(){return this.as("hours")},y.days=function(){return this.get("days")},y.asDays=function(){return this.as("days")},y.weeks=function(){return this.get("weeks")},y.asWeeks=function(){return this.as("weeks")},y.months=function(){return this.get("months")},y.asMonths=function(){return this.as("months")},y.years=function(){return this.get("years")},y.asYears=function(){return this.as("years")},l}();return function(n,i,e){t=e,s=e().$utils(),e.duration=function(t,s){var n=e.locale();return f(t,{$l:n},s)},e.isDuration=c;var r=i.prototype.add,o=i.prototype.subtract;i.prototype.add=function(t,s){return c(t)&&(t=t.asMilliseconds()),r.bind(this)(t,s)},i.prototype.subtract=function(t,s){return c(t)&&(t=t.asMilliseconds()),o.bind(this)(t,s)}}}));
+
+/***/ }),
+
+/***/ "./node_modules/dayjs/plugin/isBetween.js":
+/*!************************************************!*\
+  !*** ./node_modules/dayjs/plugin/isBetween.js ***!
+  \************************************************/
+/***/ (function(module) {
+
+!function(e,i){ true?module.exports=i():0}(this,(function(){"use strict";return function(e,i,t){i.prototype.isBetween=function(e,i,s,f){var n=t(e),o=t(i),r="("===(f=f||"()")[0],u=")"===f[1];return(r?this.isAfter(n,s):!this.isBefore(n,s))&&(u?this.isBefore(o,s):!this.isAfter(o,s))||(r?this.isBefore(n,s):!this.isAfter(n,s))&&(u?this.isAfter(o,s):!this.isBefore(o,s))}}}));
 
 /***/ }),
 
