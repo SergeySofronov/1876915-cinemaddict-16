@@ -1,6 +1,9 @@
 import { getRandomInteger, getNonRepeatUintArray, getRandomBoolean, getRandomPartFromArray, getRandomDate, getRandomFloatStrict } from './utils.js';
 import { nanoid } from 'nanoid';
 import { DateFormatStyle } from '../const.js';
+import dayjs from 'dayjs';
+import duration from 'dayjs/plugin/duration';
+dayjs.extend(duration);
 
 const BASE_IMAGE_URL = './images/posters/';
 const COMMENT_MAX_QUANTITY = 50;
@@ -11,13 +14,12 @@ const FILM_MAX_RATE = 10;
 const FILM_MIN_RATE = 0;
 const FILM_MIN_PEGI = 3;
 const FILM_MAX_PEGI = 18;
-const FILM_MIN_RUNTIME = 70;
+const FILM_MIN_RUNTIME = 30;
 const FILM_MAX_RUNTIME = 180;
 const FILM_DESCRIPTION_MAX_QUANTITY = 5;
 const FILM_DESCRIPTION_MIN_QUANTITY = 1;
 const DATE_BASE_VALUE = '1950-01-01';
 const DATE_GAP_MAX = 30;
-const HOUR_VALUE = 60;
 
 const filmUrl = new Map();
 filmUrl.set('Made for Each Other', 'made-for-each-other.png')
@@ -74,14 +76,6 @@ const getRandomCommentData = () => {
   return Array.from({ length: commentQuantity }, prepareCommentData);
 };
 
-const getFilmTime = () => {
-  const time = getRandomInteger(FILM_MIN_RUNTIME, FILM_MAX_RUNTIME);
-  const hour = parseInt(time / HOUR_VALUE, 10);
-  const minute = time - hour * HOUR_VALUE;
-
-  return `${hour}h ${minute}m`;
-};
-
 const prepareFilmData = () => {
   if (filmQuantity) {
     const filmName = [...filmUrl.keys()][getRandomInteger(0, filmUrl.size - 1)];
@@ -106,12 +100,13 @@ const prepareFilmData = () => {
           date: getRandomDate(DATE_BASE_VALUE, DATE_GAP_MAX, DateFormatStyle.DEFAULT),
           country: filmCountries[getRandomInteger(0, filmCountries.length - 1)],
         },
-        runtime: getFilmTime()
+        runtime: getRandomInteger(FILM_MIN_RUNTIME, FILM_MAX_RUNTIME)
       },
       userDetails: {
         watchlist: getRandomBoolean(),
         watched: getRandomBoolean(),
-        favorite: getRandomBoolean()
+        favorite: getRandomBoolean(),
+        watchingDate: getRandomDate(dayjs().subtract(2, 'year'), 1, DateFormatStyle.DEFAULT)
       }
     };
   }
@@ -121,6 +116,4 @@ const prepareFilmData = () => {
 
 const getRandomFilmData = () => Array.from({ length: filmQuantity }, prepareFilmData);
 
-const getCommentEmotionTypes = () => commentEmotionTypes;
-
-export { getRandomFilmData, getCommentEmotionTypes };
+export { getRandomFilmData };

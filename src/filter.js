@@ -1,44 +1,47 @@
-import { DateFormatStyle } from './const';
+import { DateFormatStyle, FilterTypes, UserScores, UserRanks } from './const';
 import { changeDateFormat } from './mock/utils';
 
-const filmStatistic = {
+const filmsStatistic = {
   watchlist: 0,
   watched: 0,
   favorite: 0,
   total: 0
 };
 
-const userRank = {
-  'novice': [1, 10],
-  'fan': [11, 20],
-  'movie buff': [21, Infinity]
-};
-
-const getUserRank = () => {
-  let rank = null;
-  const rankValues = Object.entries(userRank);
-  for (const [key, [min, max]] of rankValues) {
-    if ((filmStatistic.watched >= min) && (filmStatistic.watched <= max)) {
-      rank = key;
-      break;
-    }
+const getUserRank = (watchedFilmsQuantity) => {
+  if (watchedFilmsQuantity >= UserScores.BUFF) {
+    return UserRanks.BUFF;
   }
 
-  return rank;
+  if (watchedFilmsQuantity >= UserScores.FAN) {
+    return UserRanks.FAN;
+  }
+
+  if (watchedFilmsQuantity >= UserScores.NOVICE) {
+    return UserRanks.NOVICE;
+  }
+
+  return '';
 };
 
-const getFilmsStatistic = (filmData) => {
-  if (Array.isArray(filmData)) {
-    filmStatistic.total = filmData.length;
+const getFilmsStatistic = (films) => {
+  if (Array.isArray(films)) {
+    filmsStatistic.total = films.length;
 
-    filmData.forEach((film) => {
-      filmStatistic.watchlist += film.userDetails.watchlist ? 1 : 0;
-      filmStatistic.watched += film.userDetails.watched ? 1 : 0;
-      filmStatistic.favorite += film.userDetails.favorite ? 1 : 0;
+    films.forEach((film) => {
+      filmsStatistic.watchlist += film.userDetails.watchlist ? 1 : 0;
+      filmsStatistic.watched += film.userDetails.watched ? 1 : 0;
+      filmsStatistic.favorite += film.userDetails.favorite ? 1 : 0;
     });
   }
 
-  return filmStatistic;
+  return filmsStatistic;
+};
+
+const getWatchedFilmsData = (films) => {
+  if (Array.isArray(films)) {
+    return films.filter((film) => Boolean((film.userDetails?.watched) && (film.userDetails?.watchingDate)));
+  }
 };
 
 const getTopRatedFilmsData = (films) => {
@@ -78,8 +81,15 @@ const getFilmsDataByDate = (films) => {
   }
 
   return [];
-
 };
 
-export { getFilmsStatistic, getUserRank, getTopCommentedFilmsData, getTopRatedFilmsData, getFilmsDataByDate };
+const filterFunctions = {
+  [FilterTypes.ALL]: (films) => films.filter((film) => Boolean(film.id)),
+  [FilterTypes.WATCHLIST]: (films) => films.filter((film) => Boolean(film.userDetails.watchlist)),
+  [FilterTypes.WATCHED]: (films) => films.filter((film) => Boolean(film.userDetails.watched)),
+  [FilterTypes.FAVORITE]: (films) => films.filter((film) => Boolean(film.userDetails.favorite)),
+  [FilterTypes.STATS]: (films) => films.filter((film) => Boolean(film.id))
+};
+
+export { getFilmsStatistic, getUserRank, getWatchedFilmsData, getTopCommentedFilmsData, getTopRatedFilmsData, getFilmsDataByDate, filterFunctions };
 

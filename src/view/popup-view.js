@@ -1,8 +1,16 @@
+import he from 'he';
+import { nanoid } from 'nanoid';
+import { getFilmDuration } from '../mock/utils';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+dayjs.extend(relativeTime);
 import SmartView from './smart-view';
-import { KeyCode, PresenterMessages, UpdateStates } from '../const.js';
-import { getCommentEmotionTypes } from '../mock/data';
+import { KeyCode, UserActions, EventStates, FilterTypes } from '../const.js';
 
+const TEXTAREA_VALIDITY_MESSAGE = 'Для отправки комментария заполните поле';
+const EMOJI_VALIDITY_MESSAGE = 'Выберите эмоцию';
 const ACTIVE_CLASS = 'film-details__control-button--active';
+const emotionTypes = ['smile', 'sleeping', 'puke', 'angry'];
 
 const TableTerms = {
   DIRECTOR: 'Director',
@@ -13,8 +21,6 @@ const TableTerms = {
   COUNTRY: 'Country',
   GENRES: 'Genres'
 };
-
-const emotionTypes = (Array.isArray(getCommentEmotionTypes()) && getCommentEmotionTypes()) || [];
 
 const getCommentEmotionTemplate = (emotion, isChecked = false) => {
   if (emotionTypes.includes(emotion)) {
@@ -34,11 +40,12 @@ const getPopupNewCommentTemplate = (comment, userEmoji) => (
   `<div class="film-details__new-comment">
     <div class="film-details__add-emoji-label">
       <!--User Emoji-->
+      <input type="text" class="film-details__emoji-input visually-hidden">
       ${userEmoji ? `<img src="images/emoji/${userEmoji}.png" width="55" height="55" alt="emoji-${userEmoji}">` : ''}
     </div>
 
     <label class="film-details__comment-label">
-      <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment">${comment ? comment : ''}</textarea>
+      <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment">${comment ? he.encode(comment) : ''}</textarea>
     </label>
 
     <div class="film-details__emoji-list">
@@ -64,7 +71,7 @@ const getLoadedCommentTemplate = (comment = {}) => {
         <p class="film-details__comment-text">${content}</p>
         <p class="film-details__comment-info">
           <span class="film-details__comment-author">${author}</span>
-          <span class="film-details__comment-day">${date}</span>
+          <span class="film-details__comment-day">${dayjs(date).fromNow()}</span>
           <button class="film-details__comment-delete" data-button-id = ${id}>Delete</button>
         </p>
       </div>
@@ -95,9 +102,9 @@ const getPopupCommentSectionTemplate = (data) => {
 
 const getTableRow = (term, ceilData) => (
   `<tr class="film-details__row">
-  <td class="film-details__term">${term || ''}</td>
-  <td class="film-details__cell">${ceilData || ''}</td>
-</tr>`
+    <td class="film-details__term">${term || ''}</td>
+    <td class="film-details__cell">${ceilData || ''}</td>
+  </tr>`
 );
 
 const getCardGenres = (genres) => {
@@ -164,7 +171,7 @@ const getPopupTemplate = (data) => {
                 ${getTableRow(TableTerms.WRITERS, writers)}
                 ${getTableRow(TableTerms.ACTORS, actors)}
                 ${getTableRow(TableTerms.DATE, release.date || '')}
-                ${getTableRow(TableTerms.TIME, runtime)}
+                ${getTableRow(TableTerms.TIME, getFilmDuration(runtime))}
                 ${getTableRow(TableTerms.COUNTRY, release.country || '')}
                 ${getTableRow(TableTerms.GENRES, getCardGenres(genre))}
                 </table>
@@ -194,73 +201,128 @@ const getPopupTemplate = (data) => {
 };
 
 class PopupView extends SmartView {
-  #updateFilmPresenter = null;
-  constructor(updateFilmPresenter) {
+  #popupActionCallback = null;
+  #textArea = null;
+  #emojiInput = null;
+  #validityMessage = '';
+  constructor(popupActionCallback) {
     super();
 
-    if (!(updateFilmPresenter instanceof Function)) {
+    if (!(popupActionCallback instanceof Function)) {
       throw new Error('Can\'t create PopupView instance updateFilmPresenter is not a Function');
     }
 
-    this.#updateFilmPresenter = updateFilmPresenter;
+    this.#popupActionCallback = popupActionCallback;
   }
 
   get template() {
-    return getPopupTemplate(this.data);
+    return getPopupTemplate(this._data);
   }
 
   init = (filmData) => {
-    this.data = SmartView.parseData(filmData);
+    this._data = SmartView.parseData(filmData);
     this.restoreHandlers();
   }
 
   restoreHandlers = () => {
+    this.#updateValiditySelectors();
+    this.createEventListener('.film-details__inner', 'keydown', this.#onCommentSubmit, EventStates.EVENT_DEFAULT);
     this.createEventListener('.film-details__close-btn', 'click', this.#onPopupButtonClose);
     this.createEventListener('.film-details__control-button--watchlist', 'click', this.#onWatchListButtonClick);
     this.createEventListener('.film-details__control-button--watched', 'click', this.#onWatchedButtonClick);
     this.createEventListener('.film-details__control-button--favorite', 'click', this.#onFavoriteButtonClick);
-    this.createEventListener('.film-details__comment-input', 'change', this.#onUserCommentChange);
+    this.createEventListener('.film-details__comment-input', 'input', this.#onUserCommentInput);
     this.createEventListener('.film-details__emoji-list', 'change', this.#onUserEmojiChange);
-    this.createEventListener(document.body, 'keydown', this.#onEscKeyDown, UpdateStates.EVENT_DEFAULT);
+    this.createEventListener(document.body, 'keydown', this.#onEscKeyDown, EventStates.EVENT_DEFAULT);
     this.element.querySelectorAll('.film-details__bottom-container li button')
       .forEach((commentSelector) => this.createEventListener(commentSelector, 'click', this.#onCommentDelete));
   }
 
-  #defaultPopupUpdate = (update, message = PresenterMessages.UPDATE_FILM)=>{
+  #updateValiditySelectors = () => {
+    this.#textArea = this.element.querySelector('.film-details__comment-input');
+    this.#emojiInput = this.element.querySelector('.film-details__emoji-input');
+  }
+
+  #handleUserInputValidity = (element) => {
+    element.setCustomValidity(this.#validityMessage);
+    element.reportValidity();
+    this.#validityMessage = '';
+  }
+
+  #handleTextAreaValidity = () => {
+    if (!this._data.userComment) {
+      this.#validityMessage = TEXTAREA_VALIDITY_MESSAGE;
+    }
+    this.#handleUserInputValidity(this.#textArea);
+
+  }
+
+  #handleEmojiLabelValidity = () => {
+    if (!this._data.userEmoji) {
+      this.#validityMessage = EMOJI_VALIDITY_MESSAGE;
+    }
+    this.#handleUserInputValidity(this.#emojiInput);
+  }
+
+  #defaultPopupUpdate = (update, actionDetails, actionType = UserActions.UPDATE_DATA) => {
     this.updateElement(update);
-    this.#updateFilmPresenter(message);
+    this.#popupActionCallback(SmartView.restoreData(this._data), actionType, actionDetails);
   }
 
   #onUserEmojiChange = (evt) => {
     this.updateElement({ userEmoji: evt.target.value });
   }
 
-  #onUserCommentChange = (evt) => {
+  #onUserCommentInput = (evt) => {
     this.updateData({ userComment: evt.target.value });
   }
 
   #onCommentDelete = (evt) => {
     const buttonId = evt.target.dataset.buttonId;
-    const index = this.data.changedComments.findIndex((comment) => comment.id === buttonId);
-    this.data.changedComments.splice(index, 1);
-    this.#defaultPopupUpdate(this.data.changedComments);
+    const index = this._data.changedComments.findIndex((comment) => comment.id === buttonId);
+    this._data.changedComments.splice(index, 1);
+    this.#defaultPopupUpdate({ changedComments: this._data.changedComments });
   }
 
   #onWatchListButtonClick = () => {
-    this.#defaultPopupUpdate({ watchlist: !this.data.watchlist });
+    this.#defaultPopupUpdate({ watchlist: !this._data.watchlist }, FilterTypes.WATCHLIST);
   }
 
   #onWatchedButtonClick = () => {
-    this.#defaultPopupUpdate({ watched: !this.data.watched });
+    this.#defaultPopupUpdate({ watched: !this._data.watched, watchingDate: this._data.watched ? '' : dayjs() }, FilterTypes.WATCHED);
   }
 
   #onFavoriteButtonClick = () => {
-    this.#defaultPopupUpdate({ favorite: !this.data.favorite });
+    this.#defaultPopupUpdate({ favorite: !this._data.favorite }, FilterTypes.FAVORITE);
   }
 
   #onPopupButtonClose = () => {
-    this.#updateFilmPresenter(PresenterMessages.REMOVE_POPUP);
+    this.#popupActionCallback(null, UserActions.UPDATE_ACTIVE);
   };
+
+  #onCommentSubmit = (evt) => {
+    if ((evt.key === KeyCode.ENTER) && (evt.ctrlKey || evt.metaKey)) {
+      this.#handleEmojiLabelValidity();
+      this.#handleTextAreaValidity();
+
+      if ((!this._data.userComment) || (!this._data.userEmoji)) {
+        return;
+      }
+
+      const userComment = {
+        id: nanoid(),
+        author: 'User',
+        emotion: this._data.userEmoji,
+        content: this.#textArea.value,
+        date: dayjs(),
+      };
+
+      this._data.changedComments.push(userComment);
+      this._data.userEmoji = '';
+      this._data.userComment = '';
+      this.#defaultPopupUpdate({ changedComments: this._data.changedComments });
+    }
+  }
 
   #onEscKeyDown = (evt) => {
     if (evt.key === KeyCode.ESC) {

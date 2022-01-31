@@ -1,24 +1,19 @@
-import AbstractView from './abstract-view';
+import AbstractView from './abstract-view.js';
 
-const getFilmListSectionTemplate = (titleText, isExtraSection = false, isHidden = false) => (
+const getFilmListSectionTemplate = (isExtraSection) => (
   `<section class="films-list ${isExtraSection ? 'films-list--extra' : ''}">
-    <h2 class="films-list__title ${isHidden ? 'visually-hidden' : ''}">${titleText}</h2>
   </section>`
 );
 
 class FilmsSheetView extends AbstractView {
-  #titleText = '';
   #isExtraSection = false;
-  #isHidden = false;
-  constructor(titleText, isExtraSection, isHidden) {
+  constructor(isExtraSection) {
     super();
-    this.#titleText = titleText;
     this.#isExtraSection = isExtraSection;
-    this.#isHidden = isHidden;
   }
 
   get template() {
-    return getFilmListSectionTemplate(this.#titleText, this.#isExtraSection, this.#isHidden);
+    return getFilmListSectionTemplate(this.#isExtraSection);
   }
 }
 
