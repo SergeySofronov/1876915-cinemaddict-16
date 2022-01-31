@@ -1,5 +1,5 @@
 import he from 'he';
-import { getFilmDuration } from '../mock/utils';
+import { getFilmDuration, changeDateFormat } from '../utils';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 dayjs.extend(relativeTime);
@@ -169,7 +169,7 @@ const getPopupTemplate = (data) => {
                 ${getTableRow(TableTerms.DIRECTOR, director)}
                 ${getTableRow(TableTerms.WRITERS, writers)}
                 ${getTableRow(TableTerms.ACTORS, actors)}
-                ${getTableRow(TableTerms.DATE, release.date || '')}
+                ${getTableRow(TableTerms.DATE, changeDateFormat(release?.date, ))}
                 ${getTableRow(TableTerms.TIME, getFilmDuration(runtime))}
                 ${getTableRow(TableTerms.COUNTRY, release.country || '')}
                 ${getTableRow(TableTerms.GENRES, getCardGenres(genre))}
@@ -277,10 +277,6 @@ class PopupView extends SmartView {
   }
 
   #onCommentDelete = (evt) => {
-    // const buttonId = evt.target.dataset.buttonId;
-    // const index = this._data.changedComments.findIndex((comment) => comment.id === buttonId);
-    // this._data.changedComments.splice(index, 1);
-    //todo: isDeleting instead changedComments
     this.#defaultPopupUpdate({ deletingCommentId: evt.target.dataset.buttonId }, null, UserActions.DELETE_COMMENT);
   }
 

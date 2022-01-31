@@ -1,5 +1,7 @@
 import { EventStates } from '../const.js';
 
+const SHAKE_ANIMATION_TIMEOUT = 600;
+
 class AbstractView {
   #element = null;
   #eventInfo = new Map();
@@ -88,6 +90,16 @@ class AbstractView {
       elementSelector.removeEventListener(eventType, eventHandler);
     }
     this.#eventInfo.clear();
+  }
+
+  shake(callback) {
+    //todo:
+    console.log();
+    this.element.style.animation = `shake ${SHAKE_ANIMATION_TIMEOUT / 1000}s`;
+    setTimeout(() => {
+      this.element.style.animation = '';
+      callback();
+    }, SHAKE_ANIMATION_TIMEOUT);
   }
 }
 

@@ -1,5 +1,5 @@
 import { DateFormatStyle, FilterTypes, UserScores, UserRanks } from './const';
-import { changeDateFormat } from './mock/utils';
+import { changeDateFormat } from './utils';
 
 const getUserRank = (watchedFilmsQuantity) => {
   if (watchedFilmsQuantity >= UserScores.BUFF) {
