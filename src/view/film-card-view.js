@@ -17,7 +17,7 @@ const getFilmCardTemplate = (filmData) => {
     } = filmData.filmInfo || {};
 
     const year = changeDateFormat(release?.date, DateFormatStyle.YEAR);
-    const comments = filmData.comments || [];
+    const comments = filmData.commentsIds || [];
 
     const {
       watchlist = false,

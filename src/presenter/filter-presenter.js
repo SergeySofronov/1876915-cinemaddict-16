@@ -32,13 +32,6 @@ class FilterMenuPresenter {
     this.#filmsModel.addObserver(this.#handleModelEvent);
   }
 
-  #getStatistic = () => ({
-    watchlist: filterFunctions[FilterTypes.WATCHLIST](this.#filmsModel.filmsData).length,
-    watched: filterFunctions[FilterTypes.WATCHED](this.#filmsModel.filmsData).length,
-    favorite: filterFunctions[FilterTypes.FAVORITE](this.#filmsModel.filmsData).length
-  });
-
-
   init = () => {
 
     const prevFilterComponent = this.#filterComponent;
@@ -55,8 +48,14 @@ class FilterMenuPresenter {
     render(this.#filterContainer, this.#filterComponent, RenderPosition.AFTERBEGIN);
   }
 
+  #getStatistic = () => ({
+    watchlist: filterFunctions[FilterTypes.WATCHLIST](this.#filmsModel.filmsData).length,
+    watched: filterFunctions[FilterTypes.WATCHED](this.#filmsModel.filmsData).length,
+    favorite: filterFunctions[FilterTypes.FAVORITE](this.#filmsModel.filmsData).length
+  });
+
   #renderUserStatistic = () => {
-    if(!this.#userStatistic){
+    if (!this.#userStatistic) {
       this.#userStatistic = new UserStatisticView();
       this.#userStatistic.init(this.#filmsModel.filmsData);
       render(this.#filterContainer, this.#userStatistic, RenderPosition.BEFOREEND);
@@ -70,10 +69,12 @@ class FilterMenuPresenter {
     }
   }
 
-  #handleModelEvent = () => {
-    this.init();
-    if (this.#filterModel.filterType === FilterTypes.STATS) {
-      this.#userStatistic.init(this.#filmsModel.filmsData);
+  #handleModelEvent = (updateType) => {
+    if (updateType !== UpdateTypes.LOAD) {
+      this.init();
+      if (this.#filterModel.filterType === FilterTypes.STATS) {
+        this.#userStatistic.init(this.#filmsModel.filmsData);
+      }
     }
   }
 

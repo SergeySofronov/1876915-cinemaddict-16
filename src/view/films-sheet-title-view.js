@@ -8,7 +8,7 @@ const TitleTypes = {
   [FilterTypes.ALL]: 'There are no movies in our database',
   [FilterTypes.WATCHLIST]: 'There are no movies to watch now',
   [FilterTypes.WATCHED]: 'There are no watched movies now',
-  [FilterTypes.FAVORITE]: 'There are no favorite movies now'
+  [FilterTypes.FAVORITE]: 'There are no favorite movies now',
 };
 
 const getSheetTitleTemplate = (messageType) => (

@@ -65,7 +65,7 @@ const prepareCommentData = () => {
     id: nanoid(),
     author: commentUserNames[getRandomInteger(0, commentUserNames.length - 1)],
     emotion: commentEmotion,
-    content: filmCommentExample[commentEmotion][getRandomInteger(0, filmCommentExample[commentEmotion].length - 1)],
+    comment: filmCommentExample[commentEmotion][getRandomInteger(0, filmCommentExample[commentEmotion].length - 1)],
     date: getRandomDate(DATE_BASE_VALUE, DATE_GAP_MAX, DateFormatStyle.COMMENT),
   };
 };

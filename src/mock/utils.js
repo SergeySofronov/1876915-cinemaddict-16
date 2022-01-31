@@ -55,9 +55,8 @@ const getRandomPartFromArray = (inputArray) => {
 
     if (upper > lower) {
       return inputArray.slice(lower, upper);
-    } else {
-      return inputArray.slice(upper, lower);
     }
+    return inputArray.slice(upper, lower);
   }
 
   return new Error('getRandomPartFromArray: inputArray is not an array');
@@ -86,7 +85,7 @@ const getShortFilmDescription = (filmDescription) => {
 const getFilmDuration = (durationInMinutes) => {
   const hours = dayjs.duration(durationInMinutes, 'minutes').$d.hours;
   const minutes = dayjs.duration(durationInMinutes, 'minutes').$d.minutes;
-  return `${hours ? hours : ''}${hours?'h':''} ${minutes ? minutes : '00'}m`;
+  return `${hours ? hours : ''}${hours ? 'h' : ''} ${minutes ? minutes : '00'}m`;
 };
 
 const changeDateFormat = (date, format = DATE_FORMAT) => (date ? dayjs(date).format(format) : '');

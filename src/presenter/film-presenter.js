@@ -70,12 +70,13 @@ class FilmPresenter {
   createPopup = (currentPopup) => {
     if (currentPopup) {
       this.#filmPopup = currentPopup;
+      this.#updatePopup();
       return;
     }
 
+    this.#handleViewAction(this, UserActions.CREATE_POPUP);
     this.#filmPopup = new PopupView(this.#handleViewAction);
     this.#filmPopup.init(this.#filmData);
-    this.#handleViewAction(this, UserActions.UPDATE_ACTIVE);
     render(document.body, this.#filmPopup, RenderPosition.BEFOREEND);
     document.body.classList.add('hide-overflow');
   }
@@ -86,9 +87,7 @@ class FilmPresenter {
     }
   }
 
-  #filmActionCallback = (actionDetails) => {
-    this.#handleViewAction(this.#filmData, UserActions.UPDATE_DATA, actionDetails);
-  }
+  #filmActionCallback = (actionDetails) => this.#handleViewAction(this.#filmData, UserActions.UPDATE_DATA, actionDetails);
 
   #updateFilmHandlers = () => {
     this.#filmCard.setFilmClickHandler(this.#onFilmCardClick);
@@ -104,7 +103,6 @@ class FilmPresenter {
 
   #onWatchedClick = () => {
     this.#filmData.userDetails.watched = !this.#filmData.userDetails.watched;
-    this.#filmData.userDetails.watchingDate = this.#filmData.userDetails.watched ? '' : dayjs();
     this.#filmActionCallback(FilterTypes.WATCHED);
   }
 

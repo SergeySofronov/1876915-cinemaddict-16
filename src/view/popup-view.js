@@ -1,5 +1,4 @@
 import he from 'he';
-import { nanoid } from 'nanoid';
 import { getFilmDuration } from '../mock/utils';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -53,14 +52,14 @@ const getPopupNewCommentTemplate = (comment, userEmoji) => (
     </div>
   </div>`);
 
-const getLoadedCommentTemplate = (comment = {}) => {
+const getLoadedCommentTemplate = (loadedСomment = {}) => {
   const {
     id = '',
     author = '',
     emotion = '',
-    content = '',
+    comment = '',
     date = '',
-  } = comment;
+  } = loadedСomment;
 
   return (
     `<li class="film-details__comment">
@@ -68,7 +67,7 @@ const getLoadedCommentTemplate = (comment = {}) => {
         <img src="./images/emoji/${emotion}.png" width="55" height="55" alt="emoji-smile">
       </span>
       <div>
-        <p class="film-details__comment-text">${content}</p>
+        <p class="film-details__comment-text">${comment}</p>
         <p class="film-details__comment-info">
           <span class="film-details__comment-author">${author}</span>
           <span class="film-details__comment-day">${dayjs(date).fromNow()}</span>
@@ -84,11 +83,11 @@ const getPopupCommentSectionTemplate = (data) => {
     return (
       `<div class="film-details__bottom-container">
         <section class="film-details__comments-wrap">
-          <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${data.changedComments ? data.changedComments.length : 0}</span></h3>
+          <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${data.comments ? data.comments.length : 0}</span></h3>
 
           <ul class="film-details__comments-list">
             <!-- Отрисовка всех комментариев к фильму -->
-            ${data.changedComments.map((comment) => getLoadedCommentTemplate(comment)).join('')}
+            ${data.comments.map((comment) => getLoadedCommentTemplate(comment)).join('')}
           </ul>
 
           ${getPopupNewCommentTemplate(data.userComment, data.userEmoji)}
@@ -278,10 +277,11 @@ class PopupView extends SmartView {
   }
 
   #onCommentDelete = (evt) => {
-    const buttonId = evt.target.dataset.buttonId;
-    const index = this._data.changedComments.findIndex((comment) => comment.id === buttonId);
-    this._data.changedComments.splice(index, 1);
-    this.#defaultPopupUpdate({ changedComments: this._data.changedComments });
+    // const buttonId = evt.target.dataset.buttonId;
+    // const index = this._data.changedComments.findIndex((comment) => comment.id === buttonId);
+    // this._data.changedComments.splice(index, 1);
+    //todo: isDeleting instead changedComments
+    this.#defaultPopupUpdate({ deletingCommentId: evt.target.dataset.buttonId }, null, UserActions.DELETE_COMMENT);
   }
 
   #onWatchListButtonClick = () => {
@@ -297,7 +297,7 @@ class PopupView extends SmartView {
   }
 
   #onPopupButtonClose = () => {
-    this.#popupActionCallback(null, UserActions.UPDATE_ACTIVE);
+    this.#popupActionCallback(null, UserActions.DELETE_POPUP);
   };
 
   #onCommentSubmit = (evt) => {
@@ -310,17 +310,13 @@ class PopupView extends SmartView {
       }
 
       const userComment = {
-        id: nanoid(),
-        author: 'User',
         emotion: this._data.userEmoji,
-        content: this.#textArea.value,
-        date: dayjs(),
+        comment: this.#textArea.value,
       };
 
-      this._data.changedComments.push(userComment);
       this._data.userEmoji = '';
       this._data.userComment = '';
-      this.#defaultPopupUpdate({ changedComments: this._data.changedComments });
+      this.#defaultPopupUpdate({ addingComment: { ...userComment } }, null, UserActions.ADD_COMMENT);
     }
   }
 

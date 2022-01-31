@@ -33,7 +33,7 @@ class SmartView extends AbstractView {
 
   static parseData = (filmData) => ({
     ...filmData,
-    changedComments: [...filmData.comments],
+    //changedComments: [...filmData.comments],
     watchlist: filmData.userDetails.watchlist,
     watched: filmData.userDetails.watched,
     favorite: filmData.userDetails.favorite
@@ -41,14 +41,14 @@ class SmartView extends AbstractView {
 
   static restoreData = (data) => {
     const filmData = { ...data };
-    filmData.comments = data.changedComments;
+    //filmData.comments = data.changedComments;
     filmData.userDetails.watchlist = data.watchlist;
     filmData.userDetails.watched = data.watched;
     filmData.userDetails.favorite = data.favorite;
     delete filmData.watchlist;
     delete filmData.watched;
     delete filmData.favorite;
-    delete filmData.changedComments;
+    //delete filmData.changedComments;
     delete filmData.userComment;
     delete filmData.userEmoji;
 
