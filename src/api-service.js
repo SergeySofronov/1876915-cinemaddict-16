@@ -55,7 +55,6 @@ export default class ApiService {
   }) => {
     headers.append('Authorization', this.#authorization);
 
-    //todo: проверить, что без try fetch нормально сработает при ошибке запроса
     const response = await fetch(
       `${this.#endPoint}/${url}`,
       { method, body, headers },

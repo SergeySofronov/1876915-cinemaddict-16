@@ -34,7 +34,6 @@ const SortTypes = {
 
 const DateFormatStyle = {
   DEFAULT: 'DD MMMM YYYY',
-  COMMENT: 'YYYY/MM/DD HH:mm',
   YEAR: 'YYYY',
 };
 

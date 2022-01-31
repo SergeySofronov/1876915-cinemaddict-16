@@ -1,4 +1,4 @@
-import { getShortFilmDescription, changeDateFormat, getFilmDuration } from '../mock/utils';
+import { getShortFilmDescription, changeDateFormat, getFilmDuration } from '../utils';
 import { DateFormatStyle } from '../const';
 import AbstractView from './abstract-view';
 
