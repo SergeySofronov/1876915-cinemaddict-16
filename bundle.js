@@ -1,6 +1,177 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
+/***/ "./src/api-service.js":
+/*!****************************!*\
+  !*** ./src/api-service.js ***!
+  \****************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ ApiService),
+/* harmony export */   "ApiService": () => (/* binding */ ApiService)
+/* harmony export */ });
+/* harmony import */ var _const__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./const */ "./src/const.js");
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function _classPrivateFieldInitSpec(obj, privateMap, value) { _checkPrivateRedeclaration(obj, privateMap); privateMap.set(obj, value); }
+
+function _checkPrivateRedeclaration(obj, privateCollection) { if (privateCollection.has(obj)) { throw new TypeError("Cannot initialize the same private elements twice on an object"); } }
+
+function _classPrivateFieldGet(receiver, privateMap) { var descriptor = _classExtractFieldDescriptor(receiver, privateMap, "get"); return _classApplyDescriptorGet(receiver, descriptor); }
+
+function _classApplyDescriptorGet(receiver, descriptor) { if (descriptor.get) { return descriptor.get.call(receiver); } return descriptor.value; }
+
+function _classPrivateFieldSet(receiver, privateMap, value) { var descriptor = _classExtractFieldDescriptor(receiver, privateMap, "set"); _classApplyDescriptorSet(receiver, descriptor, value); return value; }
+
+function _classExtractFieldDescriptor(receiver, privateMap, action) { if (!privateMap.has(receiver)) { throw new TypeError("attempted to " + action + " private field on non-instance"); } return privateMap.get(receiver); }
+
+function _classApplyDescriptorSet(receiver, descriptor, value) { if (descriptor.set) { descriptor.set.call(receiver, value); } else { if (!descriptor.writable) { throw new TypeError("attempted to set read only private field"); } descriptor.value = value; } }
+
+
+
+var _endPoint = /*#__PURE__*/new WeakMap();
+
+var _authorization = /*#__PURE__*/new WeakMap();
+
+var _load = /*#__PURE__*/new WeakMap();
+
+var _adaptFilmToServer = /*#__PURE__*/new WeakMap();
+
+class ApiService {
+  constructor(endPoint, authorization) {
+    _classPrivateFieldInitSpec(this, _endPoint, {
+      writable: true,
+      value: null
+    });
+
+    _classPrivateFieldInitSpec(this, _authorization, {
+      writable: true,
+      value: null
+    });
+
+    _defineProperty(this, "updateFilm", async film => {
+      const response = await _classPrivateFieldGet(this, _load).call(this, {
+        url: `movies/${film.id}`,
+        method: _const__WEBPACK_IMPORTED_MODULE_0__.Methods.PUT,
+        body: JSON.stringify(_classPrivateFieldGet(this, _adaptFilmToServer).call(this, film)),
+        headers: new Headers({
+          'Content-Type': 'application/json'
+        })
+      });
+      return await ApiService.parseResponse(response);
+    });
+
+    _defineProperty(this, "getComments", film => _classPrivateFieldGet(this, _load).call(this, {
+      url: `comments/${film.id}`
+    }).then(ApiService.parseResponse));
+
+    _defineProperty(this, "addComment", async film => {
+      const response = await _classPrivateFieldGet(this, _load).call(this, {
+        url: `comments/${film.id}`,
+        method: _const__WEBPACK_IMPORTED_MODULE_0__.Methods.POST,
+        body: JSON.stringify(film.addingComment),
+        headers: new Headers({
+          'Content-Type': 'application/json'
+        })
+      });
+      return await ApiService.parseResponse(response);
+    });
+
+    _defineProperty(this, "deleteComment", async commentId => {
+      const response = await _classPrivateFieldGet(this, _load).call(this, {
+        url: `comments/${commentId}`,
+        method: _const__WEBPACK_IMPORTED_MODULE_0__.Methods.DELETE
+      });
+      return response;
+    });
+
+    _classPrivateFieldInitSpec(this, _load, {
+      writable: true,
+      value: async ({
+        url,
+        method = _const__WEBPACK_IMPORTED_MODULE_0__.Methods.GET,
+        body = null,
+        headers = new Headers()
+      }) => {
+        headers.append('Authorization', _classPrivateFieldGet(this, _authorization));
+        const response = await fetch(`${_classPrivateFieldGet(this, _endPoint)}/${url}`, {
+          method,
+          body,
+          headers
+        });
+
+        try {
+          ApiService.checkStatus(response);
+          return response;
+        } catch (err) {
+          ApiService.catchError(err);
+        }
+      }
+    });
+
+    _classPrivateFieldInitSpec(this, _adaptFilmToServer, {
+      writable: true,
+      value: film => {
+        const adaptedFilm = { ...film,
+          comments: film.commentsIds,
+          ['film_info']: { ...film.filmInfo,
+            ['alternative_title']: film.filmInfo.alternativeTitle,
+            ['total_rating']: film.filmInfo.totalRating,
+            ['age_rating']: film.filmInfo.pegi,
+            release: { ...film.filmInfo.release,
+              ['release_country']: film.filmInfo.release.country
+            }
+          },
+          ['user_details']: { ...film.userDetails,
+            ['already_watched']: film.userDetails.watched,
+            ['watching_date']: film.userDetails.watchingDate
+          }
+        };
+        delete adaptedFilm.commentsIds;
+        delete adaptedFilm['film_info'].alternativeTitle;
+        delete adaptedFilm['film_info'].totalRating;
+        delete adaptedFilm['film_info'].pegi;
+        delete adaptedFilm['film_info'].release.country;
+        delete adaptedFilm.filmInfo;
+        delete adaptedFilm['user_details'].watched;
+        delete adaptedFilm['user_details'].watchingDate;
+        delete adaptedFilm.userDetails;
+        return adaptedFilm;
+      }
+    });
+
+    _classPrivateFieldSet(this, _endPoint, endPoint);
+
+    _classPrivateFieldSet(this, _authorization, authorization);
+  }
+
+  get filmsData() {
+    return _classPrivateFieldGet(this, _load).call(this, {
+      url: 'movies'
+    }).then(ApiService.parseResponse);
+  }
+
+}
+
+_defineProperty(ApiService, "parseResponse", response => response.json());
+
+_defineProperty(ApiService, "checkStatus", response => {
+  if (!response.ok) {
+    throw new Error(`${response.status}: ${response.statusText}`);
+  }
+});
+
+_defineProperty(ApiService, "catchError", err => {
+  throw err;
+});
+
+
+
+/***/ }),
+
 /***/ "./src/const.js":
 /*!**********************!*\
   !*** ./src/const.js ***!
@@ -19,7 +190,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "DateFormatStyle": () => (/* binding */ DateFormatStyle),
 /* harmony export */   "UserActions": () => (/* binding */ UserActions),
 /* harmony export */   "EventStates": () => (/* binding */ EventStates),
-/* harmony export */   "UpdateTypes": () => (/* binding */ UpdateTypes)
+/* harmony export */   "UpdateTypes": () => (/* binding */ UpdateTypes),
+/* harmony export */   "Methods": () => (/* binding */ Methods)
 /* harmony export */ });
 const SectionMessages = {
   DEFAULT: 'All movies. Upcoming',
@@ -52,17 +224,21 @@ const SortTypes = {
 };
 const DateFormatStyle = {
   DEFAULT: 'DD MMMM YYYY',
-  COMMENT: 'YYYY/MM/DD HH:mm',
   YEAR: 'YYYY'
 };
 const UserActions = {
-  UPDATE_ACTIVE: 'updateActive',
+  CREATE_POPUP: 'createPopup',
+  DELETE_POPUP: 'deletePopup',
+  DELETE_COMMENT: 'deleteComment',
+  ADD_COMMENT: 'addComment',
   UPDATE_DATA: 'updateData'
 };
 const UpdateTypes = {
+  LOAD: 'load',
   PATCH: 'patch',
   MINOR: 'minor',
-  MAJOR: 'major'
+  MAJOR: 'major',
+  INIT: 'init'
 };
 const EventStates = {
   PREVENT_DEFAULT: true,
@@ -71,6 +247,12 @@ const EventStates = {
 const KeyCode = {
   ESC: 'Escape',
   ENTER: 'Enter'
+};
+const Methods = {
+  GET: 'GET',
+  PUT: 'PUT',
+  POST: 'POST',
+  DELETE: 'DELETE'
 };
 
 
@@ -85,7 +267,6 @@ const KeyCode = {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "getFilmsStatistic": () => (/* binding */ getFilmsStatistic),
 /* harmony export */   "getUserRank": () => (/* binding */ getUserRank),
 /* harmony export */   "getWatchedFilmsData": () => (/* binding */ getWatchedFilmsData),
 /* harmony export */   "getTopCommentedFilmsData": () => (/* binding */ getTopCommentedFilmsData),
@@ -94,15 +275,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "filterFunctions": () => (/* binding */ filterFunctions)
 /* harmony export */ });
 /* harmony import */ var _const__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./const */ "./src/const.js");
-/* harmony import */ var _mock_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./mock/utils */ "./src/mock/utils.js");
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./utils */ "./src/utils.js");
 
 
-const filmsStatistic = {
-  watchlist: 0,
-  watched: 0,
-  favorite: 0,
-  total: 0
-};
 
 const getUserRank = watchedFilmsQuantity => {
   if (watchedFilmsQuantity >= _const__WEBPACK_IMPORTED_MODULE_0__.UserScores.BUFF) {
@@ -118,19 +293,6 @@ const getUserRank = watchedFilmsQuantity => {
   }
 
   return '';
-};
-
-const getFilmsStatistic = films => {
-  if (Array.isArray(films)) {
-    filmsStatistic.total = films.length;
-    films.forEach(film => {
-      filmsStatistic.watchlist += film.userDetails.watchlist ? 1 : 0;
-      filmsStatistic.watched += film.userDetails.watched ? 1 : 0;
-      filmsStatistic.favorite += film.userDetails.favorite ? 1 : 0;
-    });
-  }
-
-  return filmsStatistic;
 };
 
 const getWatchedFilmsData = films => {
@@ -158,10 +320,10 @@ const getTopRatedFilmsData = films => {
 const getTopCommentedFilmsData = films => {
   if (Array.isArray(films)) {
     return films.filter(film => {
-      var _film$comments;
+      var _film$commentsIds;
 
-      return Boolean((_film$comments = film.comments) === null || _film$comments === void 0 ? void 0 : _film$comments.length);
-    }).sort((a, b) => b.comments.length - a.comments.length);
+      return Boolean((_film$commentsIds = film.commentsIds) === null || _film$commentsIds === void 0 ? void 0 : _film$commentsIds.length);
+    }).sort((a, b) => b.commentsIds.length - a.commentsIds.length);
   }
 
   return [];
@@ -174,8 +336,8 @@ const getFilmsDataByDate = films => {
 
       return Boolean((_film$filmInfo2 = film.filmInfo) === null || _film$filmInfo2 === void 0 ? void 0 : (_film$filmInfo2$relea = _film$filmInfo2.release) === null || _film$filmInfo2$relea === void 0 ? void 0 : _film$filmInfo2$relea.date);
     }).sort((a, b) => {
-      const first = parseInt((0,_mock_utils__WEBPACK_IMPORTED_MODULE_1__.changeDateFormat)(a.filmInfo.release.date, _const__WEBPACK_IMPORTED_MODULE_0__.DateFormatStyle.YEAR), 10);
-      const second = parseInt((0,_mock_utils__WEBPACK_IMPORTED_MODULE_1__.changeDateFormat)(b.filmInfo.release.date, _const__WEBPACK_IMPORTED_MODULE_0__.DateFormatStyle.YEAR), 10);
+      const first = parseInt((0,_utils__WEBPACK_IMPORTED_MODULE_1__.changeDateFormat)(a.filmInfo.release.date, _const__WEBPACK_IMPORTED_MODULE_0__.DateFormatStyle.YEAR), 10);
+      const second = parseInt((0,_utils__WEBPACK_IMPORTED_MODULE_1__.changeDateFormat)(b.filmInfo.release.date, _const__WEBPACK_IMPORTED_MODULE_0__.DateFormatStyle.YEAR), 10);
 
       if (typeof first !== 'number' && typeof second !== 'number') {
         return 0;
@@ -197,238 +359,6 @@ const filterFunctions = {
   [_const__WEBPACK_IMPORTED_MODULE_0__.FilterTypes.FAVORITE]: films => films.filter(film => Boolean(film.userDetails.favorite)),
   [_const__WEBPACK_IMPORTED_MODULE_0__.FilterTypes.STATS]: films => films.filter(film => Boolean(film.id))
 };
-
-
-/***/ }),
-
-/***/ "./src/mock/data.js":
-/*!**************************!*\
-  !*** ./src/mock/data.js ***!
-  \**************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "getRandomFilmData": () => (/* binding */ getRandomFilmData)
-/* harmony export */ });
-/* harmony import */ var _utils_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./utils.js */ "./src/mock/utils.js");
-/* harmony import */ var nanoid__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! nanoid */ "./node_modules/nanoid/index.dev.js");
-/* harmony import */ var _const_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../const.js */ "./src/const.js");
-/* harmony import */ var dayjs__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! dayjs */ "./node_modules/dayjs/dayjs.min.js");
-/* harmony import */ var dayjs__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(dayjs__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var dayjs_plugin_duration__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! dayjs/plugin/duration */ "./node_modules/dayjs/plugin/duration.js");
-/* harmony import */ var dayjs_plugin_duration__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(dayjs_plugin_duration__WEBPACK_IMPORTED_MODULE_3__);
-
-
-
-
-
-dayjs__WEBPACK_IMPORTED_MODULE_2___default().extend((dayjs_plugin_duration__WEBPACK_IMPORTED_MODULE_3___default()));
-const BASE_IMAGE_URL = './images/posters/';
-const COMMENT_MAX_QUANTITY = 50;
-const COMMENT_MIN_QUANTITY = 0;
-const FILM_MAX_QUANTITY = 50;
-const FILM_MIN_QUANTITY = 0;
-const FILM_MAX_RATE = 10;
-const FILM_MIN_RATE = 0;
-const FILM_MIN_PEGI = 3;
-const FILM_MAX_PEGI = 18;
-const FILM_MIN_RUNTIME = 30;
-const FILM_MAX_RUNTIME = 180;
-const FILM_DESCRIPTION_MAX_QUANTITY = 5;
-const FILM_DESCRIPTION_MIN_QUANTITY = 1;
-const DATE_BASE_VALUE = '1950-01-01';
-const DATE_GAP_MAX = 30;
-const filmUrl = new Map();
-filmUrl.set('Made for Each Other', 'made-for-each-other.png').set('Popeye the Sailor Meets Sindbad the Sailor', 'popeye-meets-sinbad.png').set('Sagebrush Trai', 'sagebrush-trail.jpg').set('The Dance of Life', 'the-dance-of-life.jpg').set('The Man with the Golden Arm', 'the-man-with-the-golden-arm.jpg').set('The Great Flamarion', 'the-great-flamarion.jpg').set('Santa Claus Conquers the Martians', 'santa-claus-conquers-the-martians.jpg');
-const filmDescriptions = ['Lorem ipsum dolor sit amet, consectetur adipiscing elit.', 'Cras aliquet varius magna, non porta ligula feugiat eget.', 'Fusce tristique felis at fermentum pharetra.', 'Aliquam id orci ut lectus varius viverra.', 'Nullam nunc ex, convallis sed finibus eget, sollicitudin eget ante.', 'Phasellus eros mauris, condimentum sed nibh vitae, sodales efficitur ipsum.', 'Sed blandit, eros vel aliquam faucibus, purus ex euismod diam, eu luctus nunc ante ut dui.', 'Sed sed nisi sed augue convallis suscipit in sed felis. Aliquam erat volutpat.', 'Nunc fermentum tortor ac porta dapibus.', 'In rutrum ac purus sit amet tempus.'];
-const filmCountries = ['USA', 'Italy', 'New Zealand', 'France', 'Great Britain', 'Canada'];
-const filmWriters = ['Asghar Farhadi', 'Woody Allen', 'Charlie Kaufman', 'Paul Haggis', 'Rian Johnson'];
-const filmDirectors = ['Christopher Nolan', 'Steven Spielberg', 'Quentin Tarantino', 'Martin Scorsese', 'Ridley Scott', 'Stanley Kubrick'];
-const filmActors = ['Leonardo DiCaprio', 'Brad Pitt', 'Robert De Niro', 'Christian Bale', 'Tom Hanks', 'Gary Oldman', 'Edward Norton'];
-const filmGenres = ['Drama', 'Comedy', 'Noir', 'Mystery', 'Fantasy'];
-const commentEmotionTypes = ['smile', 'sleeping', 'puke', 'angry'];
-const commentUserNames = ['Алиса Селезнёва ', 'Пашка Гераскин', 'Маша и Наташа Белые', 'Коля Наумов', 'Громозека', 'Весельчак У'];
-const filmCommentExample = {
-  smile: ['А film that changed my life, a true masterpiece, post-credit scene was just amazing omg.', 'That\'s awesome!', 'Great movie!'],
-  sleeping: ['Booooooooooring', 'Almost fell asleep. Really...', 'Good film but i\'m tired.'],
-  puke: ['Very very old. Meh', 'It\'s just disgusting'],
-  angry: ['Almost two hours? Seriously?', 'And it\'s an Oscar nominee? It sucks', 'Burn it out', 'My eyes and ears are bleeding...']
-};
-const filmQuantity = (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.getRandomInteger)(FILM_MIN_QUANTITY, FILM_MAX_QUANTITY);
-
-const prepareCommentData = () => {
-  const commentEmotion = commentEmotionTypes[(0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.getRandomInteger)(0, commentEmotionTypes.length - 1)];
-  return {
-    id: (0,nanoid__WEBPACK_IMPORTED_MODULE_4__.nanoid)(),
-    author: commentUserNames[(0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.getRandomInteger)(0, commentUserNames.length - 1)],
-    emotion: commentEmotion,
-    content: filmCommentExample[commentEmotion][(0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.getRandomInteger)(0, filmCommentExample[commentEmotion].length - 1)],
-    date: (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.getRandomDate)(DATE_BASE_VALUE, DATE_GAP_MAX, _const_js__WEBPACK_IMPORTED_MODULE_1__.DateFormatStyle.COMMENT)
-  };
-};
-
-const getRandomCommentData = () => {
-  const commentQuantity = (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.getRandomInteger)(COMMENT_MIN_QUANTITY, COMMENT_MAX_QUANTITY);
-  return Array.from({
-    length: commentQuantity
-  }, prepareCommentData);
-};
-
-const prepareFilmData = () => {
-  if (filmQuantity) {
-    const filmName = [...filmUrl.keys()][(0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.getRandomInteger)(0, filmUrl.size - 1)];
-    const randomIndexes = (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.getNonRepeatUintArray)(0, filmDescriptions.length - 1, filmDescriptions.length).slice(FILM_DESCRIPTION_MIN_QUANTITY, FILM_DESCRIPTION_MAX_QUANTITY);
-    return {
-      id: (0,nanoid__WEBPACK_IMPORTED_MODULE_4__.nanoid)(),
-      comments: getRandomCommentData(),
-      filmInfo: {
-        title: filmName,
-        alternativeTitle: filmName,
-        totalRating: (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.getRandomFloatStrict)(FILM_MIN_RATE, FILM_MAX_RATE, 1),
-        poster: `${BASE_IMAGE_URL}${filmUrl.get(filmName)}`,
-        pegi: (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.getRandomInteger)(FILM_MIN_PEGI, FILM_MAX_PEGI),
-        director: filmDirectors[(0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.getRandomInteger)(0, filmDirectors.length - 1)],
-        description: randomIndexes.map(value => filmDescriptions[value]).join(' '),
-        actors: (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.getRandomPartFromArray)(filmActors).join(', '),
-        genre: (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.getRandomPartFromArray)(filmGenres),
-        writers: (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.getRandomPartFromArray)(filmWriters).join(', '),
-        release: {
-          date: (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.getRandomDate)(DATE_BASE_VALUE, DATE_GAP_MAX, _const_js__WEBPACK_IMPORTED_MODULE_1__.DateFormatStyle.DEFAULT),
-          country: filmCountries[(0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.getRandomInteger)(0, filmCountries.length - 1)]
-        },
-        runtime: (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.getRandomInteger)(FILM_MIN_RUNTIME, FILM_MAX_RUNTIME)
-      },
-      userDetails: {
-        watchlist: (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.getRandomBoolean)(),
-        watched: (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.getRandomBoolean)(),
-        favorite: (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.getRandomBoolean)(),
-        watchingDate: (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.getRandomDate)(dayjs__WEBPACK_IMPORTED_MODULE_2___default()().subtract(2, 'year'), 1, _const_js__WEBPACK_IMPORTED_MODULE_1__.DateFormatStyle.DEFAULT)
-      }
-    };
-  }
-
-  return null;
-};
-
-const getRandomFilmData = () => Array.from({
-  length: filmQuantity
-}, prepareFilmData);
-
-
-
-/***/ }),
-
-/***/ "./src/mock/utils.js":
-/*!***************************!*\
-  !*** ./src/mock/utils.js ***!
-  \***************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "getRandomInteger": () => (/* binding */ getRandomInteger),
-/* harmony export */   "getNonRepeatUintArray": () => (/* binding */ getNonRepeatUintArray),
-/* harmony export */   "getRandomPartFromArray": () => (/* binding */ getRandomPartFromArray),
-/* harmony export */   "getRandomBoolean": () => (/* binding */ getRandomBoolean),
-/* harmony export */   "getRandomDate": () => (/* binding */ getRandomDate),
-/* harmony export */   "getRandomFloatStrict": () => (/* binding */ getRandomFloatStrict),
-/* harmony export */   "getShortFilmDescription": () => (/* binding */ getShortFilmDescription),
-/* harmony export */   "changeDateFormat": () => (/* binding */ changeDateFormat),
-/* harmony export */   "getFilmDuration": () => (/* binding */ getFilmDuration)
-/* harmony export */ });
-/* harmony import */ var dayjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! dayjs */ "./node_modules/dayjs/dayjs.min.js");
-/* harmony import */ var dayjs__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(dayjs__WEBPACK_IMPORTED_MODULE_0__);
-
-const DATE_FORMAT = 'YYYY/MM/DD HH:mm';
-const DESCRIPTION_MAX_LENGTH = 140;
-const BASE_DATE = '1990-01-01';
-const DateFormat = {
-  DAY: 'day',
-  WEEK: 'week',
-  QUARTER: 'quarter',
-  MONTH: 'month',
-  YEAR: 'year',
-  HOUR: 'hour',
-  MINUTE: 'minute',
-  SECOND: 'second',
-  MSECOND: 'millisecond'
-}; // Источник - https://github.com/you-dont-need/You-Dont-Need-Lodash-Underscore#_random
-
-const getRandomInteger = (a = 0, b = 1) => {
-  const lower = Math.ceil(Math.min(a, b));
-  const upper = Math.floor(Math.max(a, b));
-  return Math.floor(lower + Math.random() * (upper - lower + 1));
-};
-
-const getRandomFloat = (lowerBound, upperBound) => Math.random() * (upperBound - lowerBound) + lowerBound;
-
-const getRandomFloatStrict = (lowerBound, upperBound, valueAfterComma) => Number((getRandomFloat(lowerBound, upperBound) + 1 / Math.pow(10, valueAfterComma + 1)).toFixed(valueAfterComma));
-
-const getNonRepeatUintArray = (lowerBorder, upperBorder, arrayLength) => {
-  const arrayTotalNumbers = [];
-  const arrayRandomNumbers = [];
-  let lower = Math.ceil(Math.min(Math.abs(lowerBorder), Math.abs(upperBorder)));
-  const upper = Math.floor(Math.max(Math.abs(lowerBorder), Math.abs(upperBorder)));
-  let totalNumbers = Math.abs(upper - lower) + 1;
-
-  if (arrayLength && totalNumbers >= arrayLength) {
-    while (totalNumbers--) {
-      arrayTotalNumbers.push(totalNumbers + lower);
-    }
-
-    while (arrayTotalNumbers.length) {
-      lower = Math.round(Math.random() * (arrayTotalNumbers.length - 1));
-      arrayRandomNumbers.push(arrayTotalNumbers[lower]);
-      arrayTotalNumbers.splice(lower, 1);
-    }
-
-    return arrayRandomNumbers;
-  }
-
-  throw new Error('generateNonRepeatArray: wrong attributes');
-};
-
-const getRandomPartFromArray = inputArray => {
-  if (Array.isArray(inputArray)) {
-    const upper = getRandomInteger(1, inputArray.length);
-    const lower = getRandomInteger(0, inputArray.length - 1);
-
-    if (upper > lower) {
-      return inputArray.slice(lower, upper);
-    } else {
-      return inputArray.slice(upper, lower);
-    }
-  }
-
-  return new Error('getRandomPartFromArray: inputArray is not an array');
-};
-
-const getRandomBoolean = () => Boolean(getRandomInteger(0, 1));
-
-const getRandomDate = (dateBase = BASE_DATE, dateGap = 0, dateFormat = DATE_FORMAT) => {
-  const date = dayjs__WEBPACK_IMPORTED_MODULE_0___default()(dateBase).add(getRandomInteger(-dateGap, dateGap), DateFormat.DAY).add(getRandomInteger(-dateGap, dateGap), DateFormat.MONTH).add(getRandomInteger(-dateGap, dateGap), DateFormat.YEAR).toDate();
-  return dayjs__WEBPACK_IMPORTED_MODULE_0___default()(date).format(dateFormat);
-};
-
-const getShortFilmDescription = filmDescription => {
-  if ((filmDescription === null || filmDescription === void 0 ? void 0 : filmDescription.length) >= DESCRIPTION_MAX_LENGTH) {
-    return `${filmDescription.slice(0, DESCRIPTION_MAX_LENGTH - 1)}...`;
-  }
-
-  return filmDescription;
-};
-
-const getFilmDuration = durationInMinutes => {
-  const hours = dayjs__WEBPACK_IMPORTED_MODULE_0___default().duration(durationInMinutes, 'minutes').$d.hours;
-  const minutes = dayjs__WEBPACK_IMPORTED_MODULE_0___default().duration(durationInMinutes, 'minutes').$d.minutes;
-  return `${hours ? hours : ''}${hours ? 'h' : ''} ${minutes ? minutes : '00'}m`;
-};
-
-const changeDateFormat = (date, format = DATE_FORMAT) => date ? dayjs__WEBPACK_IMPORTED_MODULE_0___default()(date).format(format) : '';
-
 
 
 /***/ }),
@@ -490,6 +420,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (/* binding */ FilmsModel)
 /* harmony export */ });
 /* harmony import */ var _abstract_observable_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./abstract-observable.js */ "./src/model/abstract-observable.js");
+/* harmony import */ var _const_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../const.js */ "./src/const.js");
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _classPrivateFieldInitSpec(obj, privateMap, value) { _checkPrivateRedeclaration(obj, privateMap); privateMap.set(obj, value); }
@@ -508,32 +439,206 @@ function _classApplyDescriptorSet(receiver, descriptor, value) { if (descriptor.
 
 
 
+
 var _filmsData = /*#__PURE__*/new WeakMap();
 
+var _apiService = /*#__PURE__*/new WeakMap();
+
+var _getFilmIndex = /*#__PURE__*/new WeakMap();
+
+var _adaptCommentToClient = /*#__PURE__*/new WeakMap();
+
+var _adaptFilmToClient = /*#__PURE__*/new WeakMap();
+
 class FilmsModel extends _abstract_observable_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
-  constructor(...args) {
-    super(...args);
+  constructor(apiService) {
+    super();
 
     _classPrivateFieldInitSpec(this, _filmsData, {
       writable: true,
       value: []
     });
 
-    _defineProperty(this, "update", (updateType, updateData) => {
-      const index = _classPrivateFieldGet(this, _filmsData).findIndex(film => film.id === (updateData === null || updateData === void 0 ? void 0 : updateData.id));
+    _classPrivateFieldInitSpec(this, _apiService, {
+      writable: true,
+      value: null
+    });
 
-      if (index === -1) {
-        throw new Error('Can\'t update non existing film');
+    _defineProperty(this, "init", async () => {
+      try {
+        const films = await _classPrivateFieldGet(this, _apiService).filmsData;
+
+        _classPrivateFieldSet(this, _filmsData, Array.isArray(films) ? films.map(_classPrivateFieldGet(this, _adaptFilmToClient)) : []);
+      } catch (err) {
+        _classPrivateFieldSet(this, _filmsData, []);
       }
 
-      _classPrivateFieldSet(this, _filmsData, [..._classPrivateFieldGet(this, _filmsData).slice(0, index), updateData, ..._classPrivateFieldGet(this, _filmsData).slice(index + 1)]);
-
-      this._notify(updateType, updateData);
+      this._notify(_const_js__WEBPACK_IMPORTED_MODULE_1__.UpdateTypes.INIT);
     });
-  }
 
-  set filmsData(films) {
-    _classPrivateFieldSet(this, _filmsData, [...films]);
+    _defineProperty(this, "update", async (updateType, updateData) => {
+      try {
+        const index = _classPrivateFieldGet(this, _getFilmIndex).call(this, updateData);
+
+        const filmResponse = await _classPrivateFieldGet(this, _apiService).updateFilm(updateData);
+
+        let updatedFilm = _classPrivateFieldGet(this, _adaptFilmToClient).call(this, filmResponse);
+
+        const commentResponse = await _classPrivateFieldGet(this, _apiService).getComments(updateData);
+        updatedFilm = _classPrivateFieldGet(this, _adaptCommentToClient).call(this, updatedFilm, commentResponse);
+
+        _classPrivateFieldGet(this, _filmsData).splice(index, 1, updatedFilm);
+
+        this._notify(updateType, updatedFilm);
+      } catch (err) {
+        throw new Error('Can\'t update film');
+      }
+    });
+
+    _defineProperty(this, "getComments", async (updateType, updateData) => {
+      try {
+        const index = _classPrivateFieldGet(this, _getFilmIndex).call(this, updateData);
+
+        const response = await _classPrivateFieldGet(this, _apiService).getComments(updateData);
+
+        const updatedFilm = _classPrivateFieldGet(this, _adaptCommentToClient).call(this, this.filmsData[index], response);
+
+        _classPrivateFieldGet(this, _filmsData).splice(index, 1, updatedFilm);
+
+        this._notify(updateType, updatedFilm);
+      } catch (err) {
+        throw new Error('Can\'t get film comment');
+      }
+    });
+
+    _defineProperty(this, "addComment", async (updateType, updateData) => {
+      try {
+        const index = _classPrivateFieldGet(this, _getFilmIndex).call(this, updateData);
+
+        const response = await _classPrivateFieldGet(this, _apiService).addComment(updateData);
+        _classPrivateFieldGet(this, _filmsData)[index].comments = response.comments;
+        _classPrivateFieldGet(this, _filmsData)[index].commentsIds = response.movie.comments;
+
+        this._notify(updateType, { ...this.filmsData[index]
+        });
+      } catch (err) {
+        throw new Error('Can\'t get film comment');
+      }
+    });
+
+    _defineProperty(this, "deleteComment", async (updateType, updateData) => {
+      try {
+        const index = _classPrivateFieldGet(this, _getFilmIndex).call(this, updateData);
+
+        const commentId = updateData.deletingCommentId;
+
+        const commentIndex = _classPrivateFieldGet(this, _filmsData)[index].comments.findIndex(comment => comment.id === commentId);
+
+        await _classPrivateFieldGet(this, _apiService).deleteComment(commentId);
+
+        _classPrivateFieldGet(this, _filmsData)[index].comments.splice(commentIndex, 1);
+
+        _classPrivateFieldGet(this, _filmsData)[index].commentsIds.splice(commentIndex, 1);
+
+        this._notify(updateType, { ...this.filmsData[index]
+        });
+      } catch (err) {
+        throw new Error('Can\'t get film comment');
+      }
+    });
+
+    _classPrivateFieldInitSpec(this, _getFilmIndex, {
+      writable: true,
+      value: updateData => {
+        const index = _classPrivateFieldGet(this, _filmsData).findIndex(film => film.id === (updateData === null || updateData === void 0 ? void 0 : updateData.id));
+
+        if (index === -1) {
+          throw new Error('Can\'t update non existing film');
+        }
+
+        return index;
+      }
+    });
+
+    _classPrivateFieldInitSpec(this, _adaptCommentToClient, {
+      writable: true,
+      value: (film, comments) => ({ ...film,
+        comments: Array.isArray(comments) ? comments : []
+      })
+    });
+
+    _classPrivateFieldInitSpec(this, _adaptFilmToClient, {
+      writable: true,
+      value: film => {
+        let adaptedFilm = {
+          id: '',
+          commentsIds: [],
+          comments: [],
+          filmInfo: {
+            title: '',
+            alternativeTitle: '',
+            totalRating: '',
+            poster: '',
+            pegi: '',
+            director: '',
+            description: '',
+            actors: '',
+            genre: '',
+            writers: '',
+            release: {
+              date: '',
+              country: ''
+            },
+            runtime: ''
+          },
+          userDetails: {
+            watchlist: '',
+            watched: '',
+            favorite: '',
+            watchingDate: ''
+          },
+          deletingCommentId: '',
+          addingComment: ''
+        };
+        adaptedFilm = { ...adaptedFilm,
+          ...film,
+          comments: [],
+          commentsIds: Array.isArray(film.comments) ? film.comments : [],
+          filmInfo: { ...film.film_info
+          },
+          userDetails: { ...film.user_details
+          }
+        };
+
+        if (film.film_info) {
+          adaptedFilm.filmInfo.pegi = film.film_info.age_rating;
+          delete adaptedFilm.filmInfo.age_rating;
+          adaptedFilm.filmInfo.alternativeTitle = film.film_info.alternative_title;
+          delete adaptedFilm.filmInfo.alternative_title;
+          adaptedFilm.filmInfo.totalRating = film.film_info.total_rating;
+          delete adaptedFilm.filmInfo.total_rating;
+
+          if (film.film_info.release) {
+            adaptedFilm.filmInfo.release.country = film.film_info.release.release_country;
+            delete adaptedFilm.filmInfo.release.release_country;
+          }
+
+          delete adaptedFilm.film_info;
+        }
+
+        if (film.user_details) {
+          adaptedFilm.userDetails.watched = film.user_details.already_watched;
+          delete adaptedFilm.userDetails.already_watched;
+          adaptedFilm.userDetails.watchingDate = film.user_details.watching_date;
+          delete adaptedFilm.userDetails.watching_date;
+          delete adaptedFilm.user_details;
+        }
+
+        return adaptedFilm;
+      }
+    });
+
+    _classPrivateFieldSet(this, _apiService, apiService);
   }
 
   get filmsData() {
@@ -623,8 +728,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _view_abstract_view_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../view/abstract-view.js */ "./src/view/abstract-view.js");
 /* harmony import */ var _view_film_card_view__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../view/film-card-view */ "./src/view/film-card-view.js");
 /* harmony import */ var _view_popup_view__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../view/popup-view */ "./src/view/popup-view.js");
-/* harmony import */ var dayjs__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! dayjs */ "./node_modules/dayjs/dayjs.min.js");
-/* harmony import */ var dayjs__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(dayjs__WEBPACK_IMPORTED_MODULE_6__);
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _classPrivateFieldInitSpec(obj, privateMap, value) { _checkPrivateRedeclaration(obj, privateMap); privateMap.set(obj, value); }
@@ -640,7 +743,6 @@ function _classPrivateFieldSet(receiver, privateMap, value) { var descriptor = _
 function _classExtractFieldDescriptor(receiver, privateMap, action) { if (!privateMap.has(receiver)) { throw new TypeError("attempted to " + action + " private field on non-instance"); } return privateMap.get(receiver); }
 
 function _classApplyDescriptorSet(receiver, descriptor, value) { if (descriptor.set) { descriptor.set.call(receiver, value); } else { if (!descriptor.writable) { throw new TypeError("attempted to set read only private field"); } descriptor.value = value; } }
-
 
 
 
@@ -746,14 +848,16 @@ class FilmPresenter {
       if (currentPopup) {
         _classPrivateFieldSet(this, _filmPopup, currentPopup);
 
+        _classPrivateFieldGet(this, _updatePopup).call(this);
+
         return;
       }
+
+      _classPrivateFieldGet(this, _handleViewAction).call(this, this, _const_js__WEBPACK_IMPORTED_MODULE_1__.UserActions.CREATE_POPUP);
 
       _classPrivateFieldSet(this, _filmPopup, new _view_popup_view__WEBPACK_IMPORTED_MODULE_5__["default"](_classPrivateFieldGet(this, _handleViewAction)));
 
       _classPrivateFieldGet(this, _filmPopup).init(_classPrivateFieldGet(this, _filmData));
-
-      _classPrivateFieldGet(this, _handleViewAction).call(this, this, _const_js__WEBPACK_IMPORTED_MODULE_1__.UserActions.UPDATE_ACTIVE);
 
       (0,_render_js__WEBPACK_IMPORTED_MODULE_0__.render)(document.body, _classPrivateFieldGet(this, _filmPopup), _render_js__WEBPACK_IMPORTED_MODULE_0__.RenderPosition.BEFOREEND);
       document.body.classList.add('hide-overflow');
@@ -770,9 +874,7 @@ class FilmPresenter {
 
     _classPrivateFieldInitSpec(this, _filmActionCallback, {
       writable: true,
-      value: actionDetails => {
-        _classPrivateFieldGet(this, _handleViewAction).call(this, _classPrivateFieldGet(this, _filmData), _const_js__WEBPACK_IMPORTED_MODULE_1__.UserActions.UPDATE_DATA, actionDetails);
-      }
+      value: actionDetails => _classPrivateFieldGet(this, _handleViewAction).call(this, _classPrivateFieldGet(this, _filmData), _const_js__WEBPACK_IMPORTED_MODULE_1__.UserActions.UPDATE_DATA, actionDetails)
     });
 
     _classPrivateFieldInitSpec(this, _updateFilmHandlers, {
@@ -801,7 +903,6 @@ class FilmPresenter {
       writable: true,
       value: () => {
         _classPrivateFieldGet(this, _filmData).userDetails.watched = !_classPrivateFieldGet(this, _filmData).userDetails.watched;
-        _classPrivateFieldGet(this, _filmData).userDetails.watchingDate = _classPrivateFieldGet(this, _filmData).userDetails.watched ? '' : dayjs__WEBPACK_IMPORTED_MODULE_6___default()();
 
         _classPrivateFieldGet(this, _filmActionCallback).call(this, _const_js__WEBPACK_IMPORTED_MODULE_1__.FilterTypes.WATCHED);
       }
@@ -888,6 +989,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _view_film_card_list_view_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../view/film-card-list-view.js */ "./src/view/film-card-list-view.js");
 /* harmony import */ var _film_presenter_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./film-presenter.js */ "./src/presenter/film-presenter.js");
 /* harmony import */ var _view_show_more_button_view_js__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ../view/show-more-button-view.js */ "./src/view/show-more-button-view.js");
+/* harmony import */ var _view_films_loading_view_js__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ../view/films-loading-view.js */ "./src/view/films-loading-view.js");
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _classPrivateFieldInitSpec(obj, privateMap, value) { _checkPrivateRedeclaration(obj, privateMap); privateMap.set(obj, value); }
@@ -916,16 +1018,17 @@ function _classApplyDescriptorSet(receiver, descriptor, value) { if (descriptor.
 
 
 
+
 const FILM_SHOW_PER_STEP = 5;
 const FILM_EXTRA_QUANTITY = 2;
 
 var _deskContainer = /*#__PURE__*/new WeakMap();
 
+var _loadingComponent = /*#__PURE__*/new WeakMap();
+
 var _filmsSortMenu = /*#__PURE__*/new WeakMap();
 
 var _filmsDesk = /*#__PURE__*/new WeakMap();
-
-var _filmsStats = /*#__PURE__*/new WeakMap();
 
 var _filmsMainSheet = /*#__PURE__*/new WeakMap();
 
@@ -970,6 +1073,8 @@ var _activeFilterType = /*#__PURE__*/new WeakMap();
 var _shownFilmsQuantity = /*#__PURE__*/new WeakMap();
 
 var _restFilmQuantity = /*#__PURE__*/new WeakMap();
+
+var _isLoading = /*#__PURE__*/new WeakMap();
 
 var _renderSheet = /*#__PURE__*/new WeakMap();
 
@@ -1017,6 +1122,8 @@ var _destroyCards = /*#__PURE__*/new WeakMap();
 
 var _destroyDesk = /*#__PURE__*/new WeakMap();
 
+var _destroyLoadingComponent = /*#__PURE__*/new WeakMap();
+
 var _restoreShownFilmsQuantity = /*#__PURE__*/new WeakMap();
 
 var _resetCards = /*#__PURE__*/new WeakMap();
@@ -1032,17 +1139,17 @@ class FilmDeskPresenter {
       value: null
     });
 
+    _classPrivateFieldInitSpec(this, _loadingComponent, {
+      writable: true,
+      value: new _view_films_loading_view_js__WEBPACK_IMPORTED_MODULE_12__["default"]()
+    });
+
     _classPrivateFieldInitSpec(this, _filmsSortMenu, {
       writable: true,
       value: null
     });
 
     _classPrivateFieldInitSpec(this, _filmsDesk, {
-      writable: true,
-      value: null
-    });
-
-    _classPrivateFieldInitSpec(this, _filmsStats, {
       writable: true,
       value: null
     });
@@ -1157,7 +1264,17 @@ class FilmDeskPresenter {
       value: null
     });
 
+    _classPrivateFieldInitSpec(this, _isLoading, {
+      writable: true,
+      value: true
+    });
+
     _defineProperty(this, "init", () => {
+      if (_classPrivateFieldGet(this, _isLoading)) {
+        (0,_render_js__WEBPACK_IMPORTED_MODULE_0__.render)(_classPrivateFieldGet(this, _deskContainer), _classPrivateFieldGet(this, _loadingComponent), _render_js__WEBPACK_IMPORTED_MODULE_0__.RenderPosition.BEFOREEND);
+        return;
+      }
+
       _classPrivateFieldGet(this, _renderDesk).call(this);
 
       _classPrivateFieldGet(this, _renderSortMenu).call(this);
@@ -1276,17 +1393,27 @@ class FilmDeskPresenter {
       writable: true,
       value: film => {
         if (film) {
+          const changingFilm = { ...film
+          };
+          changingFilm.commentsIds = [...film.commentsIds];
+
+          if (changingFilm.addingComment) {
+            changingFilm.commentsIds.push('newComment');
+          } else {
+            changingFilm.commentsIds.splice(changingFilm.commentsIds.deletingCommentId, 1);
+          }
+
           const indexOld = _classPrivateFieldGet(this, _topCommentedFilms).findIndex(item => item.id === film.id);
 
           if (indexOld === -1) {
-            if (film.comments.length > _classPrivateFieldGet(this, _topCommentedFilms)[_classPrivateFieldGet(this, _topCommentedFilms).length - 1].comments.length) {
+            if (changingFilm.commentsIds.length > _classPrivateFieldGet(this, _topCommentedFilms)[_classPrivateFieldGet(this, _topCommentedFilms).length - 1].commentsIds.length) {
               return true;
             }
           } else {
             const indexTotal = _classPrivateFieldGet(this, _filmsModel).filmsData.findIndex(item => item.id === film.id);
 
             const newTopCommentFilms = [..._classPrivateFieldGet(this, _filmsModel).filmsData];
-            newTopCommentFilms.splice(indexTotal, 1, film);
+            newTopCommentFilms.splice(indexTotal, 1, changingFilm);
             const indexNew = (0,_filter_js__WEBPACK_IMPORTED_MODULE_1__.getTopCommentedFilmsData)(newTopCommentFilms).findIndex(item => item.id === film.id);
 
             if (indexNew === -1 || indexOld !== indexNew) {
@@ -1301,11 +1428,11 @@ class FilmDeskPresenter {
 
     _classPrivateFieldInitSpec(this, _isUpdatePatch, {
       writable: true,
-      value: (update, actionDetails) => {
+      value: actionDetails => {
         const isFilterTypeStats = _classPrivateFieldGet(this, _filterModel).filterType === _const_js__WEBPACK_IMPORTED_MODULE_2__.FilterTypes.STATS;
         const isFilterTypeAll = _classPrivateFieldGet(this, _filterModel).filterType === _const_js__WEBPACK_IMPORTED_MODULE_2__.FilterTypes.ALL;
         const isFilterAndActionSame = Boolean(actionDetails && _classPrivateFieldGet(this, _filterModel).filterType !== actionDetails);
-        return Boolean(isFilterTypeStats || (isFilterTypeAll || isFilterAndActionSame) && !_classPrivateFieldGet(this, _isCommentRatingChanged).call(this, update));
+        return Boolean(isFilterTypeStats || isFilterTypeAll || isFilterAndActionSame);
       }
     });
 
@@ -1313,17 +1440,30 @@ class FilmDeskPresenter {
       writable: true,
       value: (update, actionType, actionDetails) => {
         switch (actionType) {
-          case _const_js__WEBPACK_IMPORTED_MODULE_2__.UserActions.UPDATE_ACTIVE:
+          case _const_js__WEBPACK_IMPORTED_MODULE_2__.UserActions.DELETE_POPUP:
+            _classPrivateFieldGet(this, _setActiveFilm).call(this, null);
+
+            break;
+
+          case _const_js__WEBPACK_IMPORTED_MODULE_2__.UserActions.CREATE_POPUP:
             _classPrivateFieldGet(this, _setActiveFilm).call(this, update);
+
+            _classPrivateFieldGet(this, _filmsModel).getComments(_const_js__WEBPACK_IMPORTED_MODULE_2__.UpdateTypes.LOAD, update);
+
+            break;
+
+          case _const_js__WEBPACK_IMPORTED_MODULE_2__.UserActions.DELETE_COMMENT:
+            _classPrivateFieldGet(this, _filmsModel).deleteComment(_classPrivateFieldGet(this, _isCommentRatingChanged).call(this, update) ? _const_js__WEBPACK_IMPORTED_MODULE_2__.UpdateTypes.MINOR : _const_js__WEBPACK_IMPORTED_MODULE_2__.UpdateTypes.PATCH, update);
+
+            break;
+
+          case _const_js__WEBPACK_IMPORTED_MODULE_2__.UserActions.ADD_COMMENT:
+            _classPrivateFieldGet(this, _filmsModel).addComment(_classPrivateFieldGet(this, _isCommentRatingChanged).call(this, update) ? _const_js__WEBPACK_IMPORTED_MODULE_2__.UpdateTypes.MINOR : _const_js__WEBPACK_IMPORTED_MODULE_2__.UpdateTypes.PATCH, update);
 
             break;
 
           case _const_js__WEBPACK_IMPORTED_MODULE_2__.UserActions.UPDATE_DATA:
-            if (_classPrivateFieldGet(this, _isUpdatePatch).call(this, update, actionDetails)) {
-              _classPrivateFieldGet(this, _filmsModel).update(_const_js__WEBPACK_IMPORTED_MODULE_2__.UpdateTypes.PATCH, update);
-            } else {
-              _classPrivateFieldGet(this, _filmsModel).update(_const_js__WEBPACK_IMPORTED_MODULE_2__.UpdateTypes.MINOR, update);
-            }
+            _classPrivateFieldGet(this, _filmsModel).update(_classPrivateFieldGet(this, _isUpdatePatch).call(this, actionDetails) ? _const_js__WEBPACK_IMPORTED_MODULE_2__.UpdateTypes.PATCH : _const_js__WEBPACK_IMPORTED_MODULE_2__.UpdateTypes.MINOR, update);
 
             break;
 
@@ -1336,7 +1476,13 @@ class FilmDeskPresenter {
     _classPrivateFieldInitSpec(this, _handleModelEvent, {
       writable: true,
       value: (updateType, data) => {
+        var _classPrivateFieldGet5;
+
         switch (updateType) {
+          case _const_js__WEBPACK_IMPORTED_MODULE_2__.UpdateTypes.LOAD:
+            (_classPrivateFieldGet5 = _classPrivateFieldGet(this, _activeFilm)) === null || _classPrivateFieldGet5 === void 0 ? void 0 : _classPrivateFieldGet5.init(data);
+            break;
+
           case _const_js__WEBPACK_IMPORTED_MODULE_2__.UpdateTypes.PATCH:
             _classPrivateFieldGet(this, _updateFilmsPresenters).call(this, data);
 
@@ -1356,6 +1502,14 @@ class FilmDeskPresenter {
           case _const_js__WEBPACK_IMPORTED_MODULE_2__.UpdateTypes.MAJOR:
             _classPrivateFieldGet(this, _destroyDesk).call(this);
 
+            break;
+
+          case _const_js__WEBPACK_IMPORTED_MODULE_2__.UpdateTypes.INIT:
+            _classPrivateFieldSet(this, _isLoading, false);
+
+            _classPrivateFieldGet(this, _destroyLoadingComponent).call(this);
+
+            this.init();
             break;
 
           default:
@@ -1414,6 +1568,8 @@ class FilmDeskPresenter {
           presenter.createPopup(_classPrivateFieldGet(this, _activeFilm).popup);
 
           _classPrivateFieldSet(this, _activeFilm, presenter);
+
+          _classPrivateFieldSet(this, _isActiveFilmChanging, false);
         }
       }
     });
@@ -1534,13 +1690,13 @@ class FilmDeskPresenter {
         _classPrivateFieldGet(this, _destroyCards).call(this);
 
         if (_classPrivateFieldGet(this, _filmsDesk)) {
-          var _classPrivateFieldGet5, _classPrivateFieldGet6;
+          var _classPrivateFieldGet6, _classPrivateFieldGet7;
 
-          (_classPrivateFieldGet5 = _classPrivateFieldGet(this, _filmsSortMenu)) === null || _classPrivateFieldGet5 === void 0 ? void 0 : _classPrivateFieldGet5.destroyElement();
+          (_classPrivateFieldGet6 = _classPrivateFieldGet(this, _filmsSortMenu)) === null || _classPrivateFieldGet6 === void 0 ? void 0 : _classPrivateFieldGet6.destroyElement();
 
           _classPrivateFieldSet(this, _filmsSortMenu, null);
 
-          (_classPrivateFieldGet6 = _classPrivateFieldGet(this, _showMoreButton)) === null || _classPrivateFieldGet6 === void 0 ? void 0 : _classPrivateFieldGet6.destroyElement();
+          (_classPrivateFieldGet7 = _classPrivateFieldGet(this, _showMoreButton)) === null || _classPrivateFieldGet7 === void 0 ? void 0 : _classPrivateFieldGet7.destroyElement();
 
           _classPrivateFieldSet(this, _showMoreButton, null);
 
@@ -1548,6 +1704,15 @@ class FilmDeskPresenter {
 
           _classPrivateFieldSet(this, _filmsDesk, null);
         }
+      }
+    });
+
+    _classPrivateFieldInitSpec(this, _destroyLoadingComponent, {
+      writable: true,
+      value: () => {
+        _classPrivateFieldGet(this, _loadingComponent).destroyElement();
+
+        _classPrivateFieldSet(this, _loadingComponent, null);
       }
     });
 
@@ -1751,15 +1916,6 @@ class FilterMenuPresenter {
       value: null
     });
 
-    _classPrivateFieldInitSpec(this, _getStatistic, {
-      writable: true,
-      value: () => ({
-        watchlist: _filter_js__WEBPACK_IMPORTED_MODULE_5__.filterFunctions[_const_js__WEBPACK_IMPORTED_MODULE_6__.FilterTypes.WATCHLIST](_classPrivateFieldGet(this, _filmsModel).filmsData).length,
-        watched: _filter_js__WEBPACK_IMPORTED_MODULE_5__.filterFunctions[_const_js__WEBPACK_IMPORTED_MODULE_6__.FilterTypes.WATCHED](_classPrivateFieldGet(this, _filmsModel).filmsData).length,
-        favorite: _filter_js__WEBPACK_IMPORTED_MODULE_5__.filterFunctions[_const_js__WEBPACK_IMPORTED_MODULE_6__.FilterTypes.FAVORITE](_classPrivateFieldGet(this, _filmsModel).filmsData).length
-      })
-    });
-
     _defineProperty(this, "init", () => {
       const prevFilterComponent = _classPrivateFieldGet(this, _filterComponent);
 
@@ -1774,6 +1930,15 @@ class FilterMenuPresenter {
       }
 
       (0,_render_js__WEBPACK_IMPORTED_MODULE_4__.render)(_classPrivateFieldGet(this, _filterContainer), _classPrivateFieldGet(this, _filterComponent), _render_js__WEBPACK_IMPORTED_MODULE_4__.RenderPosition.AFTERBEGIN);
+    });
+
+    _classPrivateFieldInitSpec(this, _getStatistic, {
+      writable: true,
+      value: () => ({
+        watchlist: _filter_js__WEBPACK_IMPORTED_MODULE_5__.filterFunctions[_const_js__WEBPACK_IMPORTED_MODULE_6__.FilterTypes.WATCHLIST](_classPrivateFieldGet(this, _filmsModel).filmsData).length,
+        watched: _filter_js__WEBPACK_IMPORTED_MODULE_5__.filterFunctions[_const_js__WEBPACK_IMPORTED_MODULE_6__.FilterTypes.WATCHED](_classPrivateFieldGet(this, _filmsModel).filmsData).length,
+        favorite: _filter_js__WEBPACK_IMPORTED_MODULE_5__.filterFunctions[_const_js__WEBPACK_IMPORTED_MODULE_6__.FilterTypes.FAVORITE](_classPrivateFieldGet(this, _filmsModel).filmsData).length
+      })
     });
 
     _classPrivateFieldInitSpec(this, _renderUserStatistic, {
@@ -1802,11 +1967,13 @@ class FilterMenuPresenter {
 
     _classPrivateFieldInitSpec(this, _handleModelEvent, {
       writable: true,
-      value: () => {
-        this.init();
+      value: updateType => {
+        if (updateType !== _const_js__WEBPACK_IMPORTED_MODULE_6__.UpdateTypes.LOAD) {
+          this.init();
 
-        if (_classPrivateFieldGet(this, _filterModel).filterType === _const_js__WEBPACK_IMPORTED_MODULE_6__.FilterTypes.STATS) {
-          _classPrivateFieldGet(this, _userStatistic).init(_classPrivateFieldGet(this, _filmsModel).filmsData);
+          if (_classPrivateFieldGet(this, _filterModel).filterType === _const_js__WEBPACK_IMPORTED_MODULE_6__.FilterTypes.STATS) {
+            _classPrivateFieldGet(this, _userStatistic).init(_classPrivateFieldGet(this, _filmsModel).filmsData);
+          }
         }
       }
     });
@@ -1844,6 +2011,252 @@ class FilterMenuPresenter {
     _classPrivateFieldSet(this, _filterContainer, filterContainer);
 
     _classPrivateFieldSet(this, _filterModel, filterModel);
+
+    _classPrivateFieldSet(this, _filmsModel, filmsModel);
+
+    _classPrivateFieldGet(this, _filmsModel).addObserver(_classPrivateFieldGet(this, _handleModelEvent));
+  }
+
+}
+
+
+
+/***/ }),
+
+/***/ "./src/presenter/footer-profile-presenter.js":
+/*!***************************************************!*\
+  !*** ./src/presenter/footer-profile-presenter.js ***!
+  \***************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ FooterProfilePresenter)
+/* harmony export */ });
+/* harmony import */ var _view_abstract_view_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../view/abstract-view.js */ "./src/view/abstract-view.js");
+/* harmony import */ var _model_abstract_observable_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../model/abstract-observable.js */ "./src/model/abstract-observable.js");
+/* harmony import */ var _view_films_quantity_footer_view_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../view/films-quantity-footer-view.js */ "./src/view/films-quantity-footer-view.js");
+/* harmony import */ var _render_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../render.js */ "./src/render.js");
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function _classPrivateFieldInitSpec(obj, privateMap, value) { _checkPrivateRedeclaration(obj, privateMap); privateMap.set(obj, value); }
+
+function _checkPrivateRedeclaration(obj, privateCollection) { if (privateCollection.has(obj)) { throw new TypeError("Cannot initialize the same private elements twice on an object"); } }
+
+function _classPrivateFieldGet(receiver, privateMap) { var descriptor = _classExtractFieldDescriptor(receiver, privateMap, "get"); return _classApplyDescriptorGet(receiver, descriptor); }
+
+function _classApplyDescriptorGet(receiver, descriptor) { if (descriptor.get) { return descriptor.get.call(receiver); } return descriptor.value; }
+
+function _classPrivateFieldSet(receiver, privateMap, value) { var descriptor = _classExtractFieldDescriptor(receiver, privateMap, "set"); _classApplyDescriptorSet(receiver, descriptor, value); return value; }
+
+function _classExtractFieldDescriptor(receiver, privateMap, action) { if (!privateMap.has(receiver)) { throw new TypeError("attempted to " + action + " private field on non-instance"); } return privateMap.get(receiver); }
+
+function _classApplyDescriptorSet(receiver, descriptor, value) { if (descriptor.set) { descriptor.set.call(receiver, value); } else { if (!descriptor.writable) { throw new TypeError("attempted to set read only private field"); } descriptor.value = value; } }
+
+
+
+
+
+
+var _filmsModel = /*#__PURE__*/new WeakMap();
+
+var _filmQuantity = /*#__PURE__*/new WeakMap();
+
+var _footerContainer = /*#__PURE__*/new WeakMap();
+
+var _footerComponent = /*#__PURE__*/new WeakMap();
+
+var _getWatchedFilmsQuantity = /*#__PURE__*/new WeakMap();
+
+var _handleModelEvent = /*#__PURE__*/new WeakMap();
+
+class FooterProfilePresenter {
+  constructor(footerContainer, filmsModel) {
+    _classPrivateFieldInitSpec(this, _filmsModel, {
+      writable: true,
+      value: null
+    });
+
+    _classPrivateFieldInitSpec(this, _filmQuantity, {
+      writable: true,
+      value: null
+    });
+
+    _classPrivateFieldInitSpec(this, _footerContainer, {
+      writable: true,
+      value: null
+    });
+
+    _classPrivateFieldInitSpec(this, _footerComponent, {
+      writable: true,
+      value: null
+    });
+
+    _defineProperty(this, "init", () => {
+      const filmQuantity = _classPrivateFieldGet(this, _getWatchedFilmsQuantity).call(this);
+
+      if (_classPrivateFieldGet(this, _filmQuantity) !== filmQuantity) {
+        _classPrivateFieldSet(this, _filmQuantity, filmQuantity);
+
+        const prevComponent = _classPrivateFieldGet(this, _footerComponent);
+
+        _classPrivateFieldSet(this, _footerComponent, new _view_films_quantity_footer_view_js__WEBPACK_IMPORTED_MODULE_2__["default"](_classPrivateFieldGet(this, _filmQuantity)));
+
+        if (prevComponent) {
+          (0,_render_js__WEBPACK_IMPORTED_MODULE_3__.replace)(prevComponent, _classPrivateFieldGet(this, _footerComponent));
+        } else {
+          (0,_render_js__WEBPACK_IMPORTED_MODULE_3__.render)(_classPrivateFieldGet(this, _footerContainer), _classPrivateFieldGet(this, _footerComponent), _render_js__WEBPACK_IMPORTED_MODULE_3__.RenderPosition.BEFOREEND);
+        }
+      }
+    });
+
+    _classPrivateFieldInitSpec(this, _getWatchedFilmsQuantity, {
+      writable: true,
+      value: () => _classPrivateFieldGet(this, _filmsModel).filmsData.length
+    });
+
+    _classPrivateFieldInitSpec(this, _handleModelEvent, {
+      writable: true,
+      value: () => {
+        this.init();
+      }
+    });
+
+    if (!(footerContainer instanceof _view_abstract_view_js__WEBPACK_IMPORTED_MODULE_0__["default"] || footerContainer instanceof Element)) {
+      throw new Error('Can\'t create instance of FooterProfilePresenter while footerContainer is not an Element or instance of AbstractView');
+    }
+
+    if (!(filmsModel instanceof _model_abstract_observable_js__WEBPACK_IMPORTED_MODULE_1__["default"])) {
+      throw new Error('Can\\\'t create instance of FooterProfilePresenter while filmsModel is not an instance of AbstractObservable');
+    }
+
+    _classPrivateFieldSet(this, _footerContainer, footerContainer);
+
+    _classPrivateFieldSet(this, _filmsModel, filmsModel);
+
+    _classPrivateFieldGet(this, _filmsModel).addObserver(_classPrivateFieldGet(this, _handleModelEvent));
+  }
+
+}
+
+
+
+/***/ }),
+
+/***/ "./src/presenter/header-profile-presenter.js":
+/*!***************************************************!*\
+  !*** ./src/presenter/header-profile-presenter.js ***!
+  \***************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ HeaderProfilePresenter)
+/* harmony export */ });
+/* harmony import */ var _view_abstract_view_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../view/abstract-view.js */ "./src/view/abstract-view.js");
+/* harmony import */ var _model_abstract_observable_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../model/abstract-observable.js */ "./src/model/abstract-observable.js");
+/* harmony import */ var _view_user_profile_view_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../view/user-profile-view.js */ "./src/view/user-profile-view.js");
+/* harmony import */ var _render_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../render.js */ "./src/render.js");
+/* harmony import */ var _filter_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../filter.js */ "./src/filter.js");
+/* harmony import */ var _const_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../const.js */ "./src/const.js");
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function _classPrivateFieldInitSpec(obj, privateMap, value) { _checkPrivateRedeclaration(obj, privateMap); privateMap.set(obj, value); }
+
+function _checkPrivateRedeclaration(obj, privateCollection) { if (privateCollection.has(obj)) { throw new TypeError("Cannot initialize the same private elements twice on an object"); } }
+
+function _classPrivateFieldGet(receiver, privateMap) { var descriptor = _classExtractFieldDescriptor(receiver, privateMap, "get"); return _classApplyDescriptorGet(receiver, descriptor); }
+
+function _classApplyDescriptorGet(receiver, descriptor) { if (descriptor.get) { return descriptor.get.call(receiver); } return descriptor.value; }
+
+function _classPrivateFieldSet(receiver, privateMap, value) { var descriptor = _classExtractFieldDescriptor(receiver, privateMap, "set"); _classApplyDescriptorSet(receiver, descriptor, value); return value; }
+
+function _classExtractFieldDescriptor(receiver, privateMap, action) { if (!privateMap.has(receiver)) { throw new TypeError("attempted to " + action + " private field on non-instance"); } return privateMap.get(receiver); }
+
+function _classApplyDescriptorSet(receiver, descriptor, value) { if (descriptor.set) { descriptor.set.call(receiver, value); } else { if (!descriptor.writable) { throw new TypeError("attempted to set read only private field"); } descriptor.value = value; } }
+
+
+
+
+
+
+
+
+var _filmsModel = /*#__PURE__*/new WeakMap();
+
+var _headerContainer = /*#__PURE__*/new WeakMap();
+
+var _headerComponent = /*#__PURE__*/new WeakMap();
+
+var _userRank = /*#__PURE__*/new WeakMap();
+
+var _getWatchedFilmsQuantity = /*#__PURE__*/new WeakMap();
+
+var _handleModelEvent = /*#__PURE__*/new WeakMap();
+
+class HeaderProfilePresenter {
+  constructor(headerContainer, filmsModel) {
+    _classPrivateFieldInitSpec(this, _filmsModel, {
+      writable: true,
+      value: null
+    });
+
+    _classPrivateFieldInitSpec(this, _headerContainer, {
+      writable: true,
+      value: null
+    });
+
+    _classPrivateFieldInitSpec(this, _headerComponent, {
+      writable: true,
+      value: null
+    });
+
+    _classPrivateFieldInitSpec(this, _userRank, {
+      writable: true,
+      value: null
+    });
+
+    _defineProperty(this, "init", () => {
+      const newRank = (0,_filter_js__WEBPACK_IMPORTED_MODULE_4__.getUserRank)(_classPrivateFieldGet(this, _getWatchedFilmsQuantity).call(this));
+
+      if (_classPrivateFieldGet(this, _userRank) !== newRank) {
+        _classPrivateFieldSet(this, _userRank, newRank);
+
+        const prevComponent = _classPrivateFieldGet(this, _headerComponent);
+
+        _classPrivateFieldSet(this, _headerComponent, new _view_user_profile_view_js__WEBPACK_IMPORTED_MODULE_2__["default"](_classPrivateFieldGet(this, _userRank)));
+
+        if (prevComponent) {
+          (0,_render_js__WEBPACK_IMPORTED_MODULE_3__.replace)(prevComponent, _classPrivateFieldGet(this, _headerComponent));
+        } else {
+          (0,_render_js__WEBPACK_IMPORTED_MODULE_3__.render)(_classPrivateFieldGet(this, _headerContainer), _classPrivateFieldGet(this, _headerComponent), _render_js__WEBPACK_IMPORTED_MODULE_3__.RenderPosition.BEFOREEND);
+        }
+      }
+    });
+
+    _classPrivateFieldInitSpec(this, _getWatchedFilmsQuantity, {
+      writable: true,
+      value: () => _filter_js__WEBPACK_IMPORTED_MODULE_4__.filterFunctions[_const_js__WEBPACK_IMPORTED_MODULE_5__.FilterTypes.WATCHED](_classPrivateFieldGet(this, _filmsModel).filmsData).length
+    });
+
+    _classPrivateFieldInitSpec(this, _handleModelEvent, {
+      writable: true,
+      value: () => {
+        this.init();
+      }
+    });
+
+    if (!(headerContainer instanceof _view_abstract_view_js__WEBPACK_IMPORTED_MODULE_0__["default"] || headerContainer instanceof Element)) {
+      throw new Error('Can\'t create instance of HeaderProfilePresenter while headerContainer is not an Element or instance of AbstractView');
+    }
+
+    if (!(filmsModel instanceof _model_abstract_observable_js__WEBPACK_IMPORTED_MODULE_1__["default"])) {
+      throw new Error('Can\\\'t create instance of HeaderProfilePresenter while filmsModel is not an instance of AbstractObservable');
+    }
+
+    _classPrivateFieldSet(this, _headerContainer, headerContainer);
 
     _classPrivateFieldSet(this, _filmsModel, filmsModel);
 
@@ -1922,6 +2335,46 @@ const replace = (oldElement, newElement) => {
 
   oldInstance.replaceWith(newInstance);
 };
+
+
+
+/***/ }),
+
+/***/ "./src/utils.js":
+/*!**********************!*\
+  !*** ./src/utils.js ***!
+  \**********************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "getShortFilmDescription": () => (/* binding */ getShortFilmDescription),
+/* harmony export */   "changeDateFormat": () => (/* binding */ changeDateFormat),
+/* harmony export */   "getFilmDuration": () => (/* binding */ getFilmDuration)
+/* harmony export */ });
+/* harmony import */ var dayjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! dayjs */ "./node_modules/dayjs/dayjs.min.js");
+/* harmony import */ var dayjs__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(dayjs__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _const__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./const */ "./src/const.js");
+
+
+const DESCRIPTION_MAX_LENGTH = 140;
+
+const getShortFilmDescription = filmDescription => {
+  if ((filmDescription === null || filmDescription === void 0 ? void 0 : filmDescription.length) >= DESCRIPTION_MAX_LENGTH) {
+    return `${filmDescription.slice(0, DESCRIPTION_MAX_LENGTH - 1)}...`;
+  }
+
+  return filmDescription;
+};
+
+const getFilmDuration = durationInMinutes => {
+  const hours = dayjs__WEBPACK_IMPORTED_MODULE_0___default().duration(durationInMinutes, 'minutes').$d.hours;
+  const minutes = dayjs__WEBPACK_IMPORTED_MODULE_0___default().duration(durationInMinutes, 'minutes').$d.minutes;
+  return `${hours ? hours : ''}${hours ? 'h' : ''} ${minutes ? minutes : '00'}m`;
+};
+
+const changeDateFormat = (date, format = _const__WEBPACK_IMPORTED_MODULE_1__.DateFormatStyle.DEFAULT) => date ? dayjs__WEBPACK_IMPORTED_MODULE_0___default()(date).format(format) : '';
 
 
 
@@ -2116,7 +2569,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (/* binding */ FilmCardView)
 /* harmony export */ });
-/* harmony import */ var _mock_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../mock/utils */ "./src/mock/utils.js");
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../utils */ "./src/utils.js");
 /* harmony import */ var _const__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../const */ "./src/const.js");
 /* harmony import */ var _abstract_view__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./abstract-view */ "./src/view/abstract-view.js");
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
@@ -2151,8 +2604,8 @@ const getFilmCardTemplate = filmData => {
       runtime = '',
       release = ''
     } = filmData.filmInfo || {};
-    const year = (0,_mock_utils__WEBPACK_IMPORTED_MODULE_0__.changeDateFormat)(release === null || release === void 0 ? void 0 : release.date, _const__WEBPACK_IMPORTED_MODULE_1__.DateFormatStyle.YEAR);
-    const comments = filmData.comments || [];
+    const year = (0,_utils__WEBPACK_IMPORTED_MODULE_0__.changeDateFormat)(release === null || release === void 0 ? void 0 : release.date, _const__WEBPACK_IMPORTED_MODULE_1__.DateFormatStyle.YEAR);
+    const comments = filmData.commentsIds || [];
     const {
       watchlist = false,
       watched = false,
@@ -2164,11 +2617,11 @@ const getFilmCardTemplate = filmData => {
           <p class="film-card__rating">${totalRating}</p>
           <p class="film-card__info">
             <span class="film-card__year">${year}</span>
-            <span class="film-card__duration">${(0,_mock_utils__WEBPACK_IMPORTED_MODULE_0__.getFilmDuration)(runtime)}</span>
+            <span class="film-card__duration">${(0,_utils__WEBPACK_IMPORTED_MODULE_0__.getFilmDuration)(runtime)}</span>
             <span class="film-card__genre">${genre.length ? genre[genre.length - 1] : ''}</span>
           </p>
           <img src="${poster}" alt="Изображение обложки фильма" class="film-card__poster">
-          <p class="film-card__description">${(0,_mock_utils__WEBPACK_IMPORTED_MODULE_0__.getShortFilmDescription)(description)}</p>
+          <p class="film-card__description">${(0,_utils__WEBPACK_IMPORTED_MODULE_0__.getShortFilmDescription)(description)}</p>
           <span class="film-card__comments">${comments.length} comments</span>
         </a>
         <div class="film-card__controls">
@@ -2262,6 +2715,37 @@ class FilmsDeskView extends _abstract_view__WEBPACK_IMPORTED_MODULE_0__["default
 
 /***/ }),
 
+/***/ "./src/view/films-loading-view.js":
+/*!****************************************!*\
+  !*** ./src/view/films-loading-view.js ***!
+  \****************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ FilmsLoadingView)
+/* harmony export */ });
+/* harmony import */ var _abstract_view_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./abstract-view.js */ "./src/view/abstract-view.js");
+
+
+const getFilmLoadingTemplate = () => `<section class="films">
+    <section class="films-list">
+      <h2 class="films-list__title">Loading...</h2>
+    </section>
+  </section>`;
+
+class FilmsLoadingView extends _abstract_view_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  get template() {
+    return getFilmLoadingTemplate();
+  }
+
+}
+
+
+
+/***/ }),
+
 /***/ "./src/view/films-quantity-footer-view.js":
 /*!************************************************!*\
   !*** ./src/view/films-quantity-footer-view.js ***!
@@ -2290,30 +2774,24 @@ function _classApplyDescriptorSet(receiver, descriptor, value) { if (descriptor.
 
 
 
-const getFilmFooterTemplate = filmFilter => {
-  if (filmFilter !== null && filmFilter !== void 0 && filmFilter.total) {
-    return `<p>${filmFilter.total} movies inside</p>`;
-  }
+const getFilmFooterTemplate = filmQuantity => `<p>${filmQuantity ? filmQuantity : 0} movies inside</p>`;
 
-  return '';
-};
-
-var _filmFilter = /*#__PURE__*/new WeakMap();
+var _filmQuantity = /*#__PURE__*/new WeakMap();
 
 class FilmFooterView extends _abstract_view__WEBPACK_IMPORTED_MODULE_0__["default"] {
-  constructor(filmFilter) {
+  constructor(filmQuantity) {
     super();
 
-    _classPrivateFieldInitSpec(this, _filmFilter, {
+    _classPrivateFieldInitSpec(this, _filmQuantity, {
       writable: true,
-      value: {}
+      value: ''
     });
 
-    _classPrivateFieldSet(this, _filmFilter, filmFilter);
+    _classPrivateFieldSet(this, _filmQuantity, filmQuantity);
   }
 
   get template() {
-    return getFilmFooterTemplate(_classPrivateFieldGet(this, _filmFilter));
+    return getFilmFooterTemplate(_classPrivateFieldGet(this, _filmQuantity));
   }
 
 }
@@ -2571,8 +3049,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var he__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! he */ "./node_modules/he/he.js");
 /* harmony import */ var he__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(he__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var nanoid__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! nanoid */ "./node_modules/nanoid/index.dev.js");
-/* harmony import */ var _mock_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../mock/utils */ "./src/mock/utils.js");
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utils */ "./src/utils.js");
 /* harmony import */ var dayjs__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! dayjs */ "./node_modules/dayjs/dayjs.min.js");
 /* harmony import */ var dayjs__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(dayjs__WEBPACK_IMPORTED_MODULE_2__);
 /* harmony import */ var dayjs_plugin_relativeTime__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! dayjs/plugin/relativeTime */ "./node_modules/dayjs/plugin/relativeTime.js");
@@ -2594,7 +3071,6 @@ function _classPrivateFieldSet(receiver, privateMap, value) { var descriptor = _
 function _classExtractFieldDescriptor(receiver, privateMap, action) { if (!privateMap.has(receiver)) { throw new TypeError("attempted to " + action + " private field on non-instance"); } return privateMap.get(receiver); }
 
 function _classApplyDescriptorSet(receiver, descriptor, value) { if (descriptor.set) { descriptor.set.call(receiver, value); } else { if (!descriptor.writable) { throw new TypeError("attempted to set read only private field"); } descriptor.value = value; } }
-
 
 
 
@@ -2644,20 +3120,20 @@ const getPopupNewCommentTemplate = (comment, userEmoji) => `<div class="film-det
     </div>
   </div>`;
 
-const getLoadedCommentTemplate = (comment = {}) => {
+const getLoadedCommentTemplate = (loadedСomment = {}) => {
   const {
     id = '',
     author = '',
     emotion = '',
-    content = '',
+    comment = '',
     date = ''
-  } = comment;
+  } = loadedСomment;
   return `<li class="film-details__comment">
       <span class="film-details__comment-emoji">
         <img src="./images/emoji/${emotion}.png" width="55" height="55" alt="emoji-smile">
       </span>
       <div>
-        <p class="film-details__comment-text">${content}</p>
+        <p class="film-details__comment-text">${comment}</p>
         <p class="film-details__comment-info">
           <span class="film-details__comment-author">${author}</span>
           <span class="film-details__comment-day">${dayjs__WEBPACK_IMPORTED_MODULE_2___default()(date).fromNow()}</span>
@@ -2671,11 +3147,11 @@ const getPopupCommentSectionTemplate = data => {
   if (data) {
     return `<div class="film-details__bottom-container">
         <section class="film-details__comments-wrap">
-          <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${data.changedComments ? data.changedComments.length : 0}</span></h3>
+          <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${data.comments ? data.comments.length : 0}</span></h3>
 
           <ul class="film-details__comments-list">
             <!-- Отрисовка всех комментариев к фильму -->
-            ${data.changedComments.map(comment => getLoadedCommentTemplate(comment)).join('')}
+            ${data.comments.map(comment => getLoadedCommentTemplate(comment)).join('')}
           </ul>
 
           ${getPopupNewCommentTemplate(data.userComment, data.userEmoji)}
@@ -2752,8 +3228,8 @@ const getPopupTemplate = data => {
                 ${getTableRow(TableTerms.DIRECTOR, director)}
                 ${getTableRow(TableTerms.WRITERS, writers)}
                 ${getTableRow(TableTerms.ACTORS, actors)}
-                ${getTableRow(TableTerms.DATE, release.date || '')}
-                ${getTableRow(TableTerms.TIME, (0,_mock_utils__WEBPACK_IMPORTED_MODULE_1__.getFilmDuration)(runtime))}
+                ${getTableRow(TableTerms.DATE, (0,_utils__WEBPACK_IMPORTED_MODULE_1__.changeDateFormat)(release === null || release === void 0 ? void 0 : release.date))}
+                ${getTableRow(TableTerms.TIME, (0,_utils__WEBPACK_IMPORTED_MODULE_1__.getFilmDuration)(runtime))}
                 ${getTableRow(TableTerms.COUNTRY, release.country || '')}
                 ${getTableRow(TableTerms.GENRES, getCardGenres(genre))}
                 </table>
@@ -2931,15 +3407,9 @@ class PopupView extends _smart_view__WEBPACK_IMPORTED_MODULE_4__["default"] {
     _classPrivateFieldInitSpec(this, _onCommentDelete, {
       writable: true,
       value: evt => {
-        const buttonId = evt.target.dataset.buttonId;
-
-        const index = this._data.changedComments.findIndex(comment => comment.id === buttonId);
-
-        this._data.changedComments.splice(index, 1);
-
         _classPrivateFieldGet(this, _defaultPopupUpdate).call(this, {
-          changedComments: this._data.changedComments
-        });
+          deletingCommentId: evt.target.dataset.buttonId
+        }, null, _const_js__WEBPACK_IMPORTED_MODULE_5__.UserActions.DELETE_COMMENT);
       }
     });
 
@@ -2974,7 +3444,7 @@ class PopupView extends _smart_view__WEBPACK_IMPORTED_MODULE_4__["default"] {
     _classPrivateFieldInitSpec(this, _onPopupButtonClose, {
       writable: true,
       value: () => {
-        _classPrivateFieldGet(this, _popupActionCallback).call(this, null, _const_js__WEBPACK_IMPORTED_MODULE_5__.UserActions.UPDATE_ACTIVE);
+        _classPrivateFieldGet(this, _popupActionCallback).call(this, null, _const_js__WEBPACK_IMPORTED_MODULE_5__.UserActions.DELETE_POPUP);
       }
     });
 
@@ -2991,21 +3461,16 @@ class PopupView extends _smart_view__WEBPACK_IMPORTED_MODULE_4__["default"] {
           }
 
           const userComment = {
-            id: (0,nanoid__WEBPACK_IMPORTED_MODULE_6__.nanoid)(),
-            author: 'User',
             emotion: this._data.userEmoji,
-            content: _classPrivateFieldGet(this, _textArea).value,
-            date: dayjs__WEBPACK_IMPORTED_MODULE_2___default()()
+            comment: _classPrivateFieldGet(this, _textArea).value
           };
-
-          this._data.changedComments.push(userComment);
-
           this._data.userEmoji = '';
           this._data.userComment = '';
 
           _classPrivateFieldGet(this, _defaultPopupUpdate).call(this, {
-            changedComments: this._data.changedComments
-          });
+            addingComment: { ...userComment
+            }
+          }, null, _const_js__WEBPACK_IMPORTED_MODULE_5__.UserActions.ADD_COMMENT);
         }
       }
     });
@@ -3146,7 +3611,6 @@ class SmartView extends _abstract_view_js__WEBPACK_IMPORTED_MODULE_0__["default"
 }
 
 _defineProperty(SmartView, "parseData", filmData => ({ ...filmData,
-  changedComments: [...filmData.comments],
   watchlist: filmData.userDetails.watchlist,
   watched: filmData.userDetails.watched,
   favorite: filmData.userDetails.favorite
@@ -3155,14 +3619,12 @@ _defineProperty(SmartView, "parseData", filmData => ({ ...filmData,
 _defineProperty(SmartView, "restoreData", data => {
   const filmData = { ...data
   };
-  filmData.comments = data.changedComments;
   filmData.userDetails.watchlist = data.watchlist;
   filmData.userDetails.watched = data.watched;
   filmData.userDetails.favorite = data.favorite;
   delete filmData.watchlist;
   delete filmData.watched;
   delete filmData.favorite;
-  delete filmData.changedComments;
   delete filmData.userComment;
   delete filmData.userEmoji;
   return filmData;
@@ -43055,106 +43517,6 @@ webpackContext.id = "./node_modules/moment/locale sync recursive ^\\.\\/.*$";
 })));
 
 
-/***/ }),
-
-/***/ "./node_modules/nanoid/index.dev.js":
-/*!******************************************!*\
-  !*** ./node_modules/nanoid/index.dev.js ***!
-  \******************************************/
-/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "nanoid": () => (/* binding */ nanoid),
-/* harmony export */   "customAlphabet": () => (/* binding */ customAlphabet),
-/* harmony export */   "customRandom": () => (/* binding */ customRandom),
-/* harmony export */   "urlAlphabet": () => (/* reexport safe */ _url_alphabet_index_js__WEBPACK_IMPORTED_MODULE_0__.urlAlphabet),
-/* harmony export */   "random": () => (/* binding */ random)
-/* harmony export */ });
-/* harmony import */ var _url_alphabet_index_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./url-alphabet/index.js */ "./node_modules/nanoid/url-alphabet/index.js");
-
-if (true) {
-  if (
-    typeof navigator !== 'undefined' &&
-    navigator.product === 'ReactNative' &&
-    typeof crypto === 'undefined'
-  ) {
-    throw new Error(
-      'React Native does not have a built-in secure random generator. ' +
-        'If you don’t need unpredictable IDs use `nanoid/non-secure`. ' +
-        'For secure IDs, import `react-native-get-random-values` ' +
-        'before Nano ID.'
-    )
-  }
-  if (typeof msCrypto !== 'undefined' && typeof crypto === 'undefined') {
-    throw new Error(
-      'Import file with `if (!window.crypto) window.crypto = window.msCrypto`' +
-        ' before importing Nano ID to fix IE 11 support'
-    )
-  }
-  if (typeof crypto === 'undefined') {
-    throw new Error(
-      'Your browser does not have secure random generator. ' +
-        'If you don’t need unpredictable IDs, you can use nanoid/non-secure.'
-    )
-  }
-}
-let random = bytes => crypto.getRandomValues(new Uint8Array(bytes))
-let customRandom = (alphabet, size, getRandom) => {
-  let mask = (2 << (Math.log(alphabet.length - 1) / Math.LN2)) - 1
-  let step = -~((1.6 * mask * size) / alphabet.length)
-  return () => {
-    let id = ''
-    while (true) {
-      let bytes = getRandom(step)
-      let j = step
-      while (j--) {
-        id += alphabet[bytes[j] & mask] || ''
-        if (id.length === size) return id
-      }
-    }
-  }
-}
-let customAlphabet = (alphabet, size) => customRandom(alphabet, size, random)
-let nanoid = (size = 21) => {
-  let id = ''
-  let bytes = crypto.getRandomValues(new Uint8Array(size))
-  while (size--) {
-    let byte = bytes[size] & 63
-    if (byte < 36) {
-      id += byte.toString(36)
-    } else if (byte < 62) {
-      id += (byte - 26).toString(36).toUpperCase()
-    } else if (byte < 63) {
-      id += '_'
-    } else {
-      id += '-'
-    }
-  }
-  return id
-}
-
-
-
-/***/ }),
-
-/***/ "./node_modules/nanoid/url-alphabet/index.js":
-/*!***************************************************!*\
-  !*** ./node_modules/nanoid/url-alphabet/index.js ***!
-  \***************************************************/
-/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "urlAlphabet": () => (/* binding */ urlAlphabet)
-/* harmony export */ });
-let urlAlphabet =
-  'useandom-26T198340PX75pxJACKVERYMINDBUSHWOLF_GQZbfghjklqvwyzrict'
-
-
-
 /***/ })
 
 /******/ 	});
@@ -43257,15 +43619,13 @@ var __webpack_exports__ = {};
   !*** ./src/main.js ***!
   \*********************/
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _filter_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./filter.js */ "./src/filter.js");
-/* harmony import */ var _mock_data_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./mock/data.js */ "./src/mock/data.js");
-/* harmony import */ var _render_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./render.js */ "./src/render.js");
-/* harmony import */ var _view_user_profile_view_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./view/user-profile-view.js */ "./src/view/user-profile-view.js");
-/* harmony import */ var _view_films_quantity_footer_view_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./view/films-quantity-footer-view.js */ "./src/view/films-quantity-footer-view.js");
-/* harmony import */ var _presenter_films_desk_presenter_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./presenter/films-desk-presenter.js */ "./src/presenter/films-desk-presenter.js");
-/* harmony import */ var _presenter_filter_presenter_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./presenter/filter-presenter.js */ "./src/presenter/filter-presenter.js");
-/* harmony import */ var _model_films_model_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./model/films-model.js */ "./src/model/films-model.js");
-/* harmony import */ var _model_filter_model_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./model/filter-model.js */ "./src/model/filter-model.js");
+/* harmony import */ var _api_service_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./api-service.js */ "./src/api-service.js");
+/* harmony import */ var _presenter_films_desk_presenter_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./presenter/films-desk-presenter.js */ "./src/presenter/films-desk-presenter.js");
+/* harmony import */ var _presenter_filter_presenter_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./presenter/filter-presenter.js */ "./src/presenter/filter-presenter.js");
+/* harmony import */ var _presenter_header_profile_presenter_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./presenter/header-profile-presenter.js */ "./src/presenter/header-profile-presenter.js");
+/* harmony import */ var _presenter_footer_profile_presenter_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./presenter/footer-profile-presenter.js */ "./src/presenter/footer-profile-presenter.js");
+/* harmony import */ var _model_films_model_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./model/films-model.js */ "./src/model/films-model.js");
+/* harmony import */ var _model_filter_model_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./model/filter-model.js */ "./src/model/filter-model.js");
 
 
 
@@ -43273,27 +43633,23 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-
-
-const filmsData = (0,_mock_data_js__WEBPACK_IMPORTED_MODULE_1__.getRandomFilmData)();
-const filmsStatistic = (0,_filter_js__WEBPACK_IMPORTED_MODULE_0__.getFilmsStatistic)(filmsData);
-const userRank = (0,_filter_js__WEBPACK_IMPORTED_MODULE_0__.getUserRank)(filmsStatistic.watched);
+const AUTHORIZATION = 'Basic er883jdz123';
+const END_POINT = 'https://16.ecmascript.pages.academy/cinemaddict/';
 const sectionHeader = document.querySelector('.header');
 const sectionMain = document.querySelector('.main');
 const sectionFooter = document.querySelector('.footer');
 const footerStatistic = sectionFooter.querySelector('.footer__statistics');
-(0,_render_js__WEBPACK_IMPORTED_MODULE_2__.render)(sectionHeader, new _view_user_profile_view_js__WEBPACK_IMPORTED_MODULE_3__["default"](userRank), _render_js__WEBPACK_IMPORTED_MODULE_2__.RenderPosition.BEFOREEND);
-const filmsModel = new _model_films_model_js__WEBPACK_IMPORTED_MODULE_7__["default"]();
-filmsModel.filmsData = filmsData;
-const filterModel = new _model_filter_model_js__WEBPACK_IMPORTED_MODULE_8__["default"]();
-const filterMenu = new _presenter_filter_presenter_js__WEBPACK_IMPORTED_MODULE_6__["default"](sectionMain, filterModel, filmsModel);
+const filmsModel = new _model_films_model_js__WEBPACK_IMPORTED_MODULE_5__["default"](new _api_service_js__WEBPACK_IMPORTED_MODULE_0__["default"](END_POINT, AUTHORIZATION));
+filmsModel.init();
+const filterModel = new _model_filter_model_js__WEBPACK_IMPORTED_MODULE_6__["default"]();
+const filterMenu = new _presenter_filter_presenter_js__WEBPACK_IMPORTED_MODULE_2__["default"](sectionMain, filterModel, filmsModel);
 filterMenu.init();
-const filmDesk = new _presenter_films_desk_presenter_js__WEBPACK_IMPORTED_MODULE_5__["default"](sectionMain, filmsModel, filterModel);
-filmDesk.init(filmsData);
-
-if (filmsData.length) {
-  (0,_render_js__WEBPACK_IMPORTED_MODULE_2__.render)(footerStatistic, new _view_films_quantity_footer_view_js__WEBPACK_IMPORTED_MODULE_4__["default"](filmsStatistic), _render_js__WEBPACK_IMPORTED_MODULE_2__.RenderPosition.BEFOREEND);
-}
+const filmDesk = new _presenter_films_desk_presenter_js__WEBPACK_IMPORTED_MODULE_1__["default"](sectionMain, filmsModel, filterModel);
+filmDesk.init();
+const headerProfile = new _presenter_header_profile_presenter_js__WEBPACK_IMPORTED_MODULE_3__["default"](sectionHeader, filmsModel);
+headerProfile.init();
+const footerProfile = new _presenter_footer_profile_presenter_js__WEBPACK_IMPORTED_MODULE_4__["default"](footerStatistic, filmsModel);
+footerProfile.init();
 })();
 
 /******/ })()
