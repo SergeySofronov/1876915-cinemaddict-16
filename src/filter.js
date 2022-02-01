@@ -32,7 +32,6 @@ const getTopRatedFilmsData = (films) => {
   return [];
 };
 
-
 const getTopCommentedFilmsData = (films) => {
   if (Array.isArray(films)) {
     return films.filter((film) => Boolean(film.commentsIds?.length))
