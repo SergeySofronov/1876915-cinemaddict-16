@@ -1,22 +1,16 @@
 import AbstractView from './abstract-view';
 
-const getFilmFooterTemplate = (filmFilter) => {
-  if (filmFilter?.total) {
-    return `<p>${filmFilter.total} movies inside</p>`;
-  }
-
-  return '';
-};
+const getFilmFooterTemplate = (filmQuantity) => `<p>${filmQuantity ? filmQuantity : 0} movies inside</p>`;
 
 class FilmFooterView extends AbstractView {
-  #filmFilter = {};
-  constructor(filmFilter) {
+  #filmQuantity = '';
+  constructor(filmQuantity) {
     super();
-    this.#filmFilter = filmFilter;
+    this.#filmQuantity = filmQuantity;
   }
 
   get template() {
-    return getFilmFooterTemplate(this.#filmFilter);
+    return getFilmFooterTemplate(this.#filmQuantity);
   }
 }
 

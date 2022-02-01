@@ -11,15 +11,16 @@ import FilmsSheetTitleView from '../view/films-sheet-title-view.js';
 import FilmCardListView from '../view/film-card-list-view.js';
 import FilmPresenter from './film-presenter.js';
 import ShowMoreButtonView from '../view/show-more-button-view.js';
+import FilmsLoadingView from '../view/films-loading-view.js';
 
 const FILM_SHOW_PER_STEP = 5;
 const FILM_EXTRA_QUANTITY = 2;
 
 class FilmDeskPresenter {
   #deskContainer = null;
+  #loadingComponent = new FilmsLoadingView();
   #filmsSortMenu = null;
   #filmsDesk = null;
-  #filmsStats = null;
   #filmsMainSheet = new FilmsSheetView();
   #filmsRatedSheet = new FilmsSheetView(true);
   #filmsPopularSheet = new FilmsSheetView(true);
@@ -48,6 +49,7 @@ class FilmDeskPresenter {
 
   #shownFilmsQuantity = null;
   #restFilmQuantity = null;
+  #isLoading = true;
 
   constructor(deskContainer, filmsModel, filterModel) {
     if (!((deskContainer instanceof AbstractView) || (deskContainer instanceof Element))) {
@@ -92,6 +94,12 @@ class FilmDeskPresenter {
   }
 
   init = () => {
+    if (this.#isLoading) {
+      render(this.#deskContainer, this.#loadingComponent, RenderPosition.BEFOREEND);
+
+      return;
+    }
+
     this.#renderDesk();
     this.#renderSortMenu();
 
@@ -170,16 +178,25 @@ class FilmDeskPresenter {
 
   #isCommentRatingChanged = (film) => {
     if (film) {
+
+      const changingFilm = { ...film };
+      changingFilm.commentsIds = [...film.commentsIds];
+      if (changingFilm.addingComment) {
+        changingFilm.commentsIds.push('newComment');
+      } else {
+        changingFilm.commentsIds.splice(changingFilm.commentsIds.deletingCommentId, 1);
+      }
+
       const indexOld = this.#topCommentedFilms.findIndex((item) => (item.id === film.id));
       if (indexOld === -1) {
-        if (film.comments.length > this.#topCommentedFilms[this.#topCommentedFilms.length - 1].comments.length) {
+        if (changingFilm.commentsIds.length > this.#topCommentedFilms[this.#topCommentedFilms.length - 1].commentsIds.length) {
 
           return true;
         }
       } else {
         const indexTotal = this.#filmsModel.filmsData.findIndex((item) => (item.id === film.id));
         const newTopCommentFilms = [...this.#filmsModel.filmsData];
-        newTopCommentFilms.splice(indexTotal, 1, film);
+        newTopCommentFilms.splice(indexTotal, 1, changingFilm);
         const indexNew = getTopCommentedFilmsData(newTopCommentFilms).findIndex((item) => (item.id === film.id));
         if ((indexNew === -1) || (indexOld !== indexNew)) {
 
@@ -191,27 +208,37 @@ class FilmDeskPresenter {
     return false;
   }
 
-  #isUpdatePatch = (update, actionDetails) => {
+  #isUpdatePatch = (actionDetails) => {
     const isFilterTypeStats = (this.#filterModel.filterType === FilterTypes.STATS);
     const isFilterTypeAll = (this.#filterModel.filterType === FilterTypes.ALL);
     const isFilterAndActionSame = Boolean((actionDetails) && (this.#filterModel.filterType !== actionDetails));
 
-    return Boolean(isFilterTypeStats || ((isFilterTypeAll || isFilterAndActionSame) && (!this.#isCommentRatingChanged(update))));
+    return Boolean(isFilterTypeStats || isFilterTypeAll || isFilterAndActionSame);
   }
+
 
   #handleViewAction = (update, actionType, actionDetails) => {
 
     switch (actionType) {
-      case (UserActions.UPDATE_ACTIVE):
+      case (UserActions.DELETE_POPUP):
+        this.#setActiveFilm(null);
+        break;
+
+      case (UserActions.CREATE_POPUP):
         this.#setActiveFilm(update);
+        this.#filmsModel.getComments(UpdateTypes.LOAD, update);
+        break;
+
+      case (UserActions.DELETE_COMMENT):
+        this.#filmsModel.deleteComment(this.#isCommentRatingChanged(update) ? UpdateTypes.MINOR : UpdateTypes.PATCH, update);
+        break;
+
+      case (UserActions.ADD_COMMENT):
+        this.#filmsModel.addComment(this.#isCommentRatingChanged(update) ? UpdateTypes.MINOR : UpdateTypes.PATCH, update);
         break;
 
       case (UserActions.UPDATE_DATA):
-        if (this.#isUpdatePatch(update, actionDetails)) {
-          this.#filmsModel.update(UpdateTypes.PATCH, update);
-        } else {
-          this.#filmsModel.update(UpdateTypes.MINOR, update);
-        }
+        this.#filmsModel.update(this.#isUpdatePatch(actionDetails) ? UpdateTypes.PATCH : UpdateTypes.MINOR, update);
         break;
 
       default: break;
@@ -220,6 +247,11 @@ class FilmDeskPresenter {
 
   #handleModelEvent = (updateType, data) => {
     switch (updateType) {
+
+      case (UpdateTypes.LOAD):
+        this.#activeFilm?.init(data);
+        break;
+
       case (UpdateTypes.PATCH):
         this.#updateFilmsPresenters(data);
         break;
@@ -235,6 +267,12 @@ class FilmDeskPresenter {
 
       case (UpdateTypes.MAJOR):
         this.#destroyDesk();
+        break;
+
+      case (UpdateTypes.INIT):
+        this.#isLoading = false;
+        this.#destroyLoadingComponent();
+        this.init();
         break;
 
       default: break;
@@ -276,6 +314,7 @@ class FilmDeskPresenter {
     if ((this.#isActiveFilmChanging) && (filmId === this.#getActiveFilmId())) {
       presenter.createPopup(this.#activeFilm.popup);
       this.#activeFilm = presenter;
+      this.#isActiveFilmChanging = false;
     }
   }
 
@@ -366,6 +405,11 @@ class FilmDeskPresenter {
       this.#filmsDesk.destroyElement();
       this.#filmsDesk = null;
     }
+  }
+
+  #destroyLoadingComponent = () => {
+    this.#loadingComponent.destroyElement();
+    this.#loadingComponent = null;
   }
 
   #restoreShownFilmsQuantity = () => (this.#shownFilmsQuantity = (this.#getFilteredFilmsQuantity() > FILM_SHOW_PER_STEP) ? FILM_SHOW_PER_STEP : this.#shownFilmsQuantity);

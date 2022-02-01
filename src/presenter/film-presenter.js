@@ -4,7 +4,6 @@ import SmartView from '../view/smart-view.js';
 import AbstractView from '../view/abstract-view.js';
 import FilmCardView from '../view/film-card-view';
 import PopupView from '../view/popup-view';
-import dayjs from 'dayjs';
 
 class FilmPresenter {
   #filmsList = null;
@@ -70,12 +69,13 @@ class FilmPresenter {
   createPopup = (currentPopup) => {
     if (currentPopup) {
       this.#filmPopup = currentPopup;
+      this.#updatePopup();
       return;
     }
 
+    this.#handleViewAction(this, UserActions.CREATE_POPUP);
     this.#filmPopup = new PopupView(this.#handleViewAction);
     this.#filmPopup.init(this.#filmData);
-    this.#handleViewAction(this, UserActions.UPDATE_ACTIVE);
     render(document.body, this.#filmPopup, RenderPosition.BEFOREEND);
     document.body.classList.add('hide-overflow');
   }
@@ -86,9 +86,7 @@ class FilmPresenter {
     }
   }
 
-  #filmActionCallback = (actionDetails) => {
-    this.#handleViewAction(this.#filmData, UserActions.UPDATE_DATA, actionDetails);
-  }
+  #filmActionCallback = (actionDetails) => this.#handleViewAction(this.#filmData, UserActions.UPDATE_DATA, actionDetails);
 
   #updateFilmHandlers = () => {
     this.#filmCard.setFilmClickHandler(this.#onFilmCardClick);
@@ -104,7 +102,6 @@ class FilmPresenter {
 
   #onWatchedClick = () => {
     this.#filmData.userDetails.watched = !this.#filmData.userDetails.watched;
-    this.#filmData.userDetails.watchingDate = this.#filmData.userDetails.watched ? '' : dayjs();
     this.#filmActionCallback(FilterTypes.WATCHED);
   }
 

@@ -21,7 +21,7 @@ const FilterTypes = {
   WATCHLIST: 'watchlist',
   WATCHED: 'watched',
   FAVORITE: 'favorite',
-  STATS: 'stats'
+  STATS: 'stats',
 };
 
 const SortTypes = {
@@ -29,24 +29,28 @@ const SortTypes = {
   TOP_COMMENT: 'most-commented',
   TOP_RATE: 'top-rated',
   RATE: 'sortByRating',
-  DATE: 'sortByDate'
+  DATE: 'sortByDate',
 };
 
 const DateFormatStyle = {
   DEFAULT: 'DD MMMM YYYY',
-  COMMENT: 'YYYY/MM/DD HH:mm',
-  YEAR: 'YYYY'
+  YEAR: 'YYYY',
 };
 
 const UserActions = {
-  UPDATE_ACTIVE: 'updateActive',
+  CREATE_POPUP: 'createPopup',
+  DELETE_POPUP: 'deletePopup',
+  DELETE_COMMENT: 'deleteComment',
+  ADD_COMMENT:'addComment',
   UPDATE_DATA: 'updateData',
 };
 
 const UpdateTypes = {
+  LOAD: 'load',
   PATCH: 'patch',
   MINOR: 'minor',
   MAJOR: 'major',
+  INIT: 'init',
 };
 
 const EventStates = {
@@ -59,4 +63,11 @@ const KeyCode = {
   ENTER: 'Enter',
 };
 
-export { UserScores, UserRanks, FilterTypes, SectionMessages, SortTypes, KeyCode, DateFormatStyle, UserActions, EventStates, UpdateTypes };
+const Methods = {
+  GET: 'GET',
+  PUT: 'PUT',
+  POST: 'POST',
+  DELETE: 'DELETE',
+};
+
+export { UserScores, UserRanks, FilterTypes, SectionMessages, SortTypes, KeyCode, DateFormatStyle, UserActions, EventStates, UpdateTypes, Methods };
