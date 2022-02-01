@@ -92,11 +92,6 @@ class AbstractView {
     this.#eventInfo.clear();
   }
 
-  // shake = (callback) => {
-  //   this.element.style.animation = `shake ${SHAKE_ANIMATION_TIMEOUT / 1000}s`;
-  //   this.#setAnimationTimeout(this.element, callback);
-  // }
-
   shake = (selector, callback) => {
     const element = this.#getElementSelector(selector);
     element.style.animation = `shake ${SHAKE_ANIMATION_TIMEOUT / 1000}s`;
@@ -106,12 +101,6 @@ class AbstractView {
     }, SHAKE_ANIMATION_TIMEOUT);
   }
 
-  // #setAnimationTimeout = (element, callback) => {
-  //   setTimeout(() => {
-  //     element.style.animation = '';
-  //     callback();
-  //   }, SHAKE_ANIMATION_TIMEOUT);
-  // }
 }
 
 export { AbstractView as default };

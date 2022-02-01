@@ -84,9 +84,6 @@ export default class ApiService {
         },
       },
       ['user_details']: {
-        // ...film.userDetails,
-        // ['already_watched']: film.userDetails.watched,
-        // ['watching_date']: film.userDetails.watchingDate,
         ['watchlist']: film.watchlist,
         ['favorite']:film.favorite,
         ['already_watched']: film.watched,
