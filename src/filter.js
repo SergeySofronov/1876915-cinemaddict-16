@@ -17,9 +17,9 @@ const getUserRank = (watchedFilmsQuantity) => {
   return '';
 };
 
-const getWatchedFilmsData = (films) => {
+const getWatchedFilmsData = (films, isDateChecking) => {
   if (Array.isArray(films)) {
-    return films.filter((film) => Boolean((film.userDetails?.watched) && (film.userDetails?.watchingDate)));
+    return films.filter((film) => Boolean((film.userDetails?.watched) && (film.userDetails?.watchingDate || (!isDateChecking))));
   }
 };
 

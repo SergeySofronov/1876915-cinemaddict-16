@@ -127,6 +127,9 @@ class FilmsModel extends AbstractObservable {
       },
       deletingCommentId: '',
       addingComment: '',
+      watchlist:'',
+      watched:'',
+      favorite:'',
     };
 
     adaptedFilm = {
@@ -160,6 +163,9 @@ class FilmsModel extends AbstractObservable {
       adaptedFilm.userDetails.watchingDate = film.user_details.watching_date;
       delete adaptedFilm.userDetails.watching_date;
       delete adaptedFilm.user_details;
+      adaptedFilm.watchlist = adaptedFilm.userDetails.watchlist;
+      adaptedFilm.watched = adaptedFilm.userDetails.watched;
+      adaptedFilm.favorite = adaptedFilm.userDetails.favorite;
     }
 
     return adaptedFilm;

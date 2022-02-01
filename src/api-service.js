@@ -84,8 +84,12 @@ export default class ApiService {
         },
       },
       ['user_details']: {
-        ...film.userDetails,
-        ['already_watched']: film.userDetails.watched,
+        // ...film.userDetails,
+        // ['already_watched']: film.userDetails.watched,
+        // ['watching_date']: film.userDetails.watchingDate,
+        ['watchlist']: film.watchlist,
+        ['favorite']:film.favorite,
+        ['already_watched']: film.watched,
         ['watching_date']: film.userDetails.watchingDate,
       }
     };
@@ -99,6 +103,11 @@ export default class ApiService {
     delete adaptedFilm['user_details'].watched;
     delete adaptedFilm['user_details'].watchingDate;
     delete adaptedFilm.userDetails;
+    delete adaptedFilm.addingComment;
+    delete adaptedFilm.deletingCommentId;
+    delete adaptedFilm.watchlist;
+    delete adaptedFilm.watched;
+    delete adaptedFilm.favorite;
 
     return adaptedFilm;
   }

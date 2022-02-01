@@ -41,7 +41,7 @@ const UserActions = {
   CREATE_POPUP: 'createPopup',
   DELETE_POPUP: 'deletePopup',
   DELETE_COMMENT: 'deleteComment',
-  ADD_COMMENT:'addComment',
+  ADD_COMMENT: 'addComment',
   UPDATE_DATA: 'updateData',
 };
 
@@ -70,4 +70,12 @@ const Methods = {
   DELETE: 'DELETE',
 };
 
-export { UserScores, UserRanks, FilterTypes, SectionMessages, SortTypes, KeyCode, DateFormatStyle, UserActions, EventStates, UpdateTypes, Methods };
+const ViewStates = {
+  ABORTING: 'aborting',
+  COMMENT_ADDING: 'adding',
+  COMMENT_DELETING: 'deleting',
+  COMMENT_LOADING: 'loading',
+  DATA_UPDATING: 'updating',
+};
+
+export { UserScores, UserRanks, FilterTypes, SectionMessages, SortTypes, KeyCode, DateFormatStyle, UserActions, EventStates, UpdateTypes, Methods, ViewStates };

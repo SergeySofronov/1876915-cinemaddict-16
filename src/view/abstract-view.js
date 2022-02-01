@@ -1,5 +1,7 @@
 import { EventStates } from '../const.js';
 
+const SHAKE_ANIMATION_TIMEOUT = 600;
+
 class AbstractView {
   #element = null;
   #eventInfo = new Map();
@@ -83,12 +85,33 @@ class AbstractView {
     }
   }
 
-  removeAllEventListeners() {
+  removeAllEventListeners = () => {
     for (const [elementSelector, [eventType, eventHandler]] of this.#eventInfo.entries()) {
       elementSelector.removeEventListener(eventType, eventHandler);
     }
     this.#eventInfo.clear();
   }
+
+  // shake = (callback) => {
+  //   this.element.style.animation = `shake ${SHAKE_ANIMATION_TIMEOUT / 1000}s`;
+  //   this.#setAnimationTimeout(this.element, callback);
+  // }
+
+  shake = (selector, callback) => {
+    const element = this.#getElementSelector(selector);
+    element.style.animation = `shake ${SHAKE_ANIMATION_TIMEOUT / 1000}s`;
+    setTimeout(() => {
+      element.style.animation = '';
+      callback();
+    }, SHAKE_ANIMATION_TIMEOUT);
+  }
+
+  // #setAnimationTimeout = (element, callback) => {
+  //   setTimeout(() => {
+  //     element.style.animation = '';
+  //     callback();
+  //   }, SHAKE_ANIMATION_TIMEOUT);
+  // }
 }
 
 export { AbstractView as default };

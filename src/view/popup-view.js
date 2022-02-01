@@ -21,10 +21,10 @@ const TableTerms = {
   GENRES: 'Genres'
 };
 
-const getCommentEmotionTemplate = (emotion, isChecked = false) => {
+const getCommentEmotionTemplate = (emotion, isChecked = false, disableTag) => {
   if (emotionTypes.includes(emotion)) {
     return (
-      `<input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-${emotion}" value="${emotion}" ${isChecked ? 'checked' : ''}>
+      `<input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-${emotion}" value="${emotion}" ${isChecked ? 'checked' : ''} ${disableTag}>
         <label class="film-details__emoji-label" for="emoji-${emotion}">
           <img src="./images/emoji/${emotion}.png" width="30" height="30" alt="emoji">
         </label>`
@@ -35,34 +35,34 @@ const getCommentEmotionTemplate = (emotion, isChecked = false) => {
 };
 
 
-const getPopupNewCommentTemplate = (comment, userEmoji) => (
+const getPopupNewCommentTemplate = (userComment, userEmoji, disableTag) => (
   `<div class="film-details__new-comment">
-    <div class="film-details__add-emoji-label">
-      <!--User Emoji-->
-      <input type="text" class="film-details__emoji-input visually-hidden">
-      ${userEmoji ? `<img src="images/emoji/${userEmoji}.png" width="55" height="55" alt="emoji-${userEmoji}">` : ''}
-    </div>
+      <div class="film-details__add-emoji-label">
+        <!--User Emoji-->
+        <input type="text" class="film-details__emoji-input visually-hidden" ${disableTag}>
+        ${userEmoji ? `<img src="images/emoji/${userEmoji}.png" width="55" height="55" alt="emoji-${userEmoji}">` : ''}
+      </div>
 
-    <label class="film-details__comment-label">
-      <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment">${comment ? he.encode(comment) : ''}</textarea>
-    </label>
+      <label class="film-details__comment-label">
+        <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment" ${disableTag}>${userComment ? he.encode(userComment) : ''}</textarea>
+      </label>
 
-    <div class="film-details__emoji-list">
-        ${emotionTypes.map((emotion) => getCommentEmotionTemplate(emotion, (emotion === userEmoji))).join('')}
-    </div>
+      <div class="film-details__emoji-list">
+          ${emotionTypes.map((emotion) => getCommentEmotionTemplate(emotion, (emotion === userEmoji), disableTag)).join('')}
+      </div>
   </div>`);
 
-const getLoadedCommentTemplate = (loadedСomment = {}) => {
+const getLoadedCommentTemplate = (loadedComment = {}, disableTag, isCommentDeleting, deletingCommentId) => {
   const {
     id = '',
     author = '',
     emotion = '',
     comment = '',
     date = '',
-  } = loadedСomment;
+  } = loadedComment;
 
   return (
-    `<li class="film-details__comment">
+    `<li class="film-details__comment" data-list-id = "${id}">
       <span class="film-details__comment-emoji">
         <img src="./images/emoji/${emotion}.png" width="55" height="55" alt="emoji-smile">
       </span>
@@ -71,7 +71,7 @@ const getLoadedCommentTemplate = (loadedСomment = {}) => {
         <p class="film-details__comment-info">
           <span class="film-details__comment-author">${author}</span>
           <span class="film-details__comment-day">${dayjs(date).fromNow()}</span>
-          <button class="film-details__comment-delete" data-button-id = ${id}>Delete</button>
+          <button class="film-details__comment-delete" data-button-id = "${id}"${disableTag}>${(isCommentDeleting && (deletingCommentId === id)) ? 'Deleting...' : 'Delete'}</button>
         </p>
       </div>
     </li>`
@@ -79,18 +79,30 @@ const getLoadedCommentTemplate = (loadedСomment = {}) => {
 };
 
 const getPopupCommentSectionTemplate = (data) => {
+
   if (data) {
+    const {
+      isCommentsLoading = false,
+      isCommentDeleting = false,
+      isCommentAdding = false,
+    } = data;
+
+    const disableTag = (isCommentDeleting || isCommentAdding) ? 'disabled' : '';
+    const loadingMessage = isCommentsLoading ? '(Loading...)' : '';
+    const errorMessage = (!isCommentsLoading && (data.commentsIds.length !== data.comments.length)) ? '(Comments loading error)' : '';
+
+
     return (
       `<div class="film-details__bottom-container">
         <section class="film-details__comments-wrap">
-          <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${data.comments ? data.comments.length : 0}</span></h3>
+          <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count"> ${data.commentsIds ? data.commentsIds.length : 0}${loadingMessage}${errorMessage}</span></h3>
 
           <ul class="film-details__comments-list">
             <!-- Отрисовка всех комментариев к фильму -->
-            ${data.comments.map((comment) => getLoadedCommentTemplate(comment)).join('')}
+            ${data.comments.map((comment) => getLoadedCommentTemplate(comment, disableTag, isCommentDeleting, data.deletingCommentId)).join('')}
           </ul>
 
-          ${getPopupNewCommentTemplate(data.userComment, data.userEmoji)}
+          ${getPopupNewCommentTemplate(data.userComment, data.userEmoji, disableTag)}
         </section>
       </div>`
     );
@@ -137,7 +149,7 @@ const getPopupTemplate = (data) => {
     const {
       watchlist = false,
       watched = false,
-      favorite = false
+      favorite = false,
     } = data;
 
     return (
@@ -169,7 +181,7 @@ const getPopupTemplate = (data) => {
                 ${getTableRow(TableTerms.DIRECTOR, director)}
                 ${getTableRow(TableTerms.WRITERS, writers)}
                 ${getTableRow(TableTerms.ACTORS, actors)}
-                ${getTableRow(TableTerms.DATE, changeDateFormat(release?.date, ))}
+                ${getTableRow(TableTerms.DATE, changeDateFormat(release?.date))}
                 ${getTableRow(TableTerms.TIME, getFilmDuration(runtime))}
                 ${getTableRow(TableTerms.COUNTRY, release.country || '')}
                 ${getTableRow(TableTerms.GENRES, getCardGenres(genre))}
@@ -181,9 +193,9 @@ const getPopupTemplate = (data) => {
             </div>
 
             <section class="film-details__controls">
-              <button type="button" class="film-details__control-button film-details__control-button--watchlist ${watchlist ? ACTIVE_CLASS : ''}" id="watchlist" name="watchlist">Add to watchlist</button>
-              <button type="button" class="film-details__control-button film-details__control-button--watched ${watched ? ACTIVE_CLASS : ''}" id="watched" name="watched">Already watched</button>
-              <button type="button" class="film-details__control-button film-details__control-button--favorite ${favorite ? ACTIVE_CLASS : ''}" id="favorite" name="favorite">Add to favorites</button>
+              <button type="button" class="film-details__control-button film-details__control-button--watchlist ${watchlist ? ACTIVE_CLASS : ''}" id="watchlist" name="watchlist" ${data.isDataUpdating ? 'disabled' : ''}>Add to watchlist</button>
+              <button type="button" class="film-details__control-button film-details__control-button--watched ${watched ? ACTIVE_CLASS : ''}" id="watched" name="watched" ${data.isDataUpdating ? 'disabled' : ''}>Already watched</button>
+              <button type="button" class="film-details__control-button film-details__control-button--favorite ${favorite ? ACTIVE_CLASS : ''}" id="favorite" name="favorite" ${data.isDataUpdating ? 'disabled' : ''}>Add to favorites</button>
             </section>
           </div>
 
@@ -235,6 +247,20 @@ class PopupView extends SmartView {
     this.createEventListener(document.body, 'keydown', this.#onEscKeyDown, EventStates.EVENT_DEFAULT);
     this.element.querySelectorAll('.film-details__bottom-container li button')
       .forEach((commentSelector) => this.createEventListener(commentSelector, 'click', this.#onCommentDelete));
+  }
+
+  shakePopup = (callback) => {
+    this.shake(this.element, callback);
+  }
+
+  shakeComment = (callback) => {
+    const comment = this.element.querySelector(`li[data-list-id = "${this._data.deletingCommentId}"]`);
+    this.shake(comment, callback);
+  }
+
+  shakeNewComment = (callback) => {
+    const comment = this.element.querySelector('.film-details__new-comment');
+    this.shake(comment, callback);
   }
 
   #updateValiditySelectors = () => {
