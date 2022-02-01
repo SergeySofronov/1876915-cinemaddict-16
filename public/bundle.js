@@ -2627,7 +2627,12 @@ class AbstractView {
 
   get template() {
     throw new Error('Abstract method not implemented: get template()');
-  }
+  } // #setAnimationTimeout = (element, callback) => {
+  //   setTimeout(() => {
+  //     element.style.animation = '';
+  //     callback();
+  //   }, SHAKE_ANIMATION_TIMEOUT);
+  // }
 
 }
 
