@@ -35,19 +35,27 @@ class SmartView extends AbstractView {
     ...filmData,
     watchlist: filmData.userDetails.watchlist,
     watched: filmData.userDetails.watched,
-    favorite: filmData.userDetails.favorite
+    favorite: filmData.userDetails.favorite,
+    isCommentsLoading: false,
+    isCommentDeleting: false,
+    isCommentAdding: false,
+    isDataUpdating: false,
   });
 
   static restoreData = (data) => {
     const filmData = { ...data };
-    filmData.userDetails.watchlist = data.watchlist;
-    filmData.userDetails.watched = data.watched;
-    filmData.userDetails.favorite = data.favorite;
-    delete filmData.watchlist;
-    delete filmData.watched;
-    delete filmData.favorite;
+    // filmData.userDetails.watchlist = data.watchlist;
+    // filmData.userDetails.watched = data.watched;
+    // filmData.userDetails.favorite = data.favorite;
+    //delete filmData.watchlist;
+    //delete filmData.watched;
+    //delete filmData.favorite;
     delete filmData.userComment;
     delete filmData.userEmoji;
+    delete filmData.isCommentsLoading;
+    delete filmData.isCommentDeleting;
+    delete filmData.isCommentAdding;
+    delete filmData.isDataUpdating;
 
     return filmData;
   }

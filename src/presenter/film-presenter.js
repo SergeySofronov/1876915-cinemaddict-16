@@ -1,5 +1,5 @@
 import { render, replace, RenderPosition } from '../render.js';
-import { UserActions, FilterTypes } from '../const.js';
+import { UserActions, FilterTypes, ViewStates } from '../const.js';
 import SmartView from '../view/smart-view.js';
 import AbstractView from '../view/abstract-view.js';
 import FilmCardView from '../view/film-card-view';
@@ -73,11 +73,35 @@ class FilmPresenter {
       return;
     }
 
-    this.#handleViewAction(this, UserActions.CREATE_POPUP);
     this.#filmPopup = new PopupView(this.#handleViewAction);
     this.#filmPopup.init(this.#filmData);
+    this.#handleViewAction(this, UserActions.CREATE_POPUP);
     render(document.body, this.#filmPopup, RenderPosition.BEFOREEND);
     document.body.classList.add('hide-overflow');
+  }
+
+  setViewState = (state) => {
+    switch (state) {
+      case ViewStates.COMMENT_LOADING:
+        this.#filmPopup.updateElement({ isCommentsLoading: true });
+        break;
+
+      case ViewStates.COMMENT_DELETING:
+        this.#filmPopup.updateElement({ isCommentDeleting: true });
+        break;
+
+      case ViewStates.COMMENT_ADDING:
+        this.#filmPopup.updateElement({ isCommentAdding: true });
+        break;
+
+      case ViewStates.DATA_UPDATING:
+        this.#filmPopup.updateElement({ isDataUpdating: true });
+        break;
+
+      case ViewStates.ABORTING:
+        this.#filmPopup.shake(this.#updatePopup);
+        break;
+    }
   }
 
   #updatePopup = () => {

@@ -127,6 +127,9 @@ class FilmsModel extends AbstractObservable {
       },
       deletingCommentId: '',
       addingComment: '',
+      watchlist:'',
+      watched:'',
+      favorite:'',
     };
 
     adaptedFilm = {

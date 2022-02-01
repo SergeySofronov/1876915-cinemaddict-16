@@ -1,6 +1,7 @@
 import { render, RenderPosition, replace } from '../render.js';
 import { getTopRatedFilmsData, getTopCommentedFilmsData, getFilmsDataByDate, filterFunctions } from '../filter.js';
 import { SectionMessages, SortTypes, UserActions, UpdateTypes, FilterTypes } from '../const.js';
+import { ViewStates } from '../const.js';
 
 import AbstractObservable from '../model/abstract-observable.js';
 import AbstractView from '../view/abstract-view.js';
@@ -217,7 +218,7 @@ class FilmDeskPresenter {
   }
 
 
-  #handleViewAction = (update, actionType, actionDetails) => {
+  #handleViewAction = async (update, actionType, actionDetails) => {
 
     switch (actionType) {
       case (UserActions.DELETE_POPUP):
@@ -226,19 +227,39 @@ class FilmDeskPresenter {
 
       case (UserActions.CREATE_POPUP):
         this.#setActiveFilm(update);
-        this.#filmsModel.getComments(UpdateTypes.LOAD, update);
+        this.#activeFilm.setViewState(ViewStates.COMMENT_LOADING);
+        try {
+          await this.#filmsModel.getComments(UpdateTypes.LOAD, update);
+        } catch {
+          this.#activeFilm.setViewState(ViewStates.ABORTING);
+        }
         break;
 
       case (UserActions.DELETE_COMMENT):
-        this.#filmsModel.deleteComment(this.#isCommentRatingChanged(update) ? UpdateTypes.MINOR : UpdateTypes.PATCH, update);
+        this.#activeFilm.setViewState(ViewStates.COMMENT_DELETING);
+        try {
+          await this.#filmsModel.deleteComment(this.#isCommentRatingChanged(update) ? UpdateTypes.MINOR : UpdateTypes.PATCH, update);
+        } catch {
+          this.#activeFilm.setViewState(ViewStates.ABORTING);
+        }
         break;
 
       case (UserActions.ADD_COMMENT):
-        this.#filmsModel.addComment(this.#isCommentRatingChanged(update) ? UpdateTypes.MINOR : UpdateTypes.PATCH, update);
+        this.#activeFilm.setViewState(ViewStates.COMMENT_ADDING);
+        try {
+          await this.#filmsModel.addComment(this.#isCommentRatingChanged(update) ? UpdateTypes.MINOR : UpdateTypes.PATCH, update);
+        } catch {
+          this.#activeFilm.setViewState(ViewStates.ABORTING);
+        }
         break;
 
       case (UserActions.UPDATE_DATA):
-        this.#filmsModel.update(this.#isUpdatePatch(actionDetails) ? UpdateTypes.PATCH : UpdateTypes.MINOR, update);
+        this.#activeFilm.setViewState(ViewStates.DATA_UPDATING);
+        try {
+          await this.#filmsModel.update(this.#isUpdatePatch(actionDetails) ? UpdateTypes.PATCH : UpdateTypes.MINOR, update);
+        } catch {
+          this.#activeFilm.setViewState(ViewStates.ABORTING);
+        }
         break;
 
       default: break;
