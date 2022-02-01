@@ -55,7 +55,7 @@ const UpdateTypes = {
 
 const EventStates = {
   PREVENT_DEFAULT: true,
-  EVENT_DEFAULT: false
+  EVENT_DEFAULT: false,
 };
 
 const KeyCode = {
