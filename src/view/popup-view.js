@@ -62,7 +62,7 @@ const getLoadedCommentTemplate = (loadedComment = {}, disableTag, isCommentDelet
   } = loadedComment;
 
   return (
-    `<li class="film-details__comment">
+    `<li class="film-details__comment" data-list-id = "${id}">
       <span class="film-details__comment-emoji">
         <img src="./images/emoji/${emotion}.png" width="55" height="55" alt="emoji-smile">
       </span>
@@ -247,6 +247,20 @@ class PopupView extends SmartView {
     this.createEventListener(document.body, 'keydown', this.#onEscKeyDown, EventStates.EVENT_DEFAULT);
     this.element.querySelectorAll('.film-details__bottom-container li button')
       .forEach((commentSelector) => this.createEventListener(commentSelector, 'click', this.#onCommentDelete));
+  }
+
+  shakePopup = (callback) => {
+    this.shake(this.element, callback);
+  }
+
+  shakeComment = (callback) => {
+    const comment = this.element.querySelector(`li[data-list-id = "${this._data.deletingCommentId}"]`);
+    this.shake(comment, callback);
+  }
+
+  shakeNewComment = (callback) => {
+    const comment = this.element.querySelector('.film-details__new-comment');
+    this.shake(comment, callback);
   }
 
   #updateValiditySelectors = () => {

@@ -89,7 +89,7 @@ export default class ApiService {
         // ['watching_date']: film.userDetails.watchingDate,
         ['watchlist']: film.watchlist,
         ['favorite']:film.favorite,
-        ['already_watched']: film.userDetails.watched,
+        ['already_watched']: film.watched,
         ['watching_date']: film.userDetails.watchingDate,
       }
     };

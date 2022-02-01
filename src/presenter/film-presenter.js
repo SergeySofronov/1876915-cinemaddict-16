@@ -99,7 +99,13 @@ class FilmPresenter {
         break;
 
       case ViewStates.ABORTING:
-        this.#filmPopup.shake(this.#updatePopup);
+        if (this.#filmPopup._data.deletingCommentId) {
+          this.#filmPopup.shakeComment(this.#updatePopup);
+        } else if (this.#filmPopup._data.addingComment) {
+          this.#filmPopup.shakeNewComment(this.#updatePopup);
+        } else {
+          this.#filmPopup.shakePopup(this.#updatePopup);
+        }
         break;
     }
   }
@@ -120,17 +126,18 @@ class FilmPresenter {
   }
 
   #onWatchListClick = () => {
-    this.#filmData.userDetails.watchlist = !this.#filmData.userDetails.watchlist;
+    //console.log(this.#filmData);
+    this.#filmData.watchlist = !this.#filmData.userDetails.watchlist;
     this.#filmActionCallback(FilterTypes.WATCHLIST);
   }
 
   #onWatchedClick = () => {
-    this.#filmData.userDetails.watched = !this.#filmData.userDetails.watched;
+    this.#filmData.watched = !this.#filmData.userDetails.watched;
     this.#filmActionCallback(FilterTypes.WATCHED);
   }
 
   #onFavoriteClick = () => {
-    this.#filmData.userDetails.favorite = !this.#filmData.userDetails.favorite;
+    this.#filmData.favorite = !this.#filmData.userDetails.favorite;
     this.#filmActionCallback(FilterTypes.FAVORITE);
   }
 

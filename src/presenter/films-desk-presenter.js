@@ -254,11 +254,15 @@ class FilmDeskPresenter {
         break;
 
       case (UserActions.UPDATE_DATA):
-        this.#activeFilm.setViewState(ViewStates.DATA_UPDATING);
+        if (update.id === this.#activeFilm) {
+          this.#activeFilm.setViewState(ViewStates.DATA_UPDATING);
+        }
         try {
           await this.#filmsModel.update(this.#isUpdatePatch(actionDetails) ? UpdateTypes.PATCH : UpdateTypes.MINOR, update);
         } catch {
-          this.#activeFilm.setViewState(ViewStates.ABORTING);
+          if (update.id === this.#activeFilm) {
+            this.#activeFilm?.setViewState(ViewStates.ABORTING);
+          }
         }
         break;
 
