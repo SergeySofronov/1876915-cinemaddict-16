@@ -126,9 +126,6 @@ class ApiService {
             }
           },
           ['user_details']: {
-            // ...film.userDetails,
-            // ['already_watched']: film.userDetails.watched,
-            // ['watching_date']: film.userDetails.watchingDate,
             ['watchlist']: film.watchlist,
             ['favorite']: film.favorite,
             ['already_watched']: film.watched,
@@ -2630,13 +2627,7 @@ class AbstractView {
 
   get template() {
     throw new Error('Abstract method not implemented: get template()');
-  } // #setAnimationTimeout = (element, callback) => {
-  //   setTimeout(() => {
-  //     element.style.animation = '';
-  //     callback();
-  //   }, SHAKE_ANIMATION_TIMEOUT);
-  // }
-
+  }
 
 }
 
