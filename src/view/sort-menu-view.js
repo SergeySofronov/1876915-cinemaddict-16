@@ -1,25 +1,34 @@
 import AbstractView from './abstract-view';
-import { SortType } from '../const.js';
+import { SortTypes } from '../const.js';
+
+const ACTIVE_CLASS = 'sort__button--active';
 
 const getFilmSortMenuTemplate = () => (
   `<ul class="sort">
-    <li><a href="#" class="sort__button sort__button--active" data-sort-type = ${SortType.DEFAULT}>Sort by default</a></li>
-    <li><a href="#" class="sort__button" data-sort-type = ${SortType.DATE}>Sort by date</a></li>
-    <li><a href="#" class="sort__button" data-sort-type = ${SortType.RATE}>Sort by rating</a></li>
+    <li><a href="#" class="sort__button sort__button--active" data-sort-type = ${SortTypes.DEFAULT}>Sort by default</a></li>
+    <li><a href="#" class="sort__button" data-sort-type = ${SortTypes.DATE}>Sort by date</a></li>
+    <li><a href="#" class="sort__button" data-sort-type = ${SortTypes.RATE}>Sort by rating</a></li>
   </ul>`
 );
 
 class SortMenuView extends AbstractView {
+  #activeSortType = SortTypes.DEFAULT;
+
+  get sortType() {
+    return this.#activeSortType;
+  }
+
   get template() {
     return getFilmSortMenuTemplate();
   }
 
   #setActiveAnchor = (evt) => {
-    this.element.querySelectorAll('a').forEach((anchor) => {
+    this.element.querySelectorAll('A').forEach((anchor) => {
       if (anchor === evt.target) {
-        anchor.classList.add('sort__button--active');
+        anchor.classList.add(ACTIVE_CLASS);
+        this.#activeSortType = evt.target.dataset.sortType;
       } else {
-        anchor.classList.remove('sort__button--active');
+        anchor.classList.remove(ACTIVE_CLASS);
       }
     });
   }
@@ -27,8 +36,10 @@ class SortMenuView extends AbstractView {
 
   setSortClickHandler(callback) {
     this.createEventListener(this.element, 'click', (evt) => {
-      this.#setActiveAnchor(evt);
-      callback(evt);
+      if (evt.target.tagName === 'A') {
+        this.#setActiveAnchor(evt);
+        callback(evt);
+      }
     });
 
     return this.element;

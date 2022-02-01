@@ -1,31 +1,20 @@
 import AbstractView from './abstract-view.js';
-import { UpdateStates } from '../const.js';
 
 class SmartView extends AbstractView {
   #data = {};
 
-  get data() {
+  get _data() {
     return this.#data;
   }
 
-  set data(data) {
+  set _data(data) {
     this.#data = data;
   }
 
-  updateData = (update, isPopupUpdating = UpdateStates.WITH_POPUP_UPDATE, isFilmUpdating = UpdateStates.WITH_FILM_UPDATE) => {
-    if (!update) {
-      return;
-    }
+  updateData = (update) => (this.#data = { ...this.#data, ...update });
 
-    this.#data = { ...this.#data, ...update };
-
-    if (isPopupUpdating) {
-      this.updateElement(isFilmUpdating);
-    }
-
-  }
-
-  updateElement = (isFilmUpdating) => {
+  updateElement = (update) => {
+    this.updateData(update);
     const prevElement = this.element;
     const scrollPosition = (prevElement.scrollTop || 0);
     const parent = prevElement.parentElement;
@@ -35,7 +24,7 @@ class SmartView extends AbstractView {
     parent.replaceChild(newElement, prevElement);
     newElement.scrollTop = scrollPosition;
 
-    this.restoreHandlers(isFilmUpdating);
+    this.restoreHandlers();
   }
 
   restoreHandlers = () => {
@@ -43,24 +32,24 @@ class SmartView extends AbstractView {
   }
 
   static parseData = (filmData) => ({
-    ...filmData, changedComments: [...filmData.comments],
+    ...filmData,
     watchlist: filmData.userDetails.watchlist,
     watched: filmData.userDetails.watched,
-    favorite: filmData.userDetails.favorite
+    favorite: filmData.userDetails.favorite,
+    isCommentsLoading: false,
+    isCommentDeleting: false,
+    isCommentAdding: false,
+    isDataUpdating: false,
   });
 
   static restoreData = (data) => {
     const filmData = { ...data };
-    filmData.comments = data.changedComments;
-    filmData.userDetails.watchlist = data.watchlist;
-    filmData.userDetails.watched = data.watched;
-    filmData.userDetails.favorite = data.favorite;
-    delete filmData.watchlist;
-    delete filmData.watched;
-    delete filmData.favorite;
-    delete filmData.changedComments;
     delete filmData.userComment;
     delete filmData.userEmoji;
+    delete filmData.isCommentsLoading;
+    delete filmData.isCommentDeleting;
+    delete filmData.isCommentAdding;
+    delete filmData.isDataUpdating;
 
     return filmData;
   }

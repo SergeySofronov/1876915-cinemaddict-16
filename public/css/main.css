@@ -37,6 +37,32 @@
   src: local('Open Sans ExtraBold'), local('OpenSans-ExtraBold'), url('../fonts/OpenSans-ExtraBold.woff2') format('woff2');
 }
 
+@keyframes shake {
+  0%,
+  100% {
+      transform: translateX(0);
+  }
+
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+      transform: translateX(-5px);
+  }
+
+  20%,
+  40%,
+  60%,
+  80% {
+      transform: translateX(5px);
+  }
+}
+
+.shake {
+  animation: shake 0.6s;
+}
+
 html {
   background: #121213 url('../images/background.png') no-repeat 60% 0;
   display: flex;
@@ -62,6 +88,9 @@ html {
 }
 
 body {
+  min-height: 100%;
+  display:flex;
+  flex-direction: column;
   box-sizing: border-box;
   max-width: 1240px;
   padding: var(--vertical-gap) var(--horizontal-gap) 0;
@@ -227,6 +256,12 @@ button {
 .profile__avatar {
   display: block;
   margin-left: 15px;
+}
+
+.main {
+  display:flex;
+  flex-direction: column;
+  flex: 1 1 auto;
 }
 
 .main-navigation {
@@ -527,7 +562,7 @@ button {
   position: relative;
 }
 
-.films-list--extra:last-of-type::before {
+.films-list--extra:last-of-type:not(:nth-child(2))::before {
   border-left: solid 1px var(--outline-color);
   bottom: 20px;
   content: '';
@@ -730,6 +765,7 @@ button {
   color: #ffffff;
   cursor: pointer;
 }
+
 .film-details__control-button:not(:first-of-type) {
   border-left: 1px solid #31353f
 }
@@ -770,6 +806,11 @@ button {
 .film-details__control-button--active.film-details__control-button--favorite::before {
   background-image: url("../images/icons/icon-favorite-active.svg");
 }
+
+.film-details__control-button:disabled{
+  color: grey;
+}
+
 .film-details__comment {
   display: flex;
   margin-bottom: 24px;
@@ -883,6 +924,11 @@ button {
 .film-details__comment-delete:hover {
   opacity: 0.7;
 }
+
+.film-details__comment-delete:disabled{
+  color:grey;
+}
+
 .film-details__comment-input {
   width: 100%;
   height: 50px;
@@ -900,6 +946,11 @@ button {
 .film-details__comment-input::placeholder {
   color: #212126;
 }
+
+.film-details__comment-input:disabled{
+  background-color:grey;
+}
+
 .film-details__comment-label {
   width: 100%;
 }

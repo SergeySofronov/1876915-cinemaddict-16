@@ -2,43 +2,80 @@ const SectionMessages = {
   DEFAULT: 'All movies. Upcoming',
   RATED: 'Top rated',
   POPULAR: 'Most commented',
-  NO_MOVIES: 'There are no movies in our database',
-  NO_WATCHLIST: 'There are no movies to watch now',
-  NO_HISTORY: 'There are no watched movies now',
-  NO_FAVORITE: 'There are no favorite movies now'
 };
 
-const SortType = {
+const UserScores = {
+  BUFF: 21,
+  FAN: 11,
+  NOVICE: 1,
+};
+
+const UserRanks = {
+  BUFF: 'movie buff',
+  FAN: 'fan',
+  NOVICE: 'novice',
+};
+
+const FilterTypes = {
+  ALL: 'all',
+  WATCHLIST: 'watchlist',
+  WATCHED: 'watched',
+  FAVORITE: 'favorite',
+  STATS: 'stats',
+};
+
+const SortTypes = {
   DEFAULT: 'default',
-  COMMENT: 'most-commented',
-  RATE: 'top-rated',
-  DATE: 'top-dated'
+  TOP_COMMENT: 'most-commented',
+  TOP_RATE: 'top-rated',
+  RATE: 'sortByRating',
+  DATE: 'sortByDate',
 };
 
 const DateFormatStyle = {
   DEFAULT: 'DD MMMM YYYY',
-  COMMENT: 'YYYY/MM/DD HH:mm',
-  YEAR: 'YYYY'
+  YEAR: 'YYYY',
 };
 
-const PresenterMessages = {
-  DELETE_POPUP: 'popupDeleted',
-  DELETE_POPUP_UPDATE: 'popupDeletedUpdate',
-  UPDATE_POPUP: 'updatePopup',
-  UPDATE_FILM: 'updateFilm'
+const UserActions = {
+  CREATE_POPUP: 'createPopup',
+  DELETE_POPUP: 'deletePopup',
+  DELETE_COMMENT: 'deleteComment',
+  ADD_COMMENT: 'addComment',
+  UPDATE_DATA: 'updateData',
 };
 
-const UpdateStates = {
-  WITHOUT_POPUP_UPDATE: false,
-  WITHOUT_FILM_UPDATE: false,
-  WITH_POPUP_UPDATE: true,
-  WITH_FILM_UPDATE: true,
+const UpdateTypes = {
+  LOAD: 'load',
+  PATCH: 'patch',
+  MINOR: 'minor',
+  MAJOR: 'major',
+  INIT: 'init',
+};
+
+const EventStates = {
   PREVENT_DEFAULT: true,
-  EVENT_DEFAULT: false
+  EVENT_DEFAULT: false,
 };
 
 const KeyCode = {
   ESC: 'Escape',
+  ENTER: 'Enter',
 };
 
-export { SectionMessages, SortType, KeyCode, DateFormatStyle, PresenterMessages, UpdateStates };
+const Methods = {
+  GET: 'GET',
+  PUT: 'PUT',
+  POST: 'POST',
+  DELETE: 'DELETE',
+};
+
+const ViewStates = {
+  ABORTING: 'aborting',
+  COMMENT_ADDING: 'adding',
+  COMMENT_DELETING: 'deleting',
+  COMMENT_LOADING: 'loading',
+  DATA_UPDATING: 'updating',
+};
+
+export { UserScores, UserRanks, FilterTypes, SectionMessages, SortTypes, KeyCode, DateFormatStyle, UserActions, EventStates, UpdateTypes, Methods, ViewStates };

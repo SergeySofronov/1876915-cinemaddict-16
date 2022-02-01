@@ -1,44 +1,26 @@
-import { DateFormatStyle } from './const';
-import { changeDateFormat } from './mock/utils';
+import { DateFormatStyle, FilterTypes, UserScores, UserRanks } from './const';
+import { changeDateFormat } from './utils';
 
-const filmStatistic = {
-  watchlist: 0,
-  watched: 0,
-  favorite: 0,
-  total: 0
-};
-
-const userRank = {
-  'novice': [1, 10],
-  'fan': [11, 20],
-  'movie buff': [21, Infinity]
-};
-
-const getUserRank = () => {
-  let rank = null;
-  const rankValues = Object.entries(userRank);
-  for (const [key, [min, max]] of rankValues) {
-    if ((filmStatistic.watched >= min) && (filmStatistic.watched <= max)) {
-      rank = key;
-      break;
-    }
+const getUserRank = (watchedFilmsQuantity) => {
+  if (watchedFilmsQuantity >= UserScores.BUFF) {
+    return UserRanks.BUFF;
   }
 
-  return rank;
-};
-
-const getFilmsStatistic = (filmData) => {
-  if (Array.isArray(filmData)) {
-    filmStatistic.total = filmData.length;
-
-    filmData.forEach((film) => {
-      filmStatistic.watchlist += film.userDetails.watchlist ? 1 : 0;
-      filmStatistic.watched += film.userDetails.watched ? 1 : 0;
-      filmStatistic.favorite += film.userDetails.favorite ? 1 : 0;
-    });
+  if (watchedFilmsQuantity >= UserScores.FAN) {
+    return UserRanks.FAN;
   }
 
-  return filmStatistic;
+  if (watchedFilmsQuantity >= UserScores.NOVICE) {
+    return UserRanks.NOVICE;
+  }
+
+  return '';
+};
+
+const getWatchedFilmsData = (films, isDateChecking) => {
+  if (Array.isArray(films)) {
+    return films.filter((film) => Boolean((film.userDetails?.watched) && (film.userDetails?.watchingDate || (!isDateChecking))));
+  }
 };
 
 const getTopRatedFilmsData = (films) => {
@@ -50,11 +32,10 @@ const getTopRatedFilmsData = (films) => {
   return [];
 };
 
-
 const getTopCommentedFilmsData = (films) => {
   if (Array.isArray(films)) {
-    return films.filter((film) => Boolean(film.comments?.length))
-      .sort((a, b) => (b.comments.length - a.comments.length));
+    return films.filter((film) => Boolean(film.commentsIds?.length))
+      .sort((a, b) => (b.commentsIds.length - a.commentsIds.length));
   }
 
   return [];
@@ -78,8 +59,15 @@ const getFilmsDataByDate = (films) => {
   }
 
   return [];
-
 };
 
-export { getFilmsStatistic, getUserRank, getTopCommentedFilmsData, getTopRatedFilmsData, getFilmsDataByDate };
+const filterFunctions = {
+  [FilterTypes.ALL]: (films) => films.filter((film) => Boolean(film.id)),
+  [FilterTypes.WATCHLIST]: (films) => films.filter((film) => Boolean(film.userDetails.watchlist)),
+  [FilterTypes.WATCHED]: (films) => films.filter((film) => Boolean(film.userDetails.watched)),
+  [FilterTypes.FAVORITE]: (films) => films.filter((film) => Boolean(film.userDetails.favorite)),
+  [FilterTypes.STATS]: (films) => films.filter((film) => Boolean(film.id))
+};
+
+export { getUserRank, getWatchedFilmsData, getTopCommentedFilmsData, getTopRatedFilmsData, getFilmsDataByDate, filterFunctions };
 

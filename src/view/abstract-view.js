@@ -1,4 +1,6 @@
-import { UpdateStates } from '../const.js';
+import { EventStates } from '../const.js';
+
+const SHAKE_ANIMATION_TIMEOUT = 600;
 
 class AbstractView {
   #element = null;
@@ -51,11 +53,15 @@ class AbstractView {
   }
 
   destroyElement = () => {
+    if (!this.#element) {
+      return;
+    }
+
     this.#element.remove();
     this.removeElement();
   }
 
-  createEventListener = (selector, eventType, callback, isPreventDefault = UpdateStates.PREVENT_DEFAULT) => {
+  createEventListener = (selector, eventType, callback, isPreventDefault = EventStates.PREVENT_DEFAULT) => {
 
     const elementSelector = this.#getElementSelector(selector);
 
@@ -79,12 +85,22 @@ class AbstractView {
     }
   }
 
-  removeAllEventListeners() {
+  removeAllEventListeners = () => {
     for (const [elementSelector, [eventType, eventHandler]] of this.#eventInfo.entries()) {
       elementSelector.removeEventListener(eventType, eventHandler);
-      this.#eventInfo.delete(elementSelector);
     }
+    this.#eventInfo.clear();
   }
+
+  shake = (selector, callback) => {
+    const element = this.#getElementSelector(selector);
+    element.style.animation = `shake ${SHAKE_ANIMATION_TIMEOUT / 1000}s`;
+    setTimeout(() => {
+      element.style.animation = '';
+      callback();
+    }, SHAKE_ANIMATION_TIMEOUT);
+  }
+
 }
 
 export { AbstractView as default };

@@ -1,4 +1,4 @@
-import { getShortFilmDescription, changeDateFormat } from '../mock/utils';
+import { getShortFilmDescription, changeDateFormat, getFilmDuration } from '../utils';
 import { DateFormatStyle } from '../const';
 import AbstractView from './abstract-view';
 
@@ -17,7 +17,7 @@ const getFilmCardTemplate = (filmData) => {
     } = filmData.filmInfo || {};
 
     const year = changeDateFormat(release?.date, DateFormatStyle.YEAR);
-    const comments = filmData.comments || [];
+    const comments = filmData.commentsIds || [];
 
     const {
       watchlist = false,
@@ -32,7 +32,7 @@ const getFilmCardTemplate = (filmData) => {
           <p class="film-card__rating">${totalRating}</p>
           <p class="film-card__info">
             <span class="film-card__year">${year}</span>
-            <span class="film-card__duration">${runtime}</span>
+            <span class="film-card__duration">${getFilmDuration(runtime)}</span>
             <span class="film-card__genre">${genre.length ? genre[genre.length - 1] : ''}</span>
           </p>
           <img src="${poster}" alt="Изображение обложки фильма" class="film-card__poster">
