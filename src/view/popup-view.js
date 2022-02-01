@@ -181,7 +181,7 @@ const getPopupTemplate = (data) => {
                 ${getTableRow(TableTerms.DIRECTOR, director)}
                 ${getTableRow(TableTerms.WRITERS, writers)}
                 ${getTableRow(TableTerms.ACTORS, actors)}
-                ${getTableRow(TableTerms.DATE, changeDateFormat(release?.date,))}
+                ${getTableRow(TableTerms.DATE, changeDateFormat(release?.date))}
                 ${getTableRow(TableTerms.TIME, getFilmDuration(runtime))}
                 ${getTableRow(TableTerms.COUNTRY, release.country || '')}
                 ${getTableRow(TableTerms.GENRES, getCardGenres(genre))}
