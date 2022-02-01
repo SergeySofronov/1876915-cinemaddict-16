@@ -70,7 +70,7 @@ const getStatsTemplate = (data, activeFilterType, genresAndQuantity, userRank, t
       <ul class="statistic__text-list">
         <li class="statistic__text-item">
           <h4 class="statistic__item-title">You watched</h4>
-          <p class="statistic__item-text">${data.length} <span class="statistic__item-description">movies</span></p>
+          <p class="statistic__item-text">${(activeFilterType === FilterTypes.ALL_TIME) ? data.filmsData.length : data.filteredFilmsData.length} <span class="statistic__item-description">movies</span></p>
         </li>
         <li class="statistic__text-item">
           <h4 class="statistic__item-title">Total duration</h4>
@@ -78,7 +78,7 @@ const getStatsTemplate = (data, activeFilterType, genresAndQuantity, userRank, t
         </li>
         <li class="statistic__text-item">
           <h4 class="statistic__item-title">Top genre</h4>
-          <p class="statistic__item-text">${topGenre?topGenre:''}</p>
+          <p class="statistic__item-text">${topGenre ? topGenre : ''}</p>
         </li>
       </ul>
       <div class="statistic__chart-wrap">
@@ -89,6 +89,7 @@ const getStatsTemplate = (data, activeFilterType, genresAndQuantity, userRank, t
 };
 
 class UserStatisticView extends SmartView {
+  #filmsData = null;
   #userRank = '';
   #totalDuration = '';
   #genres = new Set;
@@ -97,14 +98,17 @@ class UserStatisticView extends SmartView {
   #statisticCtx = null;
 
   get template() {
-    return getStatsTemplate(this._data.filteredFilmsData, this.#activeFilterType, this.#genresAndQuantity, this.#userRank, this.#totalDuration);
+    return getStatsTemplate(this._data, this.#activeFilterType, this.#genresAndQuantity, this.#userRank, this.#totalDuration);
   }
 
   init = (filmsData) => {
-    if(filmsData){
-      this._data = { filmsData: getWatchedFilmsData(filmsData) || [], filteredFilmsData: [], };
-      this.#userRank = getUserRank(this._data.filmsData.length);
+    if (filmsData) {
+      this.#filmsData = filmsData;
     }
+    const isDateChecking = (this.#activeFilterType !== FilterTypes.ALL_TIME);
+    this._data = { filmsData: getWatchedFilmsData(this.#filmsData, isDateChecking) || [], filteredFilmsData: [], };
+    this.#userRank = getUserRank(this._data.filmsData.length);
+
     this._data.filteredFilmsData = this.#getFilteredFilmsData();
     this.#updateFilmsStatistic();
     this.updateElement();
