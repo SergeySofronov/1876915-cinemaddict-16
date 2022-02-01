@@ -125,8 +125,13 @@ class ApiService {
               ['release_country']: film.filmInfo.release.country
             }
           },
-          ['user_details']: { ...film.userDetails,
-            ['already_watched']: film.userDetails.watched,
+          ['user_details']: {
+            // ...film.userDetails,
+            // ['already_watched']: film.userDetails.watched,
+            // ['watching_date']: film.userDetails.watchingDate,
+            ['watchlist']: film.watchlist,
+            ['favorite']: film.favorite,
+            ['already_watched']: film.watched,
             ['watching_date']: film.userDetails.watchingDate
           }
         };
@@ -139,6 +144,11 @@ class ApiService {
         delete adaptedFilm['user_details'].watched;
         delete adaptedFilm['user_details'].watchingDate;
         delete adaptedFilm.userDetails;
+        delete adaptedFilm.addingComment;
+        delete adaptedFilm.deletingCommentId;
+        delete adaptedFilm.watchlist;
+        delete adaptedFilm.watched;
+        delete adaptedFilm.favorite;
         return adaptedFilm;
       }
     });
@@ -191,7 +201,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "UserActions": () => (/* binding */ UserActions),
 /* harmony export */   "EventStates": () => (/* binding */ EventStates),
 /* harmony export */   "UpdateTypes": () => (/* binding */ UpdateTypes),
-/* harmony export */   "Methods": () => (/* binding */ Methods)
+/* harmony export */   "Methods": () => (/* binding */ Methods),
+/* harmony export */   "ViewStates": () => (/* binding */ ViewStates)
 /* harmony export */ });
 const SectionMessages = {
   DEFAULT: 'All movies. Upcoming',
@@ -254,6 +265,13 @@ const Methods = {
   POST: 'POST',
   DELETE: 'DELETE'
 };
+const ViewStates = {
+  ABORTING: 'aborting',
+  COMMENT_ADDING: 'adding',
+  COMMENT_DELETING: 'deleting',
+  COMMENT_LOADING: 'loading',
+  DATA_UPDATING: 'updating'
+};
 
 
 /***/ }),
@@ -295,12 +313,12 @@ const getUserRank = watchedFilmsQuantity => {
   return '';
 };
 
-const getWatchedFilmsData = films => {
+const getWatchedFilmsData = (films, isDateChecking) => {
   if (Array.isArray(films)) {
     return films.filter(film => {
       var _film$userDetails, _film$userDetails2;
 
-      return Boolean(((_film$userDetails = film.userDetails) === null || _film$userDetails === void 0 ? void 0 : _film$userDetails.watched) && ((_film$userDetails2 = film.userDetails) === null || _film$userDetails2 === void 0 ? void 0 : _film$userDetails2.watchingDate));
+      return Boolean(((_film$userDetails = film.userDetails) === null || _film$userDetails === void 0 ? void 0 : _film$userDetails.watched) && (((_film$userDetails2 = film.userDetails) === null || _film$userDetails2 === void 0 ? void 0 : _film$userDetails2.watchingDate) || !isDateChecking));
     });
   }
 };
@@ -598,7 +616,10 @@ class FilmsModel extends _abstract_observable_js__WEBPACK_IMPORTED_MODULE_0__["d
             watchingDate: ''
           },
           deletingCommentId: '',
-          addingComment: ''
+          addingComment: '',
+          watchlist: '',
+          watched: '',
+          favorite: ''
         };
         adaptedFilm = { ...adaptedFilm,
           ...film,
@@ -632,6 +653,9 @@ class FilmsModel extends _abstract_observable_js__WEBPACK_IMPORTED_MODULE_0__["d
           adaptedFilm.userDetails.watchingDate = film.user_details.watching_date;
           delete adaptedFilm.userDetails.watching_date;
           delete adaptedFilm.user_details;
+          adaptedFilm.watchlist = adaptedFilm.userDetails.watchlist;
+          adaptedFilm.watched = adaptedFilm.userDetails.watched;
+          adaptedFilm.favorite = adaptedFilm.userDetails.favorite;
         }
 
         return adaptedFilm;
@@ -853,14 +877,57 @@ class FilmPresenter {
         return;
       }
 
-      _classPrivateFieldGet(this, _handleViewAction).call(this, this, _const_js__WEBPACK_IMPORTED_MODULE_1__.UserActions.CREATE_POPUP);
-
       _classPrivateFieldSet(this, _filmPopup, new _view_popup_view__WEBPACK_IMPORTED_MODULE_5__["default"](_classPrivateFieldGet(this, _handleViewAction)));
 
       _classPrivateFieldGet(this, _filmPopup).init(_classPrivateFieldGet(this, _filmData));
 
+      _classPrivateFieldGet(this, _handleViewAction).call(this, this, _const_js__WEBPACK_IMPORTED_MODULE_1__.UserActions.CREATE_POPUP);
+
       (0,_render_js__WEBPACK_IMPORTED_MODULE_0__.render)(document.body, _classPrivateFieldGet(this, _filmPopup), _render_js__WEBPACK_IMPORTED_MODULE_0__.RenderPosition.BEFOREEND);
       document.body.classList.add('hide-overflow');
+    });
+
+    _defineProperty(this, "setViewState", state => {
+      switch (state) {
+        case _const_js__WEBPACK_IMPORTED_MODULE_1__.ViewStates.COMMENT_LOADING:
+          _classPrivateFieldGet(this, _filmPopup).updateElement({
+            isCommentsLoading: true
+          });
+
+          break;
+
+        case _const_js__WEBPACK_IMPORTED_MODULE_1__.ViewStates.COMMENT_DELETING:
+          _classPrivateFieldGet(this, _filmPopup).updateElement({
+            isCommentDeleting: true
+          });
+
+          break;
+
+        case _const_js__WEBPACK_IMPORTED_MODULE_1__.ViewStates.COMMENT_ADDING:
+          _classPrivateFieldGet(this, _filmPopup).updateElement({
+            isCommentAdding: true
+          });
+
+          break;
+
+        case _const_js__WEBPACK_IMPORTED_MODULE_1__.ViewStates.DATA_UPDATING:
+          _classPrivateFieldGet(this, _filmPopup).updateElement({
+            isDataUpdating: true
+          });
+
+          break;
+
+        case _const_js__WEBPACK_IMPORTED_MODULE_1__.ViewStates.ABORTING:
+          if (_classPrivateFieldGet(this, _filmPopup)._data.deletingCommentId) {
+            _classPrivateFieldGet(this, _filmPopup).shakeComment(_classPrivateFieldGet(this, _updatePopup));
+          } else if (_classPrivateFieldGet(this, _filmPopup)._data.addingComment) {
+            _classPrivateFieldGet(this, _filmPopup).shakeNewComment(_classPrivateFieldGet(this, _updatePopup));
+          } else {
+            _classPrivateFieldGet(this, _filmPopup).shakePopup(_classPrivateFieldGet(this, _updatePopup));
+          }
+
+          break;
+      }
     });
 
     _classPrivateFieldInitSpec(this, _updatePopup, {
@@ -893,7 +960,7 @@ class FilmPresenter {
     _classPrivateFieldInitSpec(this, _onWatchListClick, {
       writable: true,
       value: () => {
-        _classPrivateFieldGet(this, _filmData).userDetails.watchlist = !_classPrivateFieldGet(this, _filmData).userDetails.watchlist;
+        _classPrivateFieldGet(this, _filmData).watchlist = !_classPrivateFieldGet(this, _filmData).userDetails.watchlist;
 
         _classPrivateFieldGet(this, _filmActionCallback).call(this, _const_js__WEBPACK_IMPORTED_MODULE_1__.FilterTypes.WATCHLIST);
       }
@@ -902,7 +969,7 @@ class FilmPresenter {
     _classPrivateFieldInitSpec(this, _onWatchedClick, {
       writable: true,
       value: () => {
-        _classPrivateFieldGet(this, _filmData).userDetails.watched = !_classPrivateFieldGet(this, _filmData).userDetails.watched;
+        _classPrivateFieldGet(this, _filmData).watched = !_classPrivateFieldGet(this, _filmData).userDetails.watched;
 
         _classPrivateFieldGet(this, _filmActionCallback).call(this, _const_js__WEBPACK_IMPORTED_MODULE_1__.FilterTypes.WATCHED);
       }
@@ -911,7 +978,7 @@ class FilmPresenter {
     _classPrivateFieldInitSpec(this, _onFavoriteClick, {
       writable: true,
       value: () => {
-        _classPrivateFieldGet(this, _filmData).userDetails.favorite = !_classPrivateFieldGet(this, _filmData).userDetails.favorite;
+        _classPrivateFieldGet(this, _filmData).favorite = !_classPrivateFieldGet(this, _filmData).userDetails.favorite;
 
         _classPrivateFieldGet(this, _filmActionCallback).call(this, _const_js__WEBPACK_IMPORTED_MODULE_1__.FilterTypes.FAVORITE);
       }
@@ -1005,6 +1072,7 @@ function _classPrivateFieldSet(receiver, privateMap, value) { var descriptor = _
 function _classExtractFieldDescriptor(receiver, privateMap, action) { if (!privateMap.has(receiver)) { throw new TypeError("attempted to " + action + " private field on non-instance"); } return privateMap.get(receiver); }
 
 function _classApplyDescriptorSet(receiver, descriptor, value) { if (descriptor.set) { descriptor.set.call(receiver, value); } else { if (!descriptor.writable) { throw new TypeError("attempted to set read only private field"); } descriptor.value = value; } }
+
 
 
 
@@ -1438,7 +1506,7 @@ class FilmDeskPresenter {
 
     _classPrivateFieldInitSpec(this, _handleViewAction, {
       writable: true,
-      value: (update, actionType, actionDetails) => {
+      value: async (update, actionType, actionDetails) => {
         switch (actionType) {
           case _const_js__WEBPACK_IMPORTED_MODULE_2__.UserActions.DELETE_POPUP:
             _classPrivateFieldGet(this, _setActiveFilm).call(this, null);
@@ -1448,22 +1516,52 @@ class FilmDeskPresenter {
           case _const_js__WEBPACK_IMPORTED_MODULE_2__.UserActions.CREATE_POPUP:
             _classPrivateFieldGet(this, _setActiveFilm).call(this, update);
 
-            _classPrivateFieldGet(this, _filmsModel).getComments(_const_js__WEBPACK_IMPORTED_MODULE_2__.UpdateTypes.LOAD, update);
+            _classPrivateFieldGet(this, _activeFilm).setViewState(_const_js__WEBPACK_IMPORTED_MODULE_2__.ViewStates.COMMENT_LOADING);
+
+            try {
+              await _classPrivateFieldGet(this, _filmsModel).getComments(_const_js__WEBPACK_IMPORTED_MODULE_2__.UpdateTypes.LOAD, update);
+            } catch {
+              _classPrivateFieldGet(this, _activeFilm).setViewState(_const_js__WEBPACK_IMPORTED_MODULE_2__.ViewStates.ABORTING);
+            }
 
             break;
 
           case _const_js__WEBPACK_IMPORTED_MODULE_2__.UserActions.DELETE_COMMENT:
-            _classPrivateFieldGet(this, _filmsModel).deleteComment(_classPrivateFieldGet(this, _isCommentRatingChanged).call(this, update) ? _const_js__WEBPACK_IMPORTED_MODULE_2__.UpdateTypes.MINOR : _const_js__WEBPACK_IMPORTED_MODULE_2__.UpdateTypes.PATCH, update);
+            _classPrivateFieldGet(this, _activeFilm).setViewState(_const_js__WEBPACK_IMPORTED_MODULE_2__.ViewStates.COMMENT_DELETING);
+
+            try {
+              await _classPrivateFieldGet(this, _filmsModel).deleteComment(_classPrivateFieldGet(this, _isCommentRatingChanged).call(this, update) ? _const_js__WEBPACK_IMPORTED_MODULE_2__.UpdateTypes.MINOR : _const_js__WEBPACK_IMPORTED_MODULE_2__.UpdateTypes.PATCH, update);
+            } catch {
+              _classPrivateFieldGet(this, _activeFilm).setViewState(_const_js__WEBPACK_IMPORTED_MODULE_2__.ViewStates.ABORTING);
+            }
 
             break;
 
           case _const_js__WEBPACK_IMPORTED_MODULE_2__.UserActions.ADD_COMMENT:
-            _classPrivateFieldGet(this, _filmsModel).addComment(_classPrivateFieldGet(this, _isCommentRatingChanged).call(this, update) ? _const_js__WEBPACK_IMPORTED_MODULE_2__.UpdateTypes.MINOR : _const_js__WEBPACK_IMPORTED_MODULE_2__.UpdateTypes.PATCH, update);
+            _classPrivateFieldGet(this, _activeFilm).setViewState(_const_js__WEBPACK_IMPORTED_MODULE_2__.ViewStates.COMMENT_ADDING);
+
+            try {
+              await _classPrivateFieldGet(this, _filmsModel).addComment(_classPrivateFieldGet(this, _isCommentRatingChanged).call(this, update) ? _const_js__WEBPACK_IMPORTED_MODULE_2__.UpdateTypes.MINOR : _const_js__WEBPACK_IMPORTED_MODULE_2__.UpdateTypes.PATCH, update);
+            } catch {
+              _classPrivateFieldGet(this, _activeFilm).setViewState(_const_js__WEBPACK_IMPORTED_MODULE_2__.ViewStates.ABORTING);
+            }
 
             break;
 
           case _const_js__WEBPACK_IMPORTED_MODULE_2__.UserActions.UPDATE_DATA:
-            _classPrivateFieldGet(this, _filmsModel).update(_classPrivateFieldGet(this, _isUpdatePatch).call(this, actionDetails) ? _const_js__WEBPACK_IMPORTED_MODULE_2__.UpdateTypes.PATCH : _const_js__WEBPACK_IMPORTED_MODULE_2__.UpdateTypes.MINOR, update);
+            if (update.id === _classPrivateFieldGet(this, _activeFilm)) {
+              _classPrivateFieldGet(this, _activeFilm).setViewState(_const_js__WEBPACK_IMPORTED_MODULE_2__.ViewStates.DATA_UPDATING);
+            }
+
+            try {
+              await _classPrivateFieldGet(this, _filmsModel).update(_classPrivateFieldGet(this, _isUpdatePatch).call(this, actionDetails) ? _const_js__WEBPACK_IMPORTED_MODULE_2__.UpdateTypes.PATCH : _const_js__WEBPACK_IMPORTED_MODULE_2__.UpdateTypes.MINOR, update);
+            } catch {
+              if (update.id === _classPrivateFieldGet(this, _activeFilm)) {
+                var _classPrivateFieldGet5;
+
+                (_classPrivateFieldGet5 = _classPrivateFieldGet(this, _activeFilm)) === null || _classPrivateFieldGet5 === void 0 ? void 0 : _classPrivateFieldGet5.setViewState(_const_js__WEBPACK_IMPORTED_MODULE_2__.ViewStates.ABORTING);
+              }
+            }
 
             break;
 
@@ -1476,11 +1574,11 @@ class FilmDeskPresenter {
     _classPrivateFieldInitSpec(this, _handleModelEvent, {
       writable: true,
       value: (updateType, data) => {
-        var _classPrivateFieldGet5;
+        var _classPrivateFieldGet6;
 
         switch (updateType) {
           case _const_js__WEBPACK_IMPORTED_MODULE_2__.UpdateTypes.LOAD:
-            (_classPrivateFieldGet5 = _classPrivateFieldGet(this, _activeFilm)) === null || _classPrivateFieldGet5 === void 0 ? void 0 : _classPrivateFieldGet5.init(data);
+            (_classPrivateFieldGet6 = _classPrivateFieldGet(this, _activeFilm)) === null || _classPrivateFieldGet6 === void 0 ? void 0 : _classPrivateFieldGet6.init(data);
             break;
 
           case _const_js__WEBPACK_IMPORTED_MODULE_2__.UpdateTypes.PATCH:
@@ -1690,13 +1788,13 @@ class FilmDeskPresenter {
         _classPrivateFieldGet(this, _destroyCards).call(this);
 
         if (_classPrivateFieldGet(this, _filmsDesk)) {
-          var _classPrivateFieldGet6, _classPrivateFieldGet7;
+          var _classPrivateFieldGet7, _classPrivateFieldGet8;
 
-          (_classPrivateFieldGet6 = _classPrivateFieldGet(this, _filmsSortMenu)) === null || _classPrivateFieldGet6 === void 0 ? void 0 : _classPrivateFieldGet6.destroyElement();
+          (_classPrivateFieldGet7 = _classPrivateFieldGet(this, _filmsSortMenu)) === null || _classPrivateFieldGet7 === void 0 ? void 0 : _classPrivateFieldGet7.destroyElement();
 
           _classPrivateFieldSet(this, _filmsSortMenu, null);
 
-          (_classPrivateFieldGet7 = _classPrivateFieldGet(this, _showMoreButton)) === null || _classPrivateFieldGet7 === void 0 ? void 0 : _classPrivateFieldGet7.destroyElement();
+          (_classPrivateFieldGet8 = _classPrivateFieldGet(this, _showMoreButton)) === null || _classPrivateFieldGet8 === void 0 ? void 0 : _classPrivateFieldGet8.destroyElement();
 
           _classPrivateFieldSet(this, _showMoreButton, null);
 
@@ -2409,6 +2507,7 @@ function _classExtractFieldDescriptor(receiver, privateMap, action) { if (!priva
 function _classApplyDescriptorGet(receiver, descriptor) { if (descriptor.get) { return descriptor.get.call(receiver); } return descriptor.value; }
 
 
+const SHAKE_ANIMATION_TIMEOUT = 600;
 
 var _element = /*#__PURE__*/new WeakMap();
 
@@ -2498,6 +2597,24 @@ class AbstractView {
       }
     });
 
+    _defineProperty(this, "removeAllEventListeners", () => {
+      for (const [elementSelector, [eventType, eventHandler]] of _classPrivateFieldGet(this, _eventInfo).entries()) {
+        elementSelector.removeEventListener(eventType, eventHandler);
+      }
+
+      _classPrivateFieldGet(this, _eventInfo).clear();
+    });
+
+    _defineProperty(this, "shake", (selector, callback) => {
+      const element = _classPrivateFieldGet(this, _getElementSelector).call(this, selector);
+
+      element.style.animation = `shake ${SHAKE_ANIMATION_TIMEOUT / 1000}s`;
+      setTimeout(() => {
+        element.style.animation = '';
+        callback();
+      }, SHAKE_ANIMATION_TIMEOUT);
+    });
+
     if (new.target === AbstractView) {
       throw new Error('Can\'t instantiate AbstractView, class instance only');
     }
@@ -2513,15 +2630,13 @@ class AbstractView {
 
   get template() {
     throw new Error('Abstract method not implemented: get template()');
-  }
+  } // #setAnimationTimeout = (element, callback) => {
+  //   setTimeout(() => {
+  //     element.style.animation = '';
+  //     callback();
+  //   }, SHAKE_ANIMATION_TIMEOUT);
+  // }
 
-  removeAllEventListeners() {
-    for (const [elementSelector, [eventType, eventHandler]] of _classPrivateFieldGet(this, _eventInfo).entries()) {
-      elementSelector.removeEventListener(eventType, eventHandler);
-    }
-
-    _classPrivateFieldGet(this, _eventInfo).clear();
-  }
 
 }
 
@@ -3093,9 +3208,9 @@ const TableTerms = {
   GENRES: 'Genres'
 };
 
-const getCommentEmotionTemplate = (emotion, isChecked = false) => {
+const getCommentEmotionTemplate = (emotion, isChecked = false, disableTag) => {
   if (emotionTypes.includes(emotion)) {
-    return `<input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-${emotion}" value="${emotion}" ${isChecked ? 'checked' : ''}>
+    return `<input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-${emotion}" value="${emotion}" ${isChecked ? 'checked' : ''} ${disableTag}>
         <label class="film-details__emoji-label" for="emoji-${emotion}">
           <img src="./images/emoji/${emotion}.png" width="30" height="30" alt="emoji">
         </label>`;
@@ -3104,31 +3219,31 @@ const getCommentEmotionTemplate = (emotion, isChecked = false) => {
   return '';
 };
 
-const getPopupNewCommentTemplate = (comment, userEmoji) => `<div class="film-details__new-comment">
-    <div class="film-details__add-emoji-label">
-      <!--User Emoji-->
-      <input type="text" class="film-details__emoji-input visually-hidden">
-      ${userEmoji ? `<img src="images/emoji/${userEmoji}.png" width="55" height="55" alt="emoji-${userEmoji}">` : ''}
-    </div>
+const getPopupNewCommentTemplate = (userComment, userEmoji, disableTag) => `<div class="film-details__new-comment">
+      <div class="film-details__add-emoji-label">
+        <!--User Emoji-->
+        <input type="text" class="film-details__emoji-input visually-hidden" ${disableTag}>
+        ${userEmoji ? `<img src="images/emoji/${userEmoji}.png" width="55" height="55" alt="emoji-${userEmoji}">` : ''}
+      </div>
 
-    <label class="film-details__comment-label">
-      <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment">${comment ? he__WEBPACK_IMPORTED_MODULE_0___default().encode(comment) : ''}</textarea>
-    </label>
+      <label class="film-details__comment-label">
+        <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment" ${disableTag}>${userComment ? he__WEBPACK_IMPORTED_MODULE_0___default().encode(userComment) : ''}</textarea>
+      </label>
 
-    <div class="film-details__emoji-list">
-        ${emotionTypes.map(emotion => getCommentEmotionTemplate(emotion, emotion === userEmoji)).join('')}
-    </div>
+      <div class="film-details__emoji-list">
+          ${emotionTypes.map(emotion => getCommentEmotionTemplate(emotion, emotion === userEmoji, disableTag)).join('')}
+      </div>
   </div>`;
 
-const getLoadedCommentTemplate = (loadedСomment = {}) => {
+const getLoadedCommentTemplate = (loadedComment = {}, disableTag, isCommentDeleting, deletingCommentId) => {
   const {
     id = '',
     author = '',
     emotion = '',
     comment = '',
     date = ''
-  } = loadedСomment;
-  return `<li class="film-details__comment">
+  } = loadedComment;
+  return `<li class="film-details__comment" data-list-id = "${id}">
       <span class="film-details__comment-emoji">
         <img src="./images/emoji/${emotion}.png" width="55" height="55" alt="emoji-smile">
       </span>
@@ -3137,7 +3252,7 @@ const getLoadedCommentTemplate = (loadedСomment = {}) => {
         <p class="film-details__comment-info">
           <span class="film-details__comment-author">${author}</span>
           <span class="film-details__comment-day">${dayjs__WEBPACK_IMPORTED_MODULE_2___default()(date).fromNow()}</span>
-          <button class="film-details__comment-delete" data-button-id = ${id}>Delete</button>
+          <button class="film-details__comment-delete" data-button-id = "${id}"${disableTag}>${isCommentDeleting && deletingCommentId === id ? 'Deleting...' : 'Delete'}</button>
         </p>
       </div>
     </li>`;
@@ -3145,16 +3260,24 @@ const getLoadedCommentTemplate = (loadedСomment = {}) => {
 
 const getPopupCommentSectionTemplate = data => {
   if (data) {
+    const {
+      isCommentsLoading = false,
+      isCommentDeleting = false,
+      isCommentAdding = false
+    } = data;
+    const disableTag = isCommentDeleting || isCommentAdding ? 'disabled' : '';
+    const loadingMessage = isCommentsLoading ? '(Loading...)' : '';
+    const errorMessage = !isCommentsLoading && data.commentsIds.length !== data.comments.length ? '(Comments loading error)' : '';
     return `<div class="film-details__bottom-container">
         <section class="film-details__comments-wrap">
-          <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${data.comments ? data.comments.length : 0}</span></h3>
+          <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count"> ${data.commentsIds ? data.commentsIds.length : 0}${loadingMessage}${errorMessage}</span></h3>
 
           <ul class="film-details__comments-list">
             <!-- Отрисовка всех комментариев к фильму -->
-            ${data.comments.map(comment => getLoadedCommentTemplate(comment)).join('')}
+            ${data.comments.map(comment => getLoadedCommentTemplate(comment, disableTag, isCommentDeleting, data.deletingCommentId)).join('')}
           </ul>
 
-          ${getPopupNewCommentTemplate(data.userComment, data.userEmoji)}
+          ${getPopupNewCommentTemplate(data.userComment, data.userEmoji, disableTag)}
         </section>
       </div>`;
   }
@@ -3240,9 +3363,9 @@ const getPopupTemplate = data => {
             </div>
 
             <section class="film-details__controls">
-              <button type="button" class="film-details__control-button film-details__control-button--watchlist ${watchlist ? ACTIVE_CLASS : ''}" id="watchlist" name="watchlist">Add to watchlist</button>
-              <button type="button" class="film-details__control-button film-details__control-button--watched ${watched ? ACTIVE_CLASS : ''}" id="watched" name="watched">Already watched</button>
-              <button type="button" class="film-details__control-button film-details__control-button--favorite ${favorite ? ACTIVE_CLASS : ''}" id="favorite" name="favorite">Add to favorites</button>
+              <button type="button" class="film-details__control-button film-details__control-button--watchlist ${watchlist ? ACTIVE_CLASS : ''}" id="watchlist" name="watchlist" ${data.isDataUpdating ? 'disabled' : ''}>Add to watchlist</button>
+              <button type="button" class="film-details__control-button film-details__control-button--watched ${watched ? ACTIVE_CLASS : ''}" id="watched" name="watched" ${data.isDataUpdating ? 'disabled' : ''}>Already watched</button>
+              <button type="button" class="film-details__control-button film-details__control-button--favorite ${favorite ? ACTIVE_CLASS : ''}" id="favorite" name="favorite" ${data.isDataUpdating ? 'disabled' : ''}>Add to favorites</button>
             </section>
           </div>
 
@@ -3334,6 +3457,20 @@ class PopupView extends _smart_view__WEBPACK_IMPORTED_MODULE_4__["default"] {
       this.createEventListener('.film-details__emoji-list', 'change', _classPrivateFieldGet(this, _onUserEmojiChange));
       this.createEventListener(document.body, 'keydown', _classPrivateFieldGet(this, _onEscKeyDown), _const_js__WEBPACK_IMPORTED_MODULE_5__.EventStates.EVENT_DEFAULT);
       this.element.querySelectorAll('.film-details__bottom-container li button').forEach(commentSelector => this.createEventListener(commentSelector, 'click', _classPrivateFieldGet(this, _onCommentDelete)));
+    });
+
+    _defineProperty(this, "shakePopup", callback => {
+      this.shake(this.element, callback);
+    });
+
+    _defineProperty(this, "shakeComment", callback => {
+      const comment = this.element.querySelector(`li[data-list-id = "${this._data.deletingCommentId}"]`);
+      this.shake(comment, callback);
+    });
+
+    _defineProperty(this, "shakeNewComment", callback => {
+      const comment = this.element.querySelector('.film-details__new-comment');
+      this.shake(comment, callback);
     });
 
     _classPrivateFieldInitSpec(this, _updateValiditySelectors, {
@@ -3613,20 +3750,22 @@ class SmartView extends _abstract_view_js__WEBPACK_IMPORTED_MODULE_0__["default"
 _defineProperty(SmartView, "parseData", filmData => ({ ...filmData,
   watchlist: filmData.userDetails.watchlist,
   watched: filmData.userDetails.watched,
-  favorite: filmData.userDetails.favorite
+  favorite: filmData.userDetails.favorite,
+  isCommentsLoading: false,
+  isCommentDeleting: false,
+  isCommentAdding: false,
+  isDataUpdating: false
 }));
 
 _defineProperty(SmartView, "restoreData", data => {
   const filmData = { ...data
   };
-  filmData.userDetails.watchlist = data.watchlist;
-  filmData.userDetails.watched = data.watched;
-  filmData.userDetails.favorite = data.favorite;
-  delete filmData.watchlist;
-  delete filmData.watched;
-  delete filmData.favorite;
   delete filmData.userComment;
   delete filmData.userEmoji;
+  delete filmData.isCommentsLoading;
+  delete filmData.isCommentDeleting;
+  delete filmData.isCommentAdding;
+  delete filmData.isDataUpdating;
   return filmData;
 });
 
@@ -3886,7 +4025,7 @@ const getStatsTemplate = (data, activeFilterType, genresAndQuantity, userRank, t
       <ul class="statistic__text-list">
         <li class="statistic__text-item">
           <h4 class="statistic__item-title">You watched</h4>
-          <p class="statistic__item-text">${data.length} <span class="statistic__item-description">movies</span></p>
+          <p class="statistic__item-text">${activeFilterType === FilterTypes.ALL_TIME ? data.filmsData.length : data.filteredFilmsData.length} <span class="statistic__item-description">movies</span></p>
         </li>
         <li class="statistic__text-item">
           <h4 class="statistic__item-title">Total duration</h4>
@@ -3902,6 +4041,8 @@ const getStatsTemplate = (data, activeFilterType, genresAndQuantity, userRank, t
       </div>
     </section>`;
 };
+
+var _filmsData = /*#__PURE__*/new WeakMap();
 
 var _userRank = /*#__PURE__*/new WeakMap();
 
@@ -3930,6 +4071,11 @@ var _onFiltersChange = /*#__PURE__*/new WeakMap();
 class UserStatisticView extends _smart_view_js__WEBPACK_IMPORTED_MODULE_2__["default"] {
   constructor(...args) {
     super(...args);
+
+    _classPrivateFieldInitSpec(this, _filmsData, {
+      writable: true,
+      value: null
+    });
 
     _classPrivateFieldInitSpec(this, _userRank, {
       writable: true,
@@ -3963,13 +4109,16 @@ class UserStatisticView extends _smart_view_js__WEBPACK_IMPORTED_MODULE_2__["def
 
     _defineProperty(this, "init", filmsData => {
       if (filmsData) {
-        this._data = {
-          filmsData: (0,_filter_js__WEBPACK_IMPORTED_MODULE_3__.getWatchedFilmsData)(filmsData) || [],
-          filteredFilmsData: []
-        };
-
-        _classPrivateFieldSet(this, _userRank, (0,_filter_js__WEBPACK_IMPORTED_MODULE_3__.getUserRank)(this._data.filmsData.length));
+        _classPrivateFieldSet(this, _filmsData, filmsData);
       }
+
+      const isDateChecking = _classPrivateFieldGet(this, _activeFilterType) !== FilterTypes.ALL_TIME;
+      this._data = {
+        filmsData: (0,_filter_js__WEBPACK_IMPORTED_MODULE_3__.getWatchedFilmsData)(_classPrivateFieldGet(this, _filmsData), isDateChecking) || [],
+        filteredFilmsData: []
+      };
+
+      _classPrivateFieldSet(this, _userRank, (0,_filter_js__WEBPACK_IMPORTED_MODULE_3__.getUserRank)(this._data.filmsData.length));
 
       this._data.filteredFilmsData = _classPrivateFieldGet(this, _getFilteredFilmsData).call(this);
 
@@ -4116,7 +4265,7 @@ class UserStatisticView extends _smart_view_js__WEBPACK_IMPORTED_MODULE_2__["def
   }
 
   get template() {
-    return getStatsTemplate(this._data.filteredFilmsData, _classPrivateFieldGet(this, _activeFilterType), _classPrivateFieldGet(this, _genresAndQuantity), _classPrivateFieldGet(this, _userRank), _classPrivateFieldGet(this, _totalDuration));
+    return getStatsTemplate(this._data, _classPrivateFieldGet(this, _activeFilterType), _classPrivateFieldGet(this, _genresAndQuantity), _classPrivateFieldGet(this, _userRank), _classPrivateFieldGet(this, _totalDuration));
   }
 
 }

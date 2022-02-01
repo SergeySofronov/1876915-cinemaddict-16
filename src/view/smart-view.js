@@ -44,12 +44,6 @@ class SmartView extends AbstractView {
 
   static restoreData = (data) => {
     const filmData = { ...data };
-    // filmData.userDetails.watchlist = data.watchlist;
-    // filmData.userDetails.watched = data.watched;
-    // filmData.userDetails.favorite = data.favorite;
-    //delete filmData.watchlist;
-    //delete filmData.watched;
-    //delete filmData.favorite;
     delete filmData.userComment;
     delete filmData.userEmoji;
     delete filmData.isCommentsLoading;

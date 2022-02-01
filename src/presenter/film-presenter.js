@@ -126,7 +126,6 @@ class FilmPresenter {
   }
 
   #onWatchListClick = () => {
-    //console.log(this.#filmData);
     this.#filmData.watchlist = !this.#filmData.userDetails.watchlist;
     this.#filmActionCallback(FilterTypes.WATCHLIST);
   }
