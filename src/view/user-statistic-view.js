@@ -9,6 +9,8 @@ dayjs.extend(duration);
 dayjs.extend(isBetween);
 
 const BAR_HEIGHT = 50;
+const DATE_DIFF_STEP = 1;
+const DATE_OLDEST = 1000;
 
 const FilterTypes = {
   ALL_TIME: 'all-time',
@@ -27,11 +29,11 @@ const menuNames = {
 };
 
 const dateDiffCalc = {
-  [FilterTypes.ALL_TIME]: () => dayjs().subtract(1000, 'year'),
-  [FilterTypes.TODAY]: () => dayjs().subtract(1, 'day'),
-  [FilterTypes.WEEK]: () => dayjs().subtract(1, 'week'),
-  [FilterTypes.MONTH]: () => dayjs().subtract(1, 'month'),
-  [FilterTypes.YEAR]: () => dayjs().subtract(1, 'year')
+  [FilterTypes.ALL_TIME]: () => dayjs().subtract(DATE_OLDEST, 'year'),
+  [FilterTypes.TODAY]: () => dayjs().subtract(DATE_DIFF_STEP, 'day'),
+  [FilterTypes.WEEK]: () => dayjs().subtract(DATE_DIFF_STEP, 'week'),
+  [FilterTypes.MONTH]: () => dayjs().subtract(DATE_DIFF_STEP, 'month'),
+  [FilterTypes.YEAR]: () => dayjs().subtract(DATE_DIFF_STEP, 'year')
 };
 
 const getStatisticMenuItem = (filterType, activeFilterType) => (
