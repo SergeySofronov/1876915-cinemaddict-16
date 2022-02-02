@@ -80,13 +80,10 @@ class ApiService {
       return await ApiService.parseResponse(response);
     });
 
-    _defineProperty(this, "deleteComment", async commentId => {
-      const response = await _classPrivateFieldGet(this, _load).call(this, {
-        url: `comments/${commentId}`,
-        method: _const__WEBPACK_IMPORTED_MODULE_0__.Methods.DELETE
-      });
-      return response;
-    });
+    _defineProperty(this, "deleteComment", async commentId => await _classPrivateFieldGet(this, _load).call(this, {
+      url: `comments/${commentId}`,
+      method: _const__WEBPACK_IMPORTED_MODULE_0__.Methods.DELETE
+    }));
 
     _classPrivateFieldInitSpec(this, _load, {
       writable: true,
@@ -1615,10 +1612,21 @@ class FilmDeskPresenter {
 
     _classPrivateFieldInitSpec(this, _updateFilmsPresenters, {
       writable: true,
-      value: filmPresenter => {
+      value: filmData => {
+        let isPopupShouldUpdate = Boolean(_classPrivateFieldGet(this, _activeFilm));
+
         for (const [presenter, filmId] of _classPrivateFieldGet(this, _filmsPresenters).entries()) {
-          if (filmId === filmPresenter.id) {
-            presenter.init(filmPresenter);
+          if (filmId === filmData.id) {
+            presenter.init(filmData);
+            isPopupShouldUpdate = false;
+          }
+        }
+
+        if (isPopupShouldUpdate) {
+          const index = _classPrivateFieldGet(this, _filmsModel).filmsData.findIndex(film => film.id === _classPrivateFieldGet(this, _activeFilm).id);
+
+          if (index !== -1) {
+            _classPrivateFieldGet(this, _activeFilm).init(_classPrivateFieldGet(this, _filmsModel).filmsData[index]);
           }
         }
       }
@@ -2131,7 +2139,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _view_abstract_view_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../view/abstract-view.js */ "./src/view/abstract-view.js");
 /* harmony import */ var _model_abstract_observable_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../model/abstract-observable.js */ "./src/model/abstract-observable.js");
-/* harmony import */ var _view_films_quantity_footer_view_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../view/films-quantity-footer-view.js */ "./src/view/films-quantity-footer-view.js");
+/* harmony import */ var _view_films_quantity_view_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../view/films-quantity-view.js */ "./src/view/films-quantity-view.js");
 /* harmony import */ var _render_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../render.js */ "./src/render.js");
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -2196,7 +2204,7 @@ class FooterProfilePresenter {
 
         const prevComponent = _classPrivateFieldGet(this, _footerComponent);
 
-        _classPrivateFieldSet(this, _footerComponent, new _view_films_quantity_footer_view_js__WEBPACK_IMPORTED_MODULE_2__["default"](_classPrivateFieldGet(this, _filmQuantity)));
+        _classPrivateFieldSet(this, _footerComponent, new _view_films_quantity_view_js__WEBPACK_IMPORTED_MODULE_2__["default"](_classPrivateFieldGet(this, _filmQuantity)));
 
         if (prevComponent) {
           (0,_render_js__WEBPACK_IMPORTED_MODULE_3__.replace)(prevComponent, _classPrivateFieldGet(this, _footerComponent));
@@ -2505,6 +2513,7 @@ function _classApplyDescriptorGet(receiver, descriptor) { if (descriptor.get) { 
 
 
 const SHAKE_ANIMATION_TIMEOUT = 600;
+const SECONDS_DIVIDER = 1000;
 
 var _element = /*#__PURE__*/new WeakMap();
 
@@ -2605,7 +2614,7 @@ class AbstractView {
     _defineProperty(this, "shake", (selector, callback) => {
       const element = _classPrivateFieldGet(this, _getElementSelector).call(this, selector);
 
-      element.style.animation = `shake ${SHAKE_ANIMATION_TIMEOUT / 1000}s`;
+      element.style.animation = `shake ${SHAKE_ANIMATION_TIMEOUT / SECONDS_DIVIDER}s`;
       setTimeout(() => {
         element.style.animation = '';
         callback();
@@ -2852,16 +2861,16 @@ class FilmsLoadingView extends _abstract_view_js__WEBPACK_IMPORTED_MODULE_0__["d
 
 /***/ }),
 
-/***/ "./src/view/films-quantity-footer-view.js":
-/*!************************************************!*\
-  !*** ./src/view/films-quantity-footer-view.js ***!
-  \************************************************/
+/***/ "./src/view/films-quantity-view.js":
+/*!*****************************************!*\
+  !*** ./src/view/films-quantity-view.js ***!
+  \*****************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ FilmFooterView)
+/* harmony export */   "default": () => (/* binding */ FilmQuantityView)
 /* harmony export */ });
 /* harmony import */ var _abstract_view__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./abstract-view */ "./src/view/abstract-view.js");
 function _classPrivateFieldInitSpec(obj, privateMap, value) { _checkPrivateRedeclaration(obj, privateMap); privateMap.set(obj, value); }
@@ -2880,11 +2889,11 @@ function _classApplyDescriptorSet(receiver, descriptor, value) { if (descriptor.
 
 
 
-const getFilmFooterTemplate = filmQuantity => `<p>${filmQuantity ? filmQuantity : 0} movies inside</p>`;
+const getFooterProfileTemplate = filmQuantity => `<p>${filmQuantity ? filmQuantity : 0} movies inside</p>`;
 
 var _filmQuantity = /*#__PURE__*/new WeakMap();
 
-class FilmFooterView extends _abstract_view__WEBPACK_IMPORTED_MODULE_0__["default"] {
+class FilmQuantityView extends _abstract_view__WEBPACK_IMPORTED_MODULE_0__["default"] {
   constructor(filmQuantity) {
     super();
 
@@ -2897,7 +2906,7 @@ class FilmFooterView extends _abstract_view__WEBPACK_IMPORTED_MODULE_0__["defaul
   }
 
   get template() {
-    return getFilmFooterTemplate(_classPrivateFieldGet(this, _filmQuantity));
+    return getFooterProfileTemplate(_classPrivateFieldGet(this, _filmQuantity));
   }
 
 }
@@ -3961,6 +3970,8 @@ function _classApplyDescriptorGet(receiver, descriptor) { if (descriptor.get) { 
 dayjs__WEBPACK_IMPORTED_MODULE_4___default().extend((dayjs_plugin_duration__WEBPACK_IMPORTED_MODULE_5___default()));
 dayjs__WEBPACK_IMPORTED_MODULE_4___default().extend((dayjs_plugin_isBetween__WEBPACK_IMPORTED_MODULE_6___default()));
 const BAR_HEIGHT = 50;
+const DATE_DIFF_STEP = 1;
+const DATE_OLDEST = 1000;
 const FilterTypes = {
   ALL_TIME: 'all-time',
   TODAY: 'today',
@@ -3976,11 +3987,11 @@ const menuNames = {
   [FilterTypes.YEAR]: 'Year'
 };
 const dateDiffCalc = {
-  [FilterTypes.ALL_TIME]: () => dayjs__WEBPACK_IMPORTED_MODULE_4___default()().subtract(1000, 'year'),
-  [FilterTypes.TODAY]: () => dayjs__WEBPACK_IMPORTED_MODULE_4___default()().subtract(1, 'day'),
-  [FilterTypes.WEEK]: () => dayjs__WEBPACK_IMPORTED_MODULE_4___default()().subtract(1, 'week'),
-  [FilterTypes.MONTH]: () => dayjs__WEBPACK_IMPORTED_MODULE_4___default()().subtract(1, 'month'),
-  [FilterTypes.YEAR]: () => dayjs__WEBPACK_IMPORTED_MODULE_4___default()().subtract(1, 'year')
+  [FilterTypes.ALL_TIME]: () => dayjs__WEBPACK_IMPORTED_MODULE_4___default()().subtract(DATE_OLDEST, 'year'),
+  [FilterTypes.TODAY]: () => dayjs__WEBPACK_IMPORTED_MODULE_4___default()().subtract(DATE_DIFF_STEP, 'day'),
+  [FilterTypes.WEEK]: () => dayjs__WEBPACK_IMPORTED_MODULE_4___default()().subtract(DATE_DIFF_STEP, 'week'),
+  [FilterTypes.MONTH]: () => dayjs__WEBPACK_IMPORTED_MODULE_4___default()().subtract(DATE_DIFF_STEP, 'month'),
+  [FilterTypes.YEAR]: () => dayjs__WEBPACK_IMPORTED_MODULE_4___default()().subtract(DATE_DIFF_STEP, 'year')
 };
 
 const getStatisticMenuItem = (filterType, activeFilterType) => `<input type="radio" class="statistic__filters-input visually-hidden" name="statistic-filter" id="statistic-${filterType}" value="${filterType}" ${activeFilterType === filterType ? 'checked' : ''}>
