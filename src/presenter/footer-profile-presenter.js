@@ -1,6 +1,6 @@
 import AbstractView from '../view/abstract-view.js';
 import AbstractObservable from '../model/abstract-observable.js';
-import FilmsQuantityFooterView from '../view/films-quantity-footer-view.js';
+import FilmQuantityView from '../view/films-quantity-view.js';
 import { render, replace, RenderPosition } from '../render.js';
 
 
@@ -29,7 +29,7 @@ class FooterProfilePresenter {
     if (this.#filmQuantity !== filmQuantity) {
       this.#filmQuantity = filmQuantity;
       const prevComponent = this.#footerComponent;
-      this.#footerComponent = new FilmsQuantityFooterView(this.#filmQuantity);
+      this.#footerComponent = new FilmQuantityView(this.#filmQuantity);
       if (prevComponent) {
         replace(prevComponent, this.#footerComponent);
       } else {

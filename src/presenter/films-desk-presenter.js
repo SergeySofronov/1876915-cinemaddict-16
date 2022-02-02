@@ -304,10 +304,19 @@ class FilmDeskPresenter {
     }
   }
 
-  #updateFilmsPresenters = (filmPresenter) => {
+  #updateFilmsPresenters = (filmData) => {
+    let isPopupShouldUpdate = Boolean(this.#activeFilm);
     for (const [presenter, filmId] of this.#filmsPresenters.entries()) {
-      if (filmId === filmPresenter.id) {
-        presenter.init(filmPresenter);
+      if (filmId === filmData.id) {
+        presenter.init(filmData);
+        isPopupShouldUpdate = false;
+      }
+    }
+
+    if (isPopupShouldUpdate) {
+      const index = this.#filmsModel.filmsData.findIndex((film) => (film.id === this.#activeFilm.id));
+      if (index !== -1) {
+        this.#activeFilm.init(this.#filmsModel.filmsData[index]);
       }
     }
   }

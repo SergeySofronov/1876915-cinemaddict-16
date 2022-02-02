@@ -38,14 +38,10 @@ export default class ApiService {
     return await ApiService.parseResponse(response);
   }
 
-  deleteComment = async (commentId) => {
-    const response = await this.#load({
-      url: `comments/${commentId}`,
-      method: Methods.DELETE,
-    });
-
-    return response;
-  }
+  deleteComment = async (commentId) => await this.#load({
+    url: `comments/${commentId}`,
+    method: Methods.DELETE,
+  });
 
   #load = async ({
     url,
@@ -85,7 +81,7 @@ export default class ApiService {
       },
       ['user_details']: {
         ['watchlist']: film.watchlist,
-        ['favorite']:film.favorite,
+        ['favorite']: film.favorite,
         ['already_watched']: film.watched,
         ['watching_date']: film.userDetails.watchingDate,
       }
