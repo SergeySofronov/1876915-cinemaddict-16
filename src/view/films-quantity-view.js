@@ -1,6 +1,6 @@
 import AbstractView from './abstract-view';
 
-const getFooterProfileTemplate = (filmQuantity) => `<p>${filmQuantity ? filmQuantity : 0} movies inside</p>`;
+const getFilmQuantityTemplate = (filmQuantity) => `<p>${filmQuantity ? filmQuantity : 0} movies inside</p>`;
 
 class FilmQuantityView extends AbstractView {
   #filmQuantity = '';
@@ -10,7 +10,7 @@ class FilmQuantityView extends AbstractView {
   }
 
   get template() {
-    return getFooterProfileTemplate(this.#filmQuantity);
+    return getFilmQuantityTemplate(this.#filmQuantity);
   }
 }
 
