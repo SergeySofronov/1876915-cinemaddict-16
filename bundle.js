@@ -1162,7 +1162,7 @@ var _handleModelEvent = /*#__PURE__*/new WeakMap();
 
 var _updateActiveFilmPopup = /*#__PURE__*/new WeakMap();
 
-var _updateFilmPresenter = /*#__PURE__*/new WeakMap();
+var _updateFilmsPresenters = /*#__PURE__*/new WeakMap();
 
 var _getFilmsToShow = /*#__PURE__*/new WeakMap();
 
@@ -1582,7 +1582,7 @@ class FilmDeskPresenter {
             break;
 
           case _const_js__WEBPACK_IMPORTED_MODULE_2__.UpdateTypes.PATCH:
-            _classPrivateFieldGet(this, _updateFilmPresenter).call(this, data);
+            _classPrivateFieldGet(this, _updateFilmsPresenters).call(this, data);
 
             break;
 
@@ -1622,13 +1622,12 @@ class FilmDeskPresenter {
         const index = _classPrivateFieldGet(this, _filmsModel).filmsData.findIndex(film => film.id === _classPrivateFieldGet(this, _activeFilm).id);
 
         if (index !== -1) {
-          _classPrivateFieldGet(this, _activeFilm).init(_classPrivateFieldGet(this, _filmsModel).filmsData[index]); //this.#isActiveFilmChanging = false;
-
+          _classPrivateFieldGet(this, _activeFilm).init(_classPrivateFieldGet(this, _filmsModel).filmsData[index]);
         }
       }
     });
 
-    _classPrivateFieldInitSpec(this, _updateFilmPresenter, {
+    _classPrivateFieldInitSpec(this, _updateFilmsPresenters, {
       writable: true,
       value: filmData => {
         let isPopupShouldUpdate = Boolean(_classPrivateFieldGet(this, _activeFilm));
