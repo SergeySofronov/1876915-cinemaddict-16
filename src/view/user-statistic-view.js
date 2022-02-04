@@ -11,6 +11,7 @@ dayjs.extend(isBetween);
 const BAR_HEIGHT = 50;
 const DATE_DIFF_STEP = 1;
 const DATE_OLDEST = 1000;
+const MINUTES_IN_HOUR = 60;
 
 const FilterTypes = {
   ALL_TIME: 'all-time',
@@ -49,12 +50,14 @@ const getStatisticMenu = (activeFilterType) => {
   return result.join('');
 };
 
+
 const getStatsTemplate = (data, activeFilterType, genresAndQuantity, userRank, totalDuration) => {
 
   const topGenre = [...genresAndQuantity.keys()][0];
   const chartRows = genresAndQuantity.size;
-  const hours = dayjs.duration(totalDuration, 'minutes').$d.hours;
-  const minutes = dayjs.duration(totalDuration, 'minutes').$d.minutes;
+
+  const hours = Math.floor(totalDuration / MINUTES_IN_HOUR);
+  const minutes = totalDuration % MINUTES_IN_HOUR;
 
   return (
     `<section class="statistic">
@@ -76,7 +79,7 @@ const getStatsTemplate = (data, activeFilterType, genresAndQuantity, userRank, t
         </li>
         <li class="statistic__text-item">
           <h4 class="statistic__item-title">Total duration</h4>
-          <p class="statistic__item-text">${hours} <span class="statistic__item-description">h</span> ${minutes} <span class="statistic__item-description">m</span></p>
+          <p class="statistic__item-text">${hours} <span class="statistic__item-description">h</span> ${minutes ? minutes : '00'} <span class="statistic__item-description">m</span></p>
         </li>
         <li class="statistic__text-item">
           <h4 class="statistic__item-title">Top genre</h4>

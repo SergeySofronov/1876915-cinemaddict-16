@@ -6,6 +6,7 @@ dayjs.extend(relativeTime);
 import SmartView from './smart-view';
 import { KeyCode, UserActions, EventStates, FilterTypes } from '../const.js';
 
+const PLURAL_GENRE_LENGTH = 1;
 const TEXTAREA_VALIDITY_MESSAGE = 'Для отправки комментария заполните поле';
 const EMOJI_VALIDITY_MESSAGE = 'Выберите эмоцию';
 const ACTIVE_CLASS = 'film-details__control-button--active';
@@ -18,6 +19,7 @@ const TableTerms = {
   DATE: 'Release Date',
   TIME: 'Runtime',
   COUNTRY: 'Country',
+  GENRE: 'Genre',
   GENRES: 'Genres'
 };
 
@@ -45,6 +47,7 @@ const getPopupNewCommentTemplate = (userComment, userEmoji, disableTag) => (
 
       <label class="film-details__comment-label">
         <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment" ${disableTag}>${userComment ? he.encode(userComment) : ''}</textarea>
+        <p class="film-details__comment-comment">Press Ctrl/Command + Enter for send</p>
       </label>
 
       <div class="film-details__emoji-list">
@@ -137,7 +140,6 @@ const getPopupTemplate = (data) => {
       description = '',
       totalRating = 0,
       poster = '',
-      genre = [],
       runtime = '',
       release = {},
       pegi = '',
@@ -150,7 +152,9 @@ const getPopupTemplate = (data) => {
       watchlist = false,
       watched = false,
       favorite = false,
-    } = data;
+    } = data.userDetails;
+
+    const genres = Array.isArray(data.filmInfo?.genre) ? data.filmInfo?.genre : [];
 
     return (
       `<section class="film-details">
@@ -184,7 +188,7 @@ const getPopupTemplate = (data) => {
                 ${getTableRow(TableTerms.DATE, changeDateFormat(release?.date))}
                 ${getTableRow(TableTerms.TIME, getFilmDuration(runtime))}
                 ${getTableRow(TableTerms.COUNTRY, release.country || '')}
-                ${getTableRow(TableTerms.GENRES, getCardGenres(genre))}
+                ${getTableRow(genres.length > PLURAL_GENRE_LENGTH ? TableTerms.GENRES : TableTerms.GENRE, getCardGenres(genres))}
                 </table>
 
                 <p class="film-details__film-description">
@@ -193,9 +197,9 @@ const getPopupTemplate = (data) => {
             </div>
 
             <section class="film-details__controls">
-              <button type="button" class="film-details__control-button film-details__control-button--watchlist ${watchlist ? ACTIVE_CLASS : ''}" id="watchlist" name="watchlist" ${data.isDataUpdating ? 'disabled' : ''}>Add to watchlist</button>
-              <button type="button" class="film-details__control-button film-details__control-button--watched ${watched ? ACTIVE_CLASS : ''}" id="watched" name="watched" ${data.isDataUpdating ? 'disabled' : ''}>Already watched</button>
-              <button type="button" class="film-details__control-button film-details__control-button--favorite ${favorite ? ACTIVE_CLASS : ''}" id="favorite" name="favorite" ${data.isDataUpdating ? 'disabled' : ''}>Add to favorites</button>
+              <button type="button" class="film-details__control-button film-details__control-button--watchlist ${(watchlist && !data.isDataUpdating) ? ACTIVE_CLASS : ''}" id="watchlist" name="watchlist" ${data.isDataUpdating ? 'disabled' : ''}>Add to watchlist</button>
+              <button type="button" class="film-details__control-button film-details__control-button--watched ${(watched && !data.isDataUpdating) ? ACTIVE_CLASS : ''}" id="watched" name="watched" ${data.isDataUpdating ? 'disabled' : ''}>Already watched</button>
+              <button type="button" class="film-details__control-button film-details__control-button--favorite ${(favorite && !data.isDataUpdating) ? ACTIVE_CLASS : ''}" id="favorite" name="favorite" ${data.isDataUpdating ? 'disabled' : ''}>Add to favorites</button>
             </section>
           </div>
 
@@ -300,6 +304,7 @@ class PopupView extends SmartView {
 
   #onUserCommentInput = (evt) => {
     this.updateData({ userComment: evt.target.value });
+    this.#handleTextAreaValidity();
   }
 
   #onCommentDelete = (evt) => {

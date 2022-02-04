@@ -1160,6 +1160,8 @@ var _handleViewAction = /*#__PURE__*/new WeakMap();
 
 var _handleModelEvent = /*#__PURE__*/new WeakMap();
 
+var _updateActiveFilmPopup = /*#__PURE__*/new WeakMap();
+
 var _updateFilmsPresenters = /*#__PURE__*/new WeakMap();
 
 var _getFilmsToShow = /*#__PURE__*/new WeakMap();
@@ -1501,6 +1503,8 @@ class FilmDeskPresenter {
     _classPrivateFieldInitSpec(this, _handleViewAction, {
       writable: true,
       value: async (update, actionType, actionDetails) => {
+        var _classPrivateFieldGet5;
+
         switch (actionType) {
           case _const_js__WEBPACK_IMPORTED_MODULE_2__.UserActions.DELETE_POPUP:
             _classPrivateFieldGet(this, _setActiveFilm).call(this, null);
@@ -1543,17 +1547,19 @@ class FilmDeskPresenter {
             break;
 
           case _const_js__WEBPACK_IMPORTED_MODULE_2__.UserActions.UPDATE_DATA:
-            if (update.id === _classPrivateFieldGet(this, _activeFilm)) {
+            if (update.id === ((_classPrivateFieldGet5 = _classPrivateFieldGet(this, _activeFilm)) === null || _classPrivateFieldGet5 === void 0 ? void 0 : _classPrivateFieldGet5.id)) {
               _classPrivateFieldGet(this, _activeFilm).setViewState(_const_js__WEBPACK_IMPORTED_MODULE_2__.ViewStates.DATA_UPDATING);
             }
 
             try {
               await _classPrivateFieldGet(this, _filmsModel).update(_classPrivateFieldGet(this, _isUpdatePatch).call(this, actionDetails) ? _const_js__WEBPACK_IMPORTED_MODULE_2__.UpdateTypes.PATCH : _const_js__WEBPACK_IMPORTED_MODULE_2__.UpdateTypes.MINOR, update);
             } catch {
-              if (update.id === _classPrivateFieldGet(this, _activeFilm)) {
-                var _classPrivateFieldGet5;
+              var _classPrivateFieldGet6;
 
-                (_classPrivateFieldGet5 = _classPrivateFieldGet(this, _activeFilm)) === null || _classPrivateFieldGet5 === void 0 ? void 0 : _classPrivateFieldGet5.setViewState(_const_js__WEBPACK_IMPORTED_MODULE_2__.ViewStates.ABORTING);
+              if (update.id === ((_classPrivateFieldGet6 = _classPrivateFieldGet(this, _activeFilm)) === null || _classPrivateFieldGet6 === void 0 ? void 0 : _classPrivateFieldGet6.id)) {
+                var _classPrivateFieldGet7;
+
+                (_classPrivateFieldGet7 = _classPrivateFieldGet(this, _activeFilm)) === null || _classPrivateFieldGet7 === void 0 ? void 0 : _classPrivateFieldGet7.setViewState(_const_js__WEBPACK_IMPORTED_MODULE_2__.ViewStates.ABORTING);
               }
             }
 
@@ -1568,11 +1574,11 @@ class FilmDeskPresenter {
     _classPrivateFieldInitSpec(this, _handleModelEvent, {
       writable: true,
       value: (updateType, data) => {
-        var _classPrivateFieldGet6;
+        var _classPrivateFieldGet8;
 
         switch (updateType) {
           case _const_js__WEBPACK_IMPORTED_MODULE_2__.UpdateTypes.LOAD:
-            (_classPrivateFieldGet6 = _classPrivateFieldGet(this, _activeFilm)) === null || _classPrivateFieldGet6 === void 0 ? void 0 : _classPrivateFieldGet6.init(data);
+            (_classPrivateFieldGet8 = _classPrivateFieldGet(this, _activeFilm)) === null || _classPrivateFieldGet8 === void 0 ? void 0 : _classPrivateFieldGet8.init(data);
             break;
 
           case _const_js__WEBPACK_IMPORTED_MODULE_2__.UpdateTypes.PATCH:
@@ -1610,6 +1616,17 @@ class FilmDeskPresenter {
       }
     });
 
+    _classPrivateFieldInitSpec(this, _updateActiveFilmPopup, {
+      writable: true,
+      value: () => {
+        const index = _classPrivateFieldGet(this, _filmsModel).filmsData.findIndex(film => film.id === _classPrivateFieldGet(this, _activeFilm).id);
+
+        if (index !== -1) {
+          _classPrivateFieldGet(this, _activeFilm).init(_classPrivateFieldGet(this, _filmsModel).filmsData[index]);
+        }
+      }
+    });
+
     _classPrivateFieldInitSpec(this, _updateFilmsPresenters, {
       writable: true,
       value: filmData => {
@@ -1623,11 +1640,7 @@ class FilmDeskPresenter {
         }
 
         if (isPopupShouldUpdate) {
-          const index = _classPrivateFieldGet(this, _filmsModel).filmsData.findIndex(film => film.id === _classPrivateFieldGet(this, _activeFilm).id);
-
-          if (index !== -1) {
-            _classPrivateFieldGet(this, _activeFilm).init(_classPrivateFieldGet(this, _filmsModel).filmsData[index]);
-          }
+          _classPrivateFieldGet(this, _updateActiveFilmPopup).call(this);
         }
       }
     });
@@ -1690,6 +1703,10 @@ class FilmDeskPresenter {
             _classPrivateFieldGet(this, _changeActiveFilm).call(this, film.id, filmPresenter);
           }
         });
+
+        if (_classPrivateFieldGet(this, _isActiveFilmChanging)) {
+          _classPrivateFieldGet(this, _updateActiveFilmPopup).call(this);
+        }
       }
     });
 
@@ -1793,13 +1810,13 @@ class FilmDeskPresenter {
         _classPrivateFieldGet(this, _destroyCards).call(this);
 
         if (_classPrivateFieldGet(this, _filmsDesk)) {
-          var _classPrivateFieldGet7, _classPrivateFieldGet8;
+          var _classPrivateFieldGet9, _classPrivateFieldGet10;
 
-          (_classPrivateFieldGet7 = _classPrivateFieldGet(this, _filmsSortMenu)) === null || _classPrivateFieldGet7 === void 0 ? void 0 : _classPrivateFieldGet7.destroyElement();
+          (_classPrivateFieldGet9 = _classPrivateFieldGet(this, _filmsSortMenu)) === null || _classPrivateFieldGet9 === void 0 ? void 0 : _classPrivateFieldGet9.destroyElement();
 
           _classPrivateFieldSet(this, _filmsSortMenu, null);
 
-          (_classPrivateFieldGet8 = _classPrivateFieldGet(this, _showMoreButton)) === null || _classPrivateFieldGet8 === void 0 ? void 0 : _classPrivateFieldGet8.destroyElement();
+          (_classPrivateFieldGet10 = _classPrivateFieldGet(this, _showMoreButton)) === null || _classPrivateFieldGet10 === void 0 ? void 0 : _classPrivateFieldGet10.destroyElement();
 
           _classPrivateFieldSet(this, _showMoreButton, null);
 
@@ -2889,7 +2906,7 @@ function _classApplyDescriptorSet(receiver, descriptor, value) { if (descriptor.
 
 
 
-const getFooterProfileTemplate = filmQuantity => `<p>${filmQuantity ? filmQuantity : 0} movies inside</p>`;
+const getFilmQuantityTemplate = filmQuantity => `<p>${filmQuantity ? filmQuantity : 0} movies inside</p>`;
 
 var _filmQuantity = /*#__PURE__*/new WeakMap();
 
@@ -2906,7 +2923,7 @@ class FilmQuantityView extends _abstract_view__WEBPACK_IMPORTED_MODULE_0__["defa
   }
 
   get template() {
-    return getFooterProfileTemplate(_classPrivateFieldGet(this, _filmQuantity));
+    return getFilmQuantityTemplate(_classPrivateFieldGet(this, _filmQuantity));
   }
 
 }
@@ -3194,6 +3211,7 @@ function _classApplyDescriptorSet(receiver, descriptor, value) { if (descriptor.
 dayjs__WEBPACK_IMPORTED_MODULE_2___default().extend((dayjs_plugin_relativeTime__WEBPACK_IMPORTED_MODULE_3___default()));
 
 
+const PLURAL_GENRE_LENGTH = 1;
 const TEXTAREA_VALIDITY_MESSAGE = 'Для отправки комментария заполните поле';
 const EMOJI_VALIDITY_MESSAGE = 'Выберите эмоцию';
 const ACTIVE_CLASS = 'film-details__control-button--active';
@@ -3205,6 +3223,7 @@ const TableTerms = {
   DATE: 'Release Date',
   TIME: 'Runtime',
   COUNTRY: 'Country',
+  GENRE: 'Genre',
   GENRES: 'Genres'
 };
 
@@ -3228,6 +3247,7 @@ const getPopupNewCommentTemplate = (userComment, userEmoji, disableTag) => `<div
 
       <label class="film-details__comment-label">
         <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment" ${disableTag}>${userComment ? he__WEBPACK_IMPORTED_MODULE_0___default().encode(userComment) : ''}</textarea>
+        <p class="film-details__comment-comment">Press Ctrl/Command + Enter for send</p>
       </label>
 
       <div class="film-details__emoji-list">
@@ -3304,13 +3324,14 @@ const getCardGenres = genres => {
 
 const getPopupTemplate = data => {
   if (data) {
+    var _data$filmInfo, _data$filmInfo2;
+
     const {
       title = '',
       alternativeTitle = '',
       description = '',
       totalRating = 0,
       poster = '',
-      genre = [],
       runtime = '',
       release = {},
       pegi = '',
@@ -3322,7 +3343,8 @@ const getPopupTemplate = data => {
       watchlist = false,
       watched = false,
       favorite = false
-    } = data;
+    } = data.userDetails;
+    const genres = Array.isArray((_data$filmInfo = data.filmInfo) === null || _data$filmInfo === void 0 ? void 0 : _data$filmInfo.genre) ? (_data$filmInfo2 = data.filmInfo) === null || _data$filmInfo2 === void 0 ? void 0 : _data$filmInfo2.genre : [];
     return `<section class="film-details">
         <form class="film-details__inner" action="" method="get">
           <div class="film-details__top-container">
@@ -3354,7 +3376,7 @@ const getPopupTemplate = data => {
                 ${getTableRow(TableTerms.DATE, (0,_utils__WEBPACK_IMPORTED_MODULE_1__.changeDateFormat)(release === null || release === void 0 ? void 0 : release.date))}
                 ${getTableRow(TableTerms.TIME, (0,_utils__WEBPACK_IMPORTED_MODULE_1__.getFilmDuration)(runtime))}
                 ${getTableRow(TableTerms.COUNTRY, release.country || '')}
-                ${getTableRow(TableTerms.GENRES, getCardGenres(genre))}
+                ${getTableRow(genres.length > PLURAL_GENRE_LENGTH ? TableTerms.GENRES : TableTerms.GENRE, getCardGenres(genres))}
                 </table>
 
                 <p class="film-details__film-description">
@@ -3363,9 +3385,9 @@ const getPopupTemplate = data => {
             </div>
 
             <section class="film-details__controls">
-              <button type="button" class="film-details__control-button film-details__control-button--watchlist ${watchlist ? ACTIVE_CLASS : ''}" id="watchlist" name="watchlist" ${data.isDataUpdating ? 'disabled' : ''}>Add to watchlist</button>
-              <button type="button" class="film-details__control-button film-details__control-button--watched ${watched ? ACTIVE_CLASS : ''}" id="watched" name="watched" ${data.isDataUpdating ? 'disabled' : ''}>Already watched</button>
-              <button type="button" class="film-details__control-button film-details__control-button--favorite ${favorite ? ACTIVE_CLASS : ''}" id="favorite" name="favorite" ${data.isDataUpdating ? 'disabled' : ''}>Add to favorites</button>
+              <button type="button" class="film-details__control-button film-details__control-button--watchlist ${watchlist && !data.isDataUpdating ? ACTIVE_CLASS : ''}" id="watchlist" name="watchlist" ${data.isDataUpdating ? 'disabled' : ''}>Add to watchlist</button>
+              <button type="button" class="film-details__control-button film-details__control-button--watched ${watched && !data.isDataUpdating ? ACTIVE_CLASS : ''}" id="watched" name="watched" ${data.isDataUpdating ? 'disabled' : ''}>Already watched</button>
+              <button type="button" class="film-details__control-button film-details__control-button--favorite ${favorite && !data.isDataUpdating ? ACTIVE_CLASS : ''}" id="favorite" name="favorite" ${data.isDataUpdating ? 'disabled' : ''}>Add to favorites</button>
             </section>
           </div>
 
@@ -3538,6 +3560,8 @@ class PopupView extends _smart_view__WEBPACK_IMPORTED_MODULE_4__["default"] {
         this.updateData({
           userComment: evt.target.value
         });
+
+        _classPrivateFieldGet(this, _handleTextAreaValidity).call(this);
       }
     });
 
@@ -3972,6 +3996,7 @@ dayjs__WEBPACK_IMPORTED_MODULE_4___default().extend((dayjs_plugin_isBetween__WEB
 const BAR_HEIGHT = 50;
 const DATE_DIFF_STEP = 1;
 const DATE_OLDEST = 1000;
+const MINUTES_IN_HOUR = 60;
 const FilterTypes = {
   ALL_TIME: 'all-time',
   TODAY: 'today',
@@ -4010,8 +4035,8 @@ const getStatisticMenu = activeFilterType => {
 const getStatsTemplate = (data, activeFilterType, genresAndQuantity, userRank, totalDuration) => {
   const topGenre = [...genresAndQuantity.keys()][0];
   const chartRows = genresAndQuantity.size;
-  const hours = dayjs__WEBPACK_IMPORTED_MODULE_4___default().duration(totalDuration, 'minutes').$d.hours;
-  const minutes = dayjs__WEBPACK_IMPORTED_MODULE_4___default().duration(totalDuration, 'minutes').$d.minutes;
+  const hours = Math.floor(totalDuration / MINUTES_IN_HOUR);
+  const minutes = totalDuration % MINUTES_IN_HOUR;
   return `<section class="statistic">
       <p class="statistic__rank">
         Your rank
@@ -4031,7 +4056,7 @@ const getStatsTemplate = (data, activeFilterType, genresAndQuantity, userRank, t
         </li>
         <li class="statistic__text-item">
           <h4 class="statistic__item-title">Total duration</h4>
-          <p class="statistic__item-text">${hours} <span class="statistic__item-description">h</span> ${minutes} <span class="statistic__item-description">m</span></p>
+          <p class="statistic__item-text">${hours} <span class="statistic__item-description">h</span> ${minutes ? minutes : '00'} <span class="statistic__item-description">m</span></p>
         </li>
         <li class="statistic__text-item">
           <h4 class="statistic__item-title">Top genre</h4>
