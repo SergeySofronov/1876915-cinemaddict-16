@@ -254,13 +254,13 @@ class FilmDeskPresenter {
         break;
 
       case (UserActions.UPDATE_DATA):
-        if (update.id === this.#activeFilm) {
+        if (update.id === this.#activeFilm?.id) {
           this.#activeFilm.setViewState(ViewStates.DATA_UPDATING);
         }
         try {
           await this.#filmsModel.update(this.#isUpdatePatch(actionDetails) ? UpdateTypes.PATCH : UpdateTypes.MINOR, update);
         } catch {
-          if (update.id === this.#activeFilm) {
+          if (update.id === this.#activeFilm?.id) {
             this.#activeFilm?.setViewState(ViewStates.ABORTING);
           }
         }
@@ -304,6 +304,13 @@ class FilmDeskPresenter {
     }
   }
 
+  #updateActiveFilmPopup = () => {
+    const index = this.#filmsModel.filmsData.findIndex((film) => (film.id === this.#activeFilm.id));
+    if (index !== -1) {
+      this.#activeFilm.init(this.#filmsModel.filmsData[index]);
+    }
+  }
+
   #updateFilmsPresenters = (filmData) => {
     let isPopupShouldUpdate = Boolean(this.#activeFilm);
     for (const [presenter, filmId] of this.#filmsPresenters.entries()) {
@@ -314,10 +321,7 @@ class FilmDeskPresenter {
     }
 
     if (isPopupShouldUpdate) {
-      const index = this.#filmsModel.filmsData.findIndex((film) => (film.id === this.#activeFilm.id));
-      if (index !== -1) {
-        this.#activeFilm.init(this.#filmsModel.filmsData[index]);
-      }
+      this.#updateActiveFilmPopup();
     }
   }
 
@@ -361,6 +365,9 @@ class FilmDeskPresenter {
         this.#changeActiveFilm(film.id, filmPresenter);
       }
     });
+    if (this.#isActiveFilmChanging) {
+      this.#updateActiveFilmPopup();
+    }
   }
 
   #getExtraFilmsData = (sortType) => {
